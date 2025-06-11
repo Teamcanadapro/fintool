@@ -77,7 +77,7 @@ No part of the source code, design, or content may be copied, reproduced, modifi
     </div>
     <div class="slider-group"><label>Retirement Age</label>
       <div class="slider-container">
-        <input type="range" id="retireAge" min="50" max="70" step="1">
+        <input type="range" id="retireAge" min="50" max="75" step="1">
         <input type="text" id="retireAgeText">
       </div>
     </div>
@@ -292,11 +292,11 @@ finChart.update();
         localStorage.removeItem('finToolSettings');
         els.currentInvestment.value=0;
         els.desiredIncome.value=2000;
-        els.monthlyContribution.value=0;
+        els.monthlyContribution.value=100;
         els.inflationRate.value=2; els.inflationRateText.value=2;
-        els.preReturn.value=5; els.preReturnText.value=5;
-        els.postReturn.value=5; els.postReturnText.value=5;
-        els.startAge.value=0; els.startAgeText.value=0;
+        els.preReturn.value=5; els.preReturnText.value=9;
+        els.postReturn.value=5; els.postReturnText.value=7;
+        els.startAge.value=0; els.startAgeText.value=25;
         els.retireAge.value=65; els.retireAgeText.value=65;
         els.endAge.value=85; els.endAgeText.value=85;
         els.ageWarning.style.display='none';
