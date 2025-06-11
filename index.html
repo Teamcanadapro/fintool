@@ -150,8 +150,13 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 
       function calculateFIN(){
         validateAges();
-        const ci=+els.currentInvestment.value, di=+els.desiredIncome.value, mc=+els.monthlyContribution.value;
-        const inf=+els.inflationRate.value/100, pre=+els.preReturn.value/100, post=+els.postReturn.value/100;
+       const ci = +els.currentInvestment.value || 0;
+const di = +els.desiredIncome.value || 0;
+const mc = +els.monthlyContribution.value || 0;
+const inf = +els.inflationRate.value / 100 || 0;
+const pre = +els.preReturn.value / 100 || 0;
+const post = +els.postReturn.value / 100 || 0;
+
         const sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value;
         const yrsTo=ra-sa, yrsIn=ea-ra;
         const infIncome=di*Math.pow(1+inf,yrsTo);
