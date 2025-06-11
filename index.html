@@ -92,7 +92,8 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <div class="output">Monthly Needed: <strong id="monthlyNeeded">$0</strong></div>
   <div class="output">FIN: <strong id="finAmount">$0</strong></div>
 
-  <canvas id="finChart"></canvas>
+  <canvas id="finChart" style="max-height: 400px;"></canvas>
+
 
   <div class="buttons">
     <button class="btn btn-red" onclick="exportPDF()">Export PDF</button>
@@ -147,7 +148,7 @@ const finChart = new Chart(ctx, {
   },
   options: {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
     scales: {
       x: {
         title: {
