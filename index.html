@@ -209,29 +209,34 @@ const post = +els.postReturn.value / 100 || 0;
         const monthlyNeed=rem>0?(mRate>0?rem/((Math.pow(1+mRate,months)-1)/mRate):rem/months):0;
         els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
         els.finAmount.textContent='$'+fin.toLocaleString(undefined,{maximumFractionDigits:0});
-        // Build balances per year
+// Build balances per year
 const yearLabels = [];
 const balances = [];
 
-// Accumulation phase (startAge to retireAge)
-let balance = fvCurr; // start with future value of current investment
+// Start with current investment
+let balance = fvCurr;
 
+// Accumulation phase (Start Age to Retirement Age)
 for (let age = sa; age <= ra; age++) {
   if (age > sa) {
-    // Add one year of contributions and growth
+    // Add contributions for the year
     balance += mc * 12;
+    // Apply pre-retirement return
     balance *= (1 + pre);
   }
   yearLabels.push(age);
   balances.push(balance);
 }
 
-// Decumulation phase (retireAge to endAge)
+// Decumulation phase (Retirement Age to End Age)
 for (let age = ra + 1; age <= ea; age++) {
-  // Subtract one year of desired income and apply post-retirement growth
-  balance -= infIncome * 12;
-  if (balance < 0) balance = 0;
+  // Apply post-retirement return first
   balance *= (1 + post);
+  // Subtract desired income for the year
+  balance -= infIncome * 12;
+  // Prevent negative balance
+  if (balance < 0) balance = 0;
+  
   yearLabels.push(age);
   balances.push(balance);
 }
