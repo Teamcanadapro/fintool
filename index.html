@@ -129,18 +129,58 @@ No part of the source code, design, or content may be copied, reproduced, modifi
         localStorage.setItem('finToolSettings',JSON.stringify(data));
       }
 
-      const ctx=document.getElementById('finChart').getContext('2d');
-      const finChart=new Chart(ctx,{
-        type:'bar',
-        data:{ labels:['Curr Invest','Future Contrib','Total'],
-               datasets:[{label:'Value $',data:[0,0,0],
-                 backgroundColor:['#4285f4','#0f9d58','#f4b400'],
-                 hoverBackgroundColor:['#6fa8dc','#60c99c','#ffe066']}] },
-        options:{responsive:true,maintainAspectRatio:false,
-          scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v.toLocaleString()}}},
-          plugins:{tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()}}}
+    const ctx = document.getElementById('finChart').getContext('2d');
+const finChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [], // years (to be filled in calculateFIN)
+    datasets: [{
+      label: 'Portfolio Value $',
+      data: [], // balances (to be filled in calculateFIN)
+      borderColor: '#1a73e8',
+      backgroundColor: 'rgba(26,115,232,0.1)',
+      fill: true,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      tension: 0.25 // smooth line
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Age (Years)'
         }
-      });
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Portfolio Value ($)'
+        },
+        ticks: {
+          callback: v => '$' + v.toLocaleString()
+        }
+      }
+    },
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: ctx => '$' + ctx.parsed.y.toLocaleString()
+        }
+      },
+      title: {
+        display: true,
+        text: 'Portfolio Growth & Drawdown'
+      }
+    }
+  }
+});
+
+      
       function validateAges(){
         let sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value, warn=false;
         if(ra<=sa){ ra=sa+1; els.retireAge.value=ra; els.retireAgeText.value=ra; warn=true; }
@@ -169,8 +209,38 @@ const post = +els.postReturn.value / 100 || 0;
         const monthlyNeed=rem>0?(mRate>0?rem/((Math.pow(1+mRate,months)-1)/mRate):rem/months):0;
         els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
         els.finAmount.textContent='$'+fin.toLocaleString(undefined,{maximumFractionDigits:0});
-        finChart.data.datasets[0].data=[fvCurr,fvCont,totalFV];
-        finChart.update();
+        // Build balances per year
+const yearLabels = [];
+const balances = [];
+
+// Accumulation phase (startAge to retireAge)
+let balance = fvCurr; // start with future value of current investment
+
+for (let age = sa; age <= ra; age++) {
+  if (age > sa) {
+    // Add one year of contributions and growth
+    balance += mc * 12;
+    balance *= (1 + pre);
+  }
+  yearLabels.push(age);
+  balances.push(balance);
+}
+
+// Decumulation phase (retireAge to endAge)
+for (let age = ra + 1; age <= ea; age++) {
+  // Subtract one year of desired income and apply post-retirement growth
+  balance -= infIncome * 12;
+  if (balance < 0) balance = 0;
+  balance *= (1 + post);
+  yearLabels.push(age);
+  balances.push(balance);
+}
+
+// Update chart
+finChart.data.labels = yearLabels;
+finChart.data.datasets[0].data = balances;
+finChart.update();
+
         saveSettings();
       }
 
