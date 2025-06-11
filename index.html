@@ -210,9 +210,16 @@ const post = +els.postReturn.value / 100 || 0;
         const monthlyNeed=rem>0?(mRate>0?rem/((Math.pow(1+mRate,months)-1)/mRate):rem/months):0;
         els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
         els.finAmount.textContent='$'+fin.toLocaleString(undefined,{maximumFractionDigits:0});
+
 // Build balances per year
 const yearLabels = [];
 const balances = [];
+
+// Use effective contribution:
+// If user invests less than Monthly Needed → show shortfall
+// If user invests >= Monthly Needed → use their value
+const mn = monthlyNeed;
+const effectiveMC = Math.max(mc, mn);
 
 // Start with current investment
 let balance = fvCurr;
@@ -221,7 +228,7 @@ let balance = fvCurr;
 for (let age = sa; age <= ra; age++) {
   if (age > sa) {
     // Add contributions for the year
-    balance += mc * 12;
+    balance += effectiveMC * 12;
     // Apply pre-retirement return
     balance *= (1 + pre);
   }
@@ -237,7 +244,7 @@ for (let age = ra + 1; age <= ea; age++) {
   balance -= infIncome * 12;
   // Prevent negative balance
   if (balance < 0) balance = 0;
-  
+
   yearLabels.push(age);
   balances.push(balance);
 }
@@ -246,6 +253,7 @@ for (let age = ra + 1; age <= ea; age++) {
 finChart.data.labels = yearLabels;
 finChart.data.datasets[0].data = balances;
 finChart.update();
+
 
         saveSettings();
       }
