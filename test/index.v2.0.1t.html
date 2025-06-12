@@ -295,37 +295,46 @@ finChart.update();
       document.querySelectorAll('input[type="number"]').forEach(inp=>inp.addEventListener('input', calculateFIN));
 
 function exportPDF(){
-  // Convert chart to image first
+  // Set PDF date
+  document.getElementById('pdfDate').textContent = new Date().toLocaleDateString();
+
+  // Copy inputs
+  document.getElementById('pdfCurrentInvestment').textContent = els.currentInvestment.value;
+  document.getElementById('pdfDesiredIncome').textContent = els.desiredIncome.value;
+  document.getElementById('pdfMonthlyContribution').textContent = els.monthlyContribution.value;
+  document.getElementById('pdfInflation').textContent = els.inflationRate.value;
+  document.getElementById('pdfPreReturn').textContent = els.preReturn.value;
+  document.getElementById('pdfPostReturn').textContent = els.postReturn.value;
+  document.getElementById('pdfStartAge').textContent = els.startAge.value;
+  document.getElementById('pdfRetireAge').textContent = els.retireAge.value;
+  document.getElementById('pdfEndAge').textContent = els.endAge.value;
+
+  // Copy results
+  document.getElementById('pdfFIN').textContent = els.finAmount.textContent.replace('$','');
+  document.getElementById('pdfMonthlyFIN').textContent = els.monthlyNeeded.textContent.replace('$','');
+
+  // Convert chart to image
   const canvas = document.getElementById('finChart');
   const chartImage = canvas.toDataURL('image/png', 1.0);
+  document.getElementById('pdfChartImage').src = chartImage;
 
-  // Create temporary image to replace chart
-  const img = document.createElement('img');
-  img.src = chartImage;
-  img.style.width = '100%';
-  img.style.maxWidth = '900px';
-  img.style.marginBottom = '20px';
-  img.id = 'chartImageTemp';
-
-  // Insert image above chart
-  canvas.parentNode.insertBefore(img, canvas);
-
-  // Hide the canvas
-  canvas.style.display = 'none';
+  // Show export view
+  const exportView = document.getElementById('pdfExportView');
+  exportView.style.display = 'block';
 
   // Export PDF
   html2pdf().set({
     margin: 0.5,
-    filename: 'FIN_tool.pdf',
+    filename: 'FIN_tool_report.pdf',
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2 },
     jsPDF: { unit: 'in', format: 'letter' }
-  }).from(document.body).save().then(() => {
-    // After export, restore the chart
-    canvas.style.display = '';
-    document.getElementById('chartImageTemp').remove();
+  }).from(exportView).save().then(() => {
+    // Hide export view again
+    exportView.style.display = 'none';
   });
 }
+
 
 
       function resetDefaults(){
@@ -366,5 +375,30 @@ function exportPDF(){
 
     });
   </script>
+  <div id="pdfExportView" style="display:none; padding: 20px; font-family: sans-serif;">
+  <h2 style="text-align:center;">Team Canada Financial Tool Report</h2>
+  <p style="text-align:center;">Generated on: <span id="pdfDate"></span></p>
+  <hr>
+  <h3>Inputs:</h3>
+  <ul>
+    <li>Current Investment: $<span id="pdfCurrentInvestment"></span></li>
+    <li>Desired Monthly Income: $<span id="pdfDesiredIncome"></span></li>
+    <li>Monthly Contribution: $<span id="pdfMonthlyContribution"></span></li>
+    <li>Inflation: <span id="pdfInflation"></span>%</li>
+    <li>Pre-Retirement Return: <span id="pdfPreReturn"></span>%</li>
+    <li>Post-Retirement Return: <span id="pdfPostReturn"></span>%</li>
+    <li>Start Age: <span id="pdfStartAge"></span></li>
+    <li>Retirement Age: <span id="pdfRetireAge"></span></li>
+    <li>End Age: <span id="pdfEndAge"></span></li>
+  </ul>
+  <h3>Results:</h3>
+  <ul>
+    <li>Financial Independence Number (FIN): $<span id="pdfFIN"></span></li>
+    <li>Monthly FIN: $<span id="pdfMonthlyFIN"></span></li>
+  </ul>
+  <h3>Portfolio Growth & Drawdown:</h3>
+  <img id="pdfChartImage" src="" style="width:100%; max-width:900px; border:1px solid #ccc;">
+</div>
+
 </body>
 </html>
