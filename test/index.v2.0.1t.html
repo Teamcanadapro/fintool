@@ -45,22 +45,31 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   }
 
   #pdfExportView {
-    page-break-after: always;
-    page-break-inside: avoid;
-    break-after: always;
-    break-inside: avoid;
-  }
+  display: block;
+  padding: 20px;
+  font-family: sans-serif;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  page-break-after: always;
+  page-break-inside: avoid;
+  break-after: always;
+  break-inside: avoid;
+}
+
 
   #pdfChartImage {
-    display: block;
-    width: 100%;
-    max-width: 900px;
-    height: auto;
-    max-height: 500px;
-    border: 1px solid #ccc;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
+  display: block;
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  max-height: 600px;
+  border: 1px solid #ccc;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  margin: 0 auto;
+}
+
 
   canvas { display: none !important; } /* Hide live canvas during PDF export */
 }
@@ -69,7 +78,7 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 </head>
 <body>
   <h1>Team Canada Financial Tool</h1>
-  <div class="version">v2.0.4t (Online)</div>
+  <div class="version">v2.0.5t (Online)</div>
   <div class="last-updated">Last updated: June 11, 2025</div>
   <h2>FIN# Calculator</h2>
 
