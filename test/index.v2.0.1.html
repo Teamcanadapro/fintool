@@ -264,7 +264,8 @@ const balances = [];
 // If user invests less than Monthly Needed → show shortfall
 // If user invests >= Monthly Needed → use their value
 const mn = monthlyNeed;
-const effectiveMC = Math.max(mc, mn);
+const effectiveMC = mc;
+
 
 // Start with current investment
 let balance = fvCurr;
