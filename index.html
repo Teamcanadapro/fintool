@@ -169,24 +169,25 @@ No part of the source code, design, or content may be copied, reproduced, modifi
         }
       }
     },
-    plugins: {
-      legend: {
-      labels: {
-        usePointStyle: true,
-        pointStyle: 'line' // <-- this makes the legend show as a line, not a box
-      },
-      // onClick: null // optional - disables legend click to avoid confusion
-    //},
-      tooltip: {
-        callbacks: {
-          label: ctx => '$' + ctx.parsed.y.toLocaleString()
-        }
-      },
-      title: {
-        display: true,
-        text: 'Portfolio Growth & Drawdown'
-      }
+  plugins: {
+  legend: {
+    labels: {
+      usePointStyle: true,
+      pointStyle: 'line'
+    },
+    // onClick: null
+  },
+  tooltip: {
+    callbacks: {
+      label: ctx => '$' + ctx.parsed.y.toLocaleString()
     }
+  },
+  title: {
+    display: true,
+    text: 'Portfolio Growth & Drawdown'
+  }
+}
+
   }
 });
 
