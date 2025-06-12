@@ -34,12 +34,42 @@ No part of the source code, design, or content may be copied, reproduced, modifi
     .btn-blue{background:#1976d2;} .btn-blue:hover{background:#0d47a1;}
     .btn-green{background:#388e3c;} .btn-green:hover{background:#1b5e20;}
     #ageWarning{color:#d84315;text-align:center;margin-bottom:10px;display:none;}
-    @media print{.btn,.buttons,.last-updated{display:none;}body{padding:0;background:none;}}
+    @media print {
+  .btn, .buttons, .last-updated { display:none; }
+  
+  html, body {
+    width: 100%;
+    height: auto;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  #pdfExportView {
+    page-break-after: always;
+    page-break-inside: avoid;
+    break-after: always;
+    break-inside: avoid;
+  }
+
+  #pdfChartImage {
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    height: auto;
+    max-height: 500px;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  canvas { display: none !important; } /* Hide live canvas during PDF export */
+}
+
   </style>
 </head>
 <body>
   <h1>Team Canada Financial Tool</h1>
-  <div class="version">v2.0.3t (Online)</div>
+  <div class="version">v2.0.4t (Online)</div>
   <div class="last-updated">Last updated: June 11, 2025</div>
   <h2>FIN# Calculator</h2>
 
