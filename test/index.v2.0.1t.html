@@ -294,11 +294,39 @@ finChart.update();
 
       document.querySelectorAll('input[type="number"]').forEach(inp=>inp.addEventListener('input', calculateFIN));
 
-      function exportPDF(){
-        html2pdf().set({margin:0.5,filename:'FIN_tool.pdf',
-          image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},
-          jsPDF:{unit:'in',format:'letter'}}).from(document.body).save();
-      }
+function exportPDF(){
+  // Convert chart to image first
+  const canvas = document.getElementById('finChart');
+  const chartImage = canvas.toDataURL('image/png', 1.0);
+
+  // Create temporary image to replace chart
+  const img = document.createElement('img');
+  img.src = chartImage;
+  img.style.width = '100%';
+  img.style.maxWidth = '900px';
+  img.style.marginBottom = '20px';
+  img.id = 'chartImageTemp';
+
+  // Insert image above chart
+  canvas.parentNode.insertBefore(img, canvas);
+
+  // Hide the canvas
+  canvas.style.display = 'none';
+
+  // Export PDF
+  html2pdf().set({
+    margin: 0.5,
+    filename: 'FIN_tool.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter' }
+  }).from(document.body).save().then(() => {
+    // After export, restore the chart
+    canvas.style.display = '';
+    document.getElementById('chartImageTemp').remove();
+  });
+}
+
 
       function resetDefaults(){
         localStorage.removeItem('finToolSettings');
