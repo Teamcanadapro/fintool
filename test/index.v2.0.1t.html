@@ -55,10 +55,11 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   page-break-inside: avoid;
   break-after: always;
   break-inside: avoid;
+  transform: scale(1);
+  will-change: transform;
 }
 
-
-  #pdfChartImage {
+#pdfChartImage {
   display: block;
   width: 100%;
   max-width: 900px;
@@ -67,9 +68,8 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   border: 1px solid #ccc;
   page-break-inside: avoid;
   break-inside: avoid;
-  margin: 0 auto;
+  margin: 20px auto;
 }
-
 
   canvas { display: none !important; } /* Hide live canvas during PDF export */
 }
