@@ -5,7 +5,7 @@
 	
 	<!--
 Copyright © 2025 Team Canada Financial Tool. All Rights Reserved.
-
+Created by Dmitri Ivanenko, June 10, 2025 (initial)
 This tool is provided for personal use only.
 No part of the source code, design, or content may be copied, reproduced, modified, or redistributed without prior written permission.
 -->
@@ -98,7 +98,9 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <div class="buttons">
     <button class="btn btn-red" onclick="exportPDF()">Export PDF</button>
     <button class="btn btn-blue" onclick="resetDefaults()">Reset Defaults</button>
-    <button class="btn btn-green" onclick="downloadHTML()">Download HTML</button>
+    <button id="downloadHTMLBtn" class="btn btn-green" onclick="downloadHTML()" style="display:none;">Download HTML</button>
+
+    //<button class="btn btn-green" onclick="downloadHTML()">Download HTML</button>
   </div>
   <div id="downloadLinkContainer"></div>
 
@@ -290,7 +292,7 @@ finChart.update();
       document.querySelectorAll('input[type="number"]').forEach(inp=>inp.addEventListener('input', calculateFIN));
 
       function exportPDF(){
-        html2pdf().set({margin:0.5,filename:'FIN_Tool_v1.9.pdf',
+        html2pdf().set({margin:0.5,filename:'FIN_tool.pdf',
           image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},
           jsPDF:{unit:'in',format:'letter'}}).from(document.body).save();
       }
