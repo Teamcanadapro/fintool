@@ -224,28 +224,36 @@ No part of the source code, design, or content may be copied, reproduced, modifi
         els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
         els.finAmount.textContent='$'+fin.toLocaleString(undefined,{maximumFractionDigits:0});
         
-                // Calculate Fully Funded Amount
-        const months = (ra - sa) * 12;
-        const monthlyRate = Math.pow(1 + pre, 1/12) - 1;
+// Calculate Fully Funded Amount
+const months = (ra - sa) * 12;
+const monthlyRate = Math.pow(1 + pre, 1/12) - 1;
 
-        // Future Value of Contributions (FV of PMT)
-        let fvContrib = 0;
-        if (monthlyRate > 0) {
-          fvContrib = mc * ( (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate );
-        } else {
-          fvContrib = mc * months;
-        }
+// Future Value of Contributions (FV of PMT)
+let fvContrib = 0;
+if (monthlyRate > 0) {
+  fvContrib = mc * ( (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate );
+} else {
+  fvContrib = mc * months;
+}
 
-        // Fully Funded Amount formula
-        let fullyFundedAmount = (fin - fvContrib) / Math.pow(1 + monthlyRate, months);
+// Fully Funded Amount formula (safe version)
+let fullyFundedAmount = 0;
 
-        // Prevent negative or NaN display
-        if (isNaN(fullyFundedAmount) || fullyFundedAmount < 0) {
-          fullyFundedAmount = 0;
-        }
+if (monthlyRate > 0) {
+  fullyFundedAmount = (fin - fvContrib) / Math.pow(1 + monthlyRate, months);
+} else {
+  // If monthlyRate is zero → no growth → simple linear calculation
+  fullyFundedAmount = (fin - fvContrib) / months;
+}
 
-        // Update Fully Funded Amount display
-        document.getElementById('fullyFundedAmount').textContent = '$' + fullyFundedAmount.toLocaleString(undefined, {maximumFractionDigits:0});
+// Prevent invalid display
+if (isNaN(fullyFundedAmount) || fullyFundedAmount < 0 || !isFinite(fullyFundedAmount)) {
+  fullyFundedAmount = 0;
+}
+
+// Update Fully Funded Amount display
+document.getElementById('fullyFundedAmount').textContent = '$' + fullyFundedAmount.toLocaleString(undefined, {maximumFractionDigits:0});
+
 
 
 // Build balances per year
