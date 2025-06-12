@@ -131,9 +131,9 @@ No part of the source code, design, or content may be copied, reproduced, modifi
       }
 
     const ctx = document.getElementById('finChart').getContext('2d');
-const finChart = new Chart(ctx, {
-  type: 'line',
-  data: {
+    const finChart = new Chart(ctx, {
+      type: 'line',
+      data: {
     labels: [], // years (to be filled in calculateFIN)
     datasets: [{
       label: 'Portfolio Value $',
@@ -168,6 +168,13 @@ const finChart = new Chart(ctx, {
       }
     },
     plugins: {
+      legend: {
+      labels: {
+        usePointStyle: true,
+        pointStyle: 'line' // <-- this makes the legend show as a line, not a box
+      },
+      // onClick: null // optional - disables legend click to avoid confusion
+    //},
       tooltip: {
         callbacks: {
           label: ctx => '$' + ctx.parsed.y.toLocaleString()
@@ -294,9 +301,9 @@ finChart.update();
         els.desiredIncome.value=2000;
         els.monthlyContribution.value=100;
         els.inflationRate.value=2; els.inflationRateText.value=2;
-        els.preReturn.value=5; els.preReturnText.value=9;
-        els.postReturn.value=5; els.postReturnText.value=7;
-        els.startAge.value=0; els.startAgeText.value=25;
+        els.preReturn.value=9; els.preReturnText.value=9;
+        els.postReturn.value=7; els.postReturnText.value=7;
+        els.startAge.value=25; els.startAgeText.value=25;
         els.retireAge.value=65; els.retireAgeText.value=65;
         els.endAge.value=85; els.endAgeText.value=85;
         els.ageWarning.style.display='none';
