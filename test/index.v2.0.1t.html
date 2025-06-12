@@ -315,7 +315,7 @@ function exportPDF(){
 
   // Convert chart to image
   const canvas = document.getElementById('finChart');
-  const chartImage = canvas.toDataURL('image/png', 1.0);
+  const chartImage = finChart.toBase64Image();
   document.getElementById('pdfChartImage').src = chartImage;
 
   // Show export view
