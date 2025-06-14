@@ -1,301 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	
+	
+	<!--
+Copyright © 2025 Team Canada Financial Tool. All Rights Reserved.
+Created by Dmitri Ivanenko, June 10, 2025 (initial)
+This tool is provided for personal use only.
+No part of the source code, design, or content may be copied, reproduced, modified, or redistributed without prior written permission.
+-->
+	
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Team Canada Financial Tool</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Team Canada FIN Tool (Online)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f4f4f4;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #0055a5;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    .input-group {
-      margin: 15px 0;
-    }
-    .input-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .input-pair {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    input[type="range"] {
-      flex: 1;
-    }
-    input[type="number"] {
-      width: 80px;
-      padding: 5px;
-    }
-    .output-box {
-      background: #e7f3ff;
-      padding: 10px;
-      margin-top: 20px;
-      border-left: 5px solid #0055a5;
-    }
-    .toggle-group {
-      display: flex;
-      align-items: center;
-      margin: 15px 0;
-    }
-    .toggle-group label {
-      margin-left: 10px;
-    }
-    canvas {
-      margin-top: 40px;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9em;
-      color: #777;
-      margin-top: 40px;
-    }
-  </style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',sans-serif;background:#f4f7fb;color:#222;display:flex;flex-direction:column;align-items:center;padding:20px;}
+    h1,h2{color:#1a73e8;margin-bottom:8px;}
+    .version,.last-updated{font-size:.85rem;color:#555;margin-bottom:16px;}
+    .inputs-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%;max-width:900px;}
+    .input-group,.slider-group{background:#fff;padding:12px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+    label{display:block;margin-bottom:6px;font-weight:600;}
+    input[type=number],input[type=text],input[type=range]{font-size:1rem;}
+    input[type=number],input[type=text]{width:100%;padding:6px;margin-bottom:4px;border:1px solid #aaa;border-radius:4px;}
+    .slider-container{display:flex;align-items:center;gap:8px;}
+    .output{font-size:1.2rem;font-weight:600;margin:16px 0;text-align:center;}
+    #finChart{width:100%;max-width:900px;height:350px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:20px;}
+    .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px;}
+    .btn{padding:10px 20px;font-size:1rem;color:#fff;border:none;border-radius:4px;cursor:pointer;}
+    .btn-red{background:#d32f2f;} .btn-red:hover{background:#b71c1c;}
+    .btn-blue{background:#1976d2;} .btn-blue:hover{background:#0d47a1;}
+    .btn-green{background:#388e3c;} .btn-green:hover{background:#1b5e20;}
+    #ageWarning{color:#d84315;text-align:center;margin-bottom:10px;display:none;}
+    @media print{.btn,.buttons,.last-updated{display:none;}body{padding:0;background:none;}}
+ 
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  margin-top: 4px;
+}
+
+.switch input { display: none; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+
+ 
+ </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Team Canada Financial Tool</h1>
+  <h1>Team Canada Financial Tool</h1>
+  <div class="version">v2.0.5t (Online)</div>
+  <div class="last-updated">Last updated: June 13, 2025</div>
+  <h2>FIN# Calculator</h2>
 
-    <div class="input-group">
-      <label for="currentInvestment">Current Retirement Investment</label>
-      <input type="number" id="currentInvestment" value="10000"/>
+  <div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
+
+  <div class="inputs-container">
+    <div class="input-group"><label>Current Investment ($)</label><input type="number" id="currentInvestment"></div>
+    <div class="input-group"><label>Desired Monthly Income ($)</label><input type="number" id="desiredIncome"></div>
+    <div class="input-group"><label>Monthly Contribution ($)</label><input type="number" id="monthlyContribution"></div>
+
+    <div class="slider-group"><label>Inflation (%)</label>
+      <div class="slider-container">
+        <input type="range" id="inflationRate" min="0" max="7" step="1">
+        <input type="text" id="inflationRateText">
+      </div>
     </div>
-
-    <div class="input-group">
-      <label for="desiredIncome">Desired Monthly Retirement Income</label>
-      <input type="number" id="desiredIncome" value="2000"/>
+    <div class="slider-group"><label>Pre-Retirement Return (%)</label>
+      <div class="slider-container">
+        <input type="range" id="preReturn" min="0" max="15" step="1">
+        <input type="text" id="preReturnText">
+      </div>
     </div>
-
-    <div class="input-group">
-      <label for="monthlyContribution">Current Monthly Contributions</label>
-      <input type="number" id="monthlyContribution" value="100"/>
-    </div>
-
-    <div class="input-group">
-      <label>Pre-Retirement Average Rate of Return</label>
-      <div class="input-pair">
-        <input type="range" id="preReturn" min="0" max="15" value="9"/>
-        <input type="number" id="preReturnText" min="0" max="15" step="0.1" value="9"/>
-        <span>%</span>
+    <div class="slider-group"><label>Post-Retirement Return (%)</label>
+      <div class="slider-container">
+        <input type="range" id="postReturn" min="0" max="12" step="1">
+        <input type="text" id="postReturnText">
       </div>
     </div>
 
-    <div class="input-group">
-      <label>Post-Retirement Average Rate of Return</label>
-      <div class="input-pair">
-        <input type="range" id="postReturn" min="0" max="15" value="7"/>
-        <input type="number" id="postReturnText" min="0" max="15" step="0.1" value="7"/>
-        <span>%</span>
+    <div class="slider-group"><label>Start Age</label>
+      <div class="slider-container">
+        <input type="range" id="startAge" min="0" max="50" step="1">
+        <input type="text" id="startAgeText">
       </div>
     </div>
-
-    <div class="input-group">
-      <label>Inflation Rate</label>
-      <div class="input-pair">
-        <input type="range" id="inflationRate" min="0" max="10" value="2"/>
-        <input type="number" id="inflationRateText" min="0" max="10" step="0.1" value="2"/>
-        <span>%</span>
+    <div class="slider-group"><label>Retirement Age</label>
+      <div class="slider-container">
+        <input type="range" id="retireAge" min="50" max="75" step="1">
+        <input type="text" id="retireAgeText">
       </div>
     </div>
-
-    <div class="input-group">
-      <label>Start Age</label>
-      <div class="input-pair">
-        <input type="range" id="startAge" min="18" max="64" value="25"/>
-        <input type="number" id="startAgeText" min="18" max="64" value="25"/>
+    <div class="slider-group"><label>End Age</label>
+      <div class="slider-container">
+        <input type="range" id="endAge" min="75" max="100" step="1">
+        <input type="text" id="endAgeText">
       </div>
     </div>
+    <div class="input-group tooltip">
+  <label for="drawdownToggle">
+    Retirement Mode:
+    <span class="tooltiptext">
+      Toggle between a fixed retirement period or perpetual drawdown (FIRE style).
+    </span>
+  </label>
+  <label class="switch">
+    <input type="checkbox" id="drawdownToggle">
+    <span class="slider"></span>
+  </label>
+  <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
+</div>
 
-    <div class="input-group">
-      <label>Retirement Age</label>
-      <div class="input-pair">
-        <input type="range" id="retireAge" min="30" max="75" value="65"/>
-        <input type="number" id="retireAgeText" min="30" max="75" value="65"/>
-      </div>
-    </div>
 
-    <div class="input-group">
-      <label>End Age</label>
-      <div class="input-pair">
-        <input type="range" id="endAge" min="40" max="100" value="85"/>
-        <input type="number" id="endAgeText" min="40" max="100" value="85"/>
-      </div>
-    </div>
-
-    <div class="toggle-group">
-      <input type="checkbox" id="drawdownToggle"/>
-      <label for="drawdownToggle" id="modeLabel">End at End Age</label>
-    </div>
-
-    <div class="toggle-group">
-      <input type="checkbox" id="finModeToggle"/>
-      <label for="finModeToggle" id="finModeLabel">Show FIN in Today's Dollars</label>
-    </div>
-
-    <div class="output-box">
-      <p><strong>FIN Required:</strong> <span id="finAmount">$0</span></p>
-      <p><strong>Monthly FIN Shortfall:</strong> <span id="monthlyNeeded">$0</span></p>
-    </div>
-
-    <div id="ageWarning" style="display:none;color:red;font-weight:bold;">
-      Retirement age must be after start age, and end age after retirement age.
-    </div>
-
-    <canvas id="finChart" width="800" height="300"></canvas>
-
-    <footer>Team Canada Financial Tool — Version 2.2t</footer>
   </div>
 
+  <div class="output">Financial Independence Number (FIN): <strong id="finAmount">$0</strong></div>
+  <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
+  
+  <canvas id="finChart" style="max-height: 400px;"></canvas>
+
+
+  <div class="buttons">
+    <button class="btn btn-red" onclick="exportPDF()">Export PDF</button>
+    <button class="btn btn-blue" onclick="resetDefaults()">Reset Defaults</button>
+    <button id="downloadHTMLBtn" class="btn btn-green" onclick="downloadHTML()" style="display:none;">Download HTML</button>
+
+    <!-- <button class="btn btn-green" onclick="downloadHTML()">Download HTML</button> -->
+  </div>
+  <div id="downloadLinkContainer"></div>
+
   <script>
-    const els = {};
-    ['currentInvestment','desiredIncome','monthlyContribution',
-     'inflationRate','inflationRateText','preReturn','preReturnText',
-     'postReturn','postReturnText','startAge','startAgeText',
-     'retireAge','retireAgeText','endAge','endAgeText',
-     'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
-      els[id]=document.getElementById(id);
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+      const els = {};
+      ['currentInvestment','desiredIncome','monthlyContribution',
+       'inflationRate','inflationRateText','preReturn','preReturnText',
+       'postReturn','postReturnText','startAge','startAgeText',
+       'retireAge','retireAgeText','endAge','endAgeText',
+       'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
+        els[id]=document.getElementById(id);
+        
+          });
+        document.getElementById("drawdownToggle").addEventListener("change", function () {
+         const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
+        document.getElementById("modeLabel").textContent = label;
+        calculateFIN();
+      });
 
-    function sync(id1, id2) {
-      els[id1].addEventListener('input', ()=>{ els[id2].value = els[id1].value; calculateFIN(); });
-      els[id2].addEventListener('input', ()=>{ els[id1].value = els[id2].value; calculateFIN(); });
-    }
-    ['inflationRate','preReturn','postReturn','startAge','retireAge','endAge'].forEach(base=> sync(base, base + 'Text'));
+      function loadSettings(){
+        const saved=localStorage.getItem('finToolSettings');
+        if(saved){
+          const s=JSON.parse(saved);
+          Object.keys(s).forEach(k=>{ if(els[k]) els[k].value=s[k];});
+        } else resetDefaults();
+      }
 
-    document.getElementById("drawdownToggle").addEventListener("change", () => {
-      document.getElementById("modeLabel").textContent = document.getElementById("drawdownToggle").checked ? "Forever (FIRE style)" : "End at End Age";
-      calculateFIN();
-    });
-
-    document.getElementById("finModeToggle").addEventListener("change", () => {
-      document.getElementById("finModeLabel").textContent = document.getElementById("finModeToggle").checked ? "Show FIN in Today's Dollars" : "Show FIN in Future Dollars";
-      calculateFIN();
-    });
-
-    function validateAges(){
-      let sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value, warn=false;
-      if(ra<=sa){ ra=sa+1; els.retireAge.value=ra; els.retireAgeText.value=ra; warn=true; }
-      if(ea<=ra){ ea=ra+1; els.endAge.value=ea; els.endAgeText.value=ea; warn=true; }
-      els.ageWarning.style.display = warn?'block':'none';
-    }
+      function saveSettings(){
+        const data={};
+        Object.keys(els).forEach(k=>{
+          if(['monthlyNeeded','finAmount','ageWarning'].includes(k)) return;
+          data[k]=els[k].value;
+        });
+        localStorage.setItem('finToolSettings',JSON.stringify(data));
+      }
 
     const ctx = document.getElementById('finChart').getContext('2d');
     const finChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: [],
-        datasets: [{
-          label: 'Projected Balance',
-          data: [],
-          borderColor: '#4285f4',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.1,
-        }]
+    labels: [], // years (to be filled in calculateFIN)
+    datasets: [{
+      label: 'Portfolio Value $',
+      data: [], // balances (to be filled in calculateFIN)
+      borderColor: '#1a73e8',
+      backgroundColor: 'rgba(26,115,232,0.1)',
+      fill: true,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      tension: 0.25 // smooth line
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Age (Years)'
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            labels: {
-              usePointStyle: true,
-              pointStyle: 'line'
-            }
-          }
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Portfolio Value ($)'
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: v => '$'+v.toLocaleString()
-            }
-          }
+        ticks: {
+          callback: v => '$' + v.toLocaleString()
         }
       }
+    },
+  plugins: {
+  legend: {
+    labels: {
+      usePointStyle: true,
+      pointStyle: 'line'
+    },
+    
+  },
+  tooltip: {
+    callbacks: {
+      label: ctx => '$' + ctx.parsed.y.toLocaleString()
+    }
+  },
+  title: {
+    display: true,
+    text: 'Portfolio Growth & Drawdown'
+  }
+}
+
+  }
+});
+
+      
+      function validateAges(){
+        let sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value, warn=false;
+        if(ra<=sa){ ra=sa+1; els.retireAge.value=ra; els.retireAgeText.value=ra; warn=true; }
+        if(ea<=ra){ ea=ra+1; els.endAge.value=ea; els.endAgeText.value=ea; warn=true; }
+        els.ageWarning.style.display = warn?'block':'none';
+      }
+
+
+function calculateFIN(){
+        validateAges();
+       const ci = +els.currentInvestment.value || 0;
+const di = +els.desiredIncome.value || 0;
+const mc = +els.monthlyContribution.value || 0;
+const inf = +els.inflationRate.value / 100 || 0;
+const pre = +els.preReturn.value / 100 || 0;
+const post = +els.postReturn.value / 100 || 0;
+
+        const sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value;
+        const yrsTo=ra-sa, yrsIn=ea-ra;
+        const infIncome=di*Math.pow(1+inf,yrsTo);
+       // const fin = post>0?infIncome*12*((1-Math.pow(1+post,-yrsIn))/post):infIncome*12*yrsIn;
+       const drawdownType = document.getElementById("drawdownToggle")?.checked ? "perpetual" : "finite";
+
+let fin;
+
+if (drawdownType === "finite") {
+  // Standard drawdown to end age
+  fin = post > 0
+    ? infIncome * 12 * ((1 - Math.pow(1 + post, -yrsIn)) / post)
+    : infIncome * 12 * yrsIn;
+} else {
+  // FIRE-style perpetual drawdown using real rate of return
+  const realRate = post - inf;
+  fin = realRate > 0
+  ? infIncome * 12 / realRate
+  : infIncome * 12 * 50; // fallback large number if ROR too low
+}
+
+
+        const fvCurr=ci*Math.pow(1+pre,yrsTo);
+        const mRate=pre/12, months=yrsTo*12;
+        const fvCont=mRate>0?mc*((Math.pow(1+mRate,months)-1)/mRate):mc*months;
+        const totalFV=fvCurr+fvCont;
+        const rem=Math.max(fin-totalFV,0);
+        const monthlyNeed=rem>0?(mRate>0?rem/((Math.pow(1+mRate,months)-1)/mRate):rem/months):0;
+        els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
+        els.finAmount.textContent='$'+fin.toLocaleString(undefined,{maximumFractionDigits:0});
+
+// Build balances per year
+const yearLabels = [];
+const balances = [];
+
+// Use effective contribution:
+// If user invests less than Monthly Needed → show shortfall
+// If user invests >= Monthly Needed → use their value
+const mn = monthlyNeed;
+const effectiveMC = Math.max(mc, mn);
+
+// Start with current investment
+let balance = fvCurr;
+
+// Accumulation phase (Start Age to Retirement Age)
+for (let age = sa; age <= ra; age++) {
+  if (age > sa) {
+    // Add contributions for the year
+    balance += effectiveMC * 12;
+    // Apply pre-retirement return
+    balance *= (1 + pre);
+  }
+  yearLabels.push(age);
+  balances.push(balance);
+}
+
+// Decumulation phase (Retirement Age to End Age)
+for (let age = ra + 1; age <= ea; age++) {
+  // Apply post-retirement return first
+  balance *= (1 + post);
+  // Subtract desired income for the year
+  balance -= infIncome * 12;
+  // Prevent negative balance
+  if (balance < 0) balance = 0;
+
+  yearLabels.push(age);
+  balances.push(balance);
+}
+
+// Update chart
+finChart.data.labels = yearLabels;
+finChart.data.datasets[0].data = balances;
+finChart.update();
+
+
+        saveSettings();
+      }
+
+      [['inflationRate','inflationRateText'],
+       ['preReturn','preReturnText'],
+       ['postReturn','postReturnText'],
+       ['startAge','startAgeText'],
+       ['retireAge','retireAgeText'],
+       ['endAge','endAgeText']].forEach(pair=>{
+        const [sl,tx]=pair, slider=els[sl], text=els[tx];
+        slider.addEventListener('input',()=>{
+          const whole=Math.round(slider.value);
+          slider.value=whole;
+          text.value=whole;
+          calculateFIN();
+        });
+        text.addEventListener('change',()=>{
+          let v=parseFloat(text.value);
+          if(isNaN(v)) v=+slider.min;
+          slider.value=Math.min(Math.max(v,+slider.min),+slider.max);
+          text.value=slider.value;
+          calculateFIN();
+        });
+      });
+
+      document.querySelectorAll('input[type="number"]').forEach(inp=>inp.addEventListener('input', calculateFIN));
+
+      function exportPDF(){
+        html2pdf().set({margin:0.5,filename:'FIN_tool.pdf',
+          image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},
+          jsPDF:{unit:'in',format:'letter'}}).from(document.body).save();
+      }
+
+      function resetDefaults(){
+        localStorage.removeItem('finToolSettings');
+        els.currentInvestment.value=0;
+        els.desiredIncome.value=2000;
+        els.monthlyContribution.value=100;
+        els.inflationRate.value=2; els.inflationRateText.value=2;
+        els.preReturn.value=9; els.preReturnText.value=9;
+        els.postReturn.value=7; els.postReturnText.value=7;
+        els.startAge.value=25; els.startAgeText.value=25;
+        els.retireAge.value=65; els.retireAgeText.value=65;
+        els.endAge.value=85; els.endAgeText.value=85;
+        els.ageWarning.style.display='none';
+        calculateFIN();
+      }
+
+      function downloadHTML(){
+        const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download='TeamCanada_FIN_Tool_v1.9.html';
+        a.textContent='Download your FIN Tool';
+        a.style.display='block'; a.style.margin='20px auto'; a.style.color='#1565c0'; a.style.textAlign='center';
+        document.getElementById('downloadLinkContainer').innerHTML=''; document.getElementById('downloadLinkContainer').appendChild(a);
+        window.scrollTo(0,document.body.scrollHeight);
+      }
+
+      // Initial load
+      loadSettings();
+      // Set correct label on toggle
+const drawdownInitial = document.getElementById("drawdownToggle").checked;
+document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "End at End Age";
+
+      calculateFIN();
+
+      // FINAL FIX — expose functions to window so buttons work:
+      window.exportPDF = exportPDF;
+      window.resetDefaults = resetDefaults;
+      window.downloadHTML = downloadHTML;
+
     });
 
-    function calculateFIN() {
-      validateAges();
-
-      const ci = +els.currentInvestment.value || 0;
-      const di = +els.desiredIncome.value || 0;
-      const mc = +els.monthlyContribution.value || 0;
-      const inf = +els.inflationRate.value / 100 || 0;
-      const pre = +els.preReturn.value / 100 || 0;
-      const post = +els.postReturn.value / 100 || 0;
-      const sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value;
-      const yrsTo = ra - sa, yrsIn = ea - ra;
-      const future = !document.getElementById("finModeToggle").checked;
-      const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
-
-      const infIncome = future ? di * Math.pow(1 + inf, yrsTo) : di;
-
-      let fin;
-      if (drawdownType === "finite") {
-        fin = post > 0
-          ? infIncome * 12 * ((1 - Math.pow(1 + post, -yrsIn)) / post)
-          : infIncome * 12 * yrsIn;
-      } else {
-        const realRate = post - inf;
-        fin = realRate > 0
-          ? infIncome * 12 / realRate
-          : infIncome * 12 * 50;
-      }
-
-      const fvCurr = ci * Math.pow(1 + pre, yrsTo);
-      const mRate = pre / 12, months = yrsTo * 12;
-      const fvCont = mRate > 0 ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate) : mc * months;
-      const totalFV = fvCurr + fvCont;
-      const rem = Math.max(fin - totalFV, 0);
-      const monthlyNeed = rem > 0 ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months) : 0;
-
-      els.finAmount.textContent = '$' + fin.toLocaleString(undefined, {maximumFractionDigits:0});
-      els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, {maximumFractionDigits:0});
-
-      const yearLabels = [], balances = [];
-      let balance = fvCurr;
-      for (let age = sa; age <= ra; age++) {
-        if (age > sa) {
-          balance += mc * 12;
-          balance *= 1 + pre;
-        }
-        yearLabels.push(age);
-        balances.push(balance);
-      }
-      for (let age = ra + 1; age <= ea; age++) {
-        balance *= 1 + post;
-        balance -= infIncome * 12;
-        if (balance < 0) balance = 0;
-        yearLabels.push(age);
-        balances.push(balance);
-      }
-
-      finChart.data.labels = yearLabels;
-      finChart.data.datasets[0].data = balances;
-      finChart.update();
-    }
-
-    document.addEventListener("DOMContentLoaded", calculateFIN);
   </script>
 </body>
 </html>
-
