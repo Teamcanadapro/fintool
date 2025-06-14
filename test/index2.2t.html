@@ -36,41 +36,51 @@ No part of the source code, design, or content may be copied, reproduced, modifi
     #ageWarning{color:#d84315;text-align:center;margin-bottom:10px;display:none;}
     @media print{.btn,.buttons,.last-updated{display:none;}body{padding:0;background:none;}}
  
- .tooltip {
+.switch {
   position: relative;
   display: inline-block;
-  cursor: help;
+  width: 48px;
+  height: 24px;
+  margin-top: 4px;
 }
 
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 280px;
-  background-color: #333;
-  color: #fff;
-  text-align: left;
-  border-radius: 5px;
-  padding: 10px;
+.switch input { display: none; }
+
+.slider {
   position: absolute;
-  z-index: 100;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 13px;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
 }
 
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
 }
+
+input:checked + .slider {
+  background-color: #4caf50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
 
  
  </style>
 </head>
 <body>
   <h1>Team Canada Financial Tool</h1>
-  <div class="version">v2.0.4t (Online)</div>
+  <div class="version">v2.0.5t (Online)</div>
   <div class="last-updated">Last updated: June 13, 2025</div>
   <h2>FIN# Calculator</h2>
 
@@ -119,17 +129,19 @@ No part of the source code, design, or content may be copied, reproduced, modifi
       </div>
     </div>
     <div class="input-group tooltip">
-  <label for="drawdownType">
+  <label for="drawdownToggle">
     Retirement Mode:
     <span class="tooltiptext">
-      Choose between a fixed retirement period (e.g., age 65–85) or perpetual retirement (FIRE-style), where you withdraw inflation-adjusted income forever.
+      Toggle between a fixed retirement period or perpetual drawdown (FIRE style).
     </span>
   </label>
-  <select id="drawdownType">
-    <option value="finite" selected>End at End Age</option>
-    <option value="perpetual">Forever (FIRE style)</option>
-  </select>
+  <label class="switch">
+    <input type="checkbox" id="drawdownToggle">
+    <span class="slider"></span>
+  </label>
+  <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
 </div>
+
 
   </div>
 
@@ -157,6 +169,12 @@ No part of the source code, design, or content may be copied, reproduced, modifi
        'retireAge','retireAgeText','endAge','endAgeText',
        'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
         els[id]=document.getElementById(id);
+        document.getElementById("drawdownToggle").addEventListener("change", function () {
+  const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
+  document.getElementById("modeLabel").textContent = label;
+  calculateFIN();
+});
+
       });
 
       function loadSettings(){
@@ -243,7 +261,8 @@ No part of the source code, design, or content may be copied, reproduced, modifi
         els.ageWarning.style.display = warn?'block':'none';
       }
 
-      function calculateFIN(){
+
+function calculateFIN(){
         validateAges();
        const ci = +els.currentInvestment.value || 0;
 const di = +els.desiredIncome.value || 0;
@@ -256,7 +275,8 @@ const post = +els.postReturn.value / 100 || 0;
         const yrsTo=ra-sa, yrsIn=ea-ra;
         const infIncome=di*Math.pow(1+inf,yrsTo);
        // const fin = post>0?infIncome*12*((1-Math.pow(1+post,-yrsIn))/post):infIncome*12*yrsIn;
-       const drawdownType = document.getElementById("drawdownType")?.value || "finite";
+       const drawdownType = document.getElementById("drawdownToggle")?.checked ? "perpetual" : "finite";
+
 let fin;
 
 if (drawdownType === "finite") {
@@ -396,7 +416,6 @@ finChart.update();
       window.downloadHTML = downloadHTML;
 
     });
-document.getElementById("drawdownType").addEventListener("change", calculateFIN);
 
   </script>
 </body>
