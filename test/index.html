@@ -80,7 +80,7 @@ input:checked + .slider:before {
 </head>
 <body>
   <h1>Team Canada Financial Tool</h1>
-  <div class="version">v2.0.6t (Online)</div>
+  <div class="version">v2.0.7t (Online)</div>
   <div class="last-updated">Last updated: June 14, 2025</div>
   <h2>FIN# Calculator</h2>
 
@@ -128,35 +128,33 @@ input:checked + .slider:before {
         <input type="text" id="endAgeText">
       </div>
     </div>
-    <div class="input-group tooltip">
-  <label for="drawdownToggle">
-    Retirement Mode:
-    <span class="tooltiptext">
-      Toggle between a fixed retirement period or perpetual drawdown (FIRE style).
-    </span>
-  </label>
-  <label class="switch">
-    <input type="checkbox" id="drawdownToggle">
-    <span class="slider"></span>
-  </label>
-  <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
-</div>
-<div class="form-group">
+    <div class="form-group">
   <label for="drawdownToggle">
     Retirement Mode 
     <span title="Choose how long money should last. 'End at End Age' means your money should last until the end age you selected. 'Forever (FIRE style)' means you'll withdraw a fixed % forever (inflation-adjusted).">🛈</span>
   </label><br>
   <label class="switch">
     <input type="checkbox" id="drawdownToggle">
-    <span class="slider round"></span>
+    <span class="slider"></span>
   </label>
-  <span id="modeLabel">End at End Age</span>
+  <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
 </div>
-
 
   </div>
 
   <div class="output">Financial Independence Number (FIN): <strong id="finAmount">$0</strong></div>
+  <div class="form-group" style="text-align:center; margin-bottom:10px;">
+  <label for="finDisplayToggle">
+    Show FIN in 
+    <span title="Toggle between future dollars (inflation-adjusted at retirement) and today's value.">🛈</span>
+  </label><br>
+  <label class="switch">
+    <input type="checkbox" id="finDisplayToggle" checked>
+    <span class="slider"></span>
+  </label>
+  <div style="margin-top:5px;">Display Mode: <span id="finDisplayLabel">Future $</span></div>
+</div>
+
   <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
   
   <canvas id="finChart" style="max-height: 400px;"></canvas>
@@ -180,11 +178,15 @@ input:checked + .slider:before {
        'retireAge','retireAgeText','endAge','endAgeText',
        'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
         els[id]=document.getElementById(id);
-        
-          });
+        });
         document.getElementById("drawdownToggle").addEventListener("change", function () {
          const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
         document.getElementById("modeLabel").textContent = label;
+        calculateFIN();
+        });
+        document.getElementById("finDisplayToggle").addEventListener("change", function () {
+        const label = this.checked ? "Future $" : "Today's $";
+        document.getElementById("finDisplayLabel").textContent = label;
         calculateFIN();
       });
 
@@ -287,6 +289,9 @@ const post = +els.postReturn.value / 100 || 0;
         const infIncome=di*Math.pow(1+inf,yrsTo);
        // const fin = post>0?infIncome*12*((1-Math.pow(1+post,-yrsIn))/post):infIncome*12*yrsIn;
        const drawdownType = document.getElementById("drawdownToggle")?.checked ? "perpetual" : "finite";
+const showFuture = document.getElementById("finDisplayToggle")?.checked;
+     
+       
 
 let fin;
 
@@ -311,7 +316,9 @@ if (drawdownType === "finite") {
         const rem=Math.max(fin-totalFV,0);
         const monthlyNeed=rem>0?(mRate>0?rem/((Math.pow(1+mRate,months)-1)/mRate):rem/months):0;
         els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
-        els.finAmount.textContent='$'+fin.toLocaleString(undefined,{maximumFractionDigits:0});
+        const displayFIN = showFuture ? fin : fin / Math.pow(1 + inf, yrsTo);
+els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
 
 // Build balances per year
 const yearLabels = [];
