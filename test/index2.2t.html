@@ -169,12 +169,12 @@ input:checked + .slider:before {
        'retireAge','retireAgeText','endAge','endAgeText',
        'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
         els[id]=document.getElementById(id);
+        
+          });
         document.getElementById("drawdownToggle").addEventListener("change", function () {
-  const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
-  document.getElementById("modeLabel").textContent = label;
-  calculateFIN();
-});
-
+         const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
+        document.getElementById("modeLabel").textContent = label;
+        calculateFIN();
       });
 
       function loadSettings(){
