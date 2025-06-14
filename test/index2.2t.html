@@ -35,11 +35,42 @@ No part of the source code, design, or content may be copied, reproduced, modifi
     .btn-green{background:#388e3c;} .btn-green:hover{background:#1b5e20;}
     #ageWarning{color:#d84315;text-align:center;margin-bottom:10px;display:none;}
     @media print{.btn,.buttons,.last-updated{display:none;}body{padding:0;background:none;}}
-  </style>
+ 
+ .tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 280px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 5px;
+  padding: 10px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 13px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+ 
+ </style>
 </head>
 <body>
   <h1>Team Canada Financial Tool</h1>
-  <div class="version">v2.0.2t (Online)</div>
+  <div class="version">v2.0.3t (Online)</div>
   <div class="last-updated">Last updated: June 13, 2025</div>
   <h2>FIN# Calculator</h2>
 
@@ -87,6 +118,19 @@ No part of the source code, design, or content may be copied, reproduced, modifi
         <input type="text" id="endAgeText">
       </div>
     </div>
+    <div class="input-group tooltip">
+  <label for="drawdownType">
+    Retirement Mode:
+    <span class="tooltiptext">
+      Choose between a fixed retirement period (e.g., age 65–85) or perpetual retirement (FIRE-style), where you withdraw inflation-adjusted income forever.
+    </span>
+  </label>
+  <select id="drawdownType">
+    <option value="finite" selected>End at End Age</option>
+    <option value="perpetual">Forever (FIRE style)</option>
+  </select>
+</div>
+
   </div>
 
   <div class="output">Financial Independence Number (FIN): <strong id="finAmount">$0</strong></div>
@@ -211,7 +255,24 @@ const post = +els.postReturn.value / 100 || 0;
         const sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value;
         const yrsTo=ra-sa, yrsIn=ea-ra;
         const infIncome=di*Math.pow(1+inf,yrsTo);
-        const fin = post>0?infIncome*12*((1-Math.pow(1+post,-yrsIn))/post):infIncome*12*yrsIn;
+       // const fin = post>0?infIncome*12*((1-Math.pow(1+post,-yrsIn))/post):infIncome*12*yrsIn;
+       const drawdownType = document.getElementById("drawdownType")?.value || "finite";
+let fin;
+
+if (drawdownType === "finite") {
+  // Standard drawdown to end age
+  fin = post > 0
+    ? infIncome * 12 * ((1 - Math.pow(1 + post, -yrsIn)) / post)
+    : infIncome * 12 * yrsIn;
+} else {
+  // FIRE-style perpetual drawdown using real rate of return
+  const realRate = post - inf;
+  fin = realRate > 0
+    ? (di * 12) / realRate
+    : di * 12 * 50; // fallback large number if ROR too low
+}
+
+
         const fvCurr=ci*Math.pow(1+pre,yrsTo);
         const mRate=pre/12, months=yrsTo*12;
         const fvCont=mRate>0?mc*((Math.pow(1+mRate,months)-1)/mRate):mc*months;
