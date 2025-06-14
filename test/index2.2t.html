@@ -3,212 +3,299 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Financial Independence Calculator</title>
+  <title>Team Canada Financial Tool</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
-    h1 { text-align: center; }
-    label { display: inline-block; width: 240px; }
-    input[type="number"], input[type="range"] { width: 200px; }
-    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 700px; margin: auto; }
-    .section { margin-bottom: 20px; }
-    .output { font-size: 1.2em; font-weight: bold; margin-top: 10px; }
-    canvas { max-height: 400px; }
-    .chart-container { position: relative; height: 400px; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f4f4;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #0055a5;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .input-group {
+      margin: 15px 0;
+    }
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .input-pair {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    input[type="range"] {
+      flex: 1;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 5px;
+    }
+    .output-box {
+      background: #e7f3ff;
+      padding: 10px;
+      margin-top: 20px;
+      border-left: 5px solid #0055a5;
+    }
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+    }
+    .toggle-group label {
+      margin-left: 10px;
+    }
+    canvas {
+      margin-top: 40px;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.9em;
+      color: #777;
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Financial Independence Tool</h1>
+    <h1>Team Canada Financial Tool</h1>
 
-    <div class="section">
-      <label for="currentInvestment">Current Retirement Investment ($):</label>
-      <input type="number" id="currentInvestment" value="10000"><br/>
-      
-      <label for="desiredIncome">Desired Monthly Retirement Income ($):</label>
-      <input type="number" id="desiredIncome" value="2000"><br/>
-      
-      <label for="monthlyContribution">Current Monthly Contribution ($):</label>
-      <input type="number" id="monthlyContribution" value="100"><br/>
-
-      <label for="inflationRate">Inflation Rate (%):</label>
-      <input type="number" id="inflationRate" value="2"><br/>
-
-      <label for="preReturn">Pre-Retirement Rate of Return (%):</label>
-      <input type="range" id="preReturn" min="0" max="15" value="9">
-      <span id="preReturnText">9</span>%<br/>
-
-      <label for="postReturn">Post-Retirement Rate of Return (%):</label>
-      <input type="range" id="postReturn" min="0" max="15" value="7">
-      <span id="postReturnText">7</span>%<br/>
-
-      <label for="startAge">Start Age:</label>
-      <input type="range" id="startAge" min="18" max="64" value="25">
-      <span id="startAgeText">25</span><br/>
-
-      <label for="retireAge">Retirement Age:</label>
-      <input type="range" id="retireAge" min="25" max="75" value="65">
-      <span id="retireAgeText">65</span><br/>
-
-      <label for="endAge">End Age:</label>
-      <input type="range" id="endAge" min="66" max="100" value="85">
-      <span id="endAgeText">85</span><br/>
+    <div class="input-group">
+      <label for="currentInvestment">Current Retirement Investment</label>
+      <input type="number" id="currentInvestment" value="10000"/>
     </div>
 
-    <div class="section">
-      <label for="drawdownToggle" title="Toggle between ending your money at end age, or perpetual income like FIRE.">
-        Retirement Mode (Finite vs FIRE):
-      </label>
-      <input type="checkbox" id="drawdownToggle"><br/>
-
-      <label for="finDollarModeToggle" title="Show FIN in future value or today's value.">
-        Show FIN in Future Dollars:
-      </label>
-      <input type="checkbox" id="finDollarModeToggle"><br/>
+    <div class="input-group">
+      <label for="desiredIncome">Desired Monthly Retirement Income</label>
+      <input type="number" id="desiredIncome" value="2000"/>
     </div>
 
-    <div class="section output">
-      <div>FIN: <span id="finAmount">$0</span></div>
-      <div>Monthly Shortfall: <span id="monthlyNeeded">$0</span></div>
+    <div class="input-group">
+      <label for="monthlyContribution">Current Monthly Contributions</label>
+      <input type="number" id="monthlyContribution" value="100"/>
     </div>
 
-    <div class="chart-container">
-      <canvas id="finChart"></canvas>
+    <div class="input-group">
+      <label>Pre-Retirement Average Rate of Return</label>
+      <div class="input-pair">
+        <input type="range" id="preReturn" min="0" max="15" value="9"/>
+        <input type="number" id="preReturnText" min="0" max="15" step="0.1" value="9"/>
+        <span>%</span>
+      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <script>
-      const els = {};
-      ['currentInvestment','desiredIncome','monthlyContribution',
-       'inflationRate','preReturn','preReturnText','postReturn','postReturnText',
-       'startAge','startAgeText','retireAge','retireAgeText','endAge','endAgeText',
-       'monthlyNeeded','finAmount','drawdownToggle','finDollarModeToggle'].forEach(id=>{
-         els[id]=document.getElementById(id);
-      });
 
-      let finChart;
+    <div class="input-group">
+      <label>Post-Retirement Average Rate of Return</label>
+      <div class="input-pair">
+        <input type="range" id="postReturn" min="0" max="15" value="7"/>
+        <input type="number" id="postReturnText" min="0" max="15" step="0.1" value="7"/>
+        <span>%</span>
+      </div>
+    </div>
 
-      function validateAges(){
-        let sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value;
-        if(ra<=sa){ ra=sa+1; els.retireAge.value=ra; els.retireAgeText.textContent=ra; }
-        if(ea<=ra){ ea=ra+1; els.endAge.value=ea; els.endAgeText.textContent=ea; }
-      }
+    <div class="input-group">
+      <label>Inflation Rate</label>
+      <div class="input-pair">
+        <input type="range" id="inflationRate" min="0" max="10" value="2"/>
+        <input type="number" id="inflationRateText" min="0" max="10" step="0.1" value="2"/>
+        <span>%</span>
+      </div>
+    </div>
 
-      function calculateFIN(){
-        validateAges();
-        const ci=+els.currentInvestment.value||0;
-        const di=+els.desiredIncome.value||0;
-        const mc=+els.monthlyContribution.value||0;
-        const inf=+els.inflationRate.value/100||0;
-        const pre=+els.preReturn.value/100||0;
-        const post=+els.postReturn.value/100||0;
-        const sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value;
-        const yrsTo=ra-sa, yrsIn=ea-ra;
-        const futureIncome=di*Math.pow(1+inf,yrsTo);
-        const realRate=post-inf;
+    <div class="input-group">
+      <label>Start Age</label>
+      <div class="input-pair">
+        <input type="range" id="startAge" min="18" max="64" value="25"/>
+        <input type="number" id="startAgeText" min="18" max="64" value="25"/>
+      </div>
+    </div>
 
-        const drawdownType = els.drawdownToggle.checked ? 'perpetual' : 'finite';
-        const dollarMode = els.finDollarModeToggle.checked ? 'future' : 'today';
+    <div class="input-group">
+      <label>Retirement Age</label>
+      <div class="input-pair">
+        <input type="range" id="retireAge" min="30" max="75" value="65"/>
+        <input type="number" id="retireAgeText" min="30" max="75" value="65"/>
+      </div>
+    </div>
 
-        let fin = 0;
-        if(drawdownType === 'finite'){
-          fin = post > 0 ? futureIncome*12*((1 - Math.pow(1 + post, -yrsIn)) / post) : futureIncome*12*yrsIn;
-        } else {
-          fin = realRate > 0 ? (di * 12) / realRate : di * 12 * 50;
-        }
+    <div class="input-group">
+      <label>End Age</label>
+      <div class="input-pair">
+        <input type="range" id="endAge" min="40" max="100" value="85"/>
+        <input type="number" id="endAgeText" min="40" max="100" value="85"/>
+      </div>
+    </div>
 
-        if(dollarMode === 'today') {
-          fin = fin / Math.pow(1+inf, yrsTo);
-        }
+    <div class="toggle-group">
+      <input type="checkbox" id="drawdownToggle"/>
+      <label for="drawdownToggle" id="modeLabel">End at End Age</label>
+    </div>
 
-        const fvCurr = ci * Math.pow(1+pre, yrsTo);
-        const months = yrsTo * 12;
-        const mRate = pre / 12;
-        const fvCont = mRate > 0 ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate) : mc * months;
-        const totalFV = fvCurr + fvCont;
-        const rem = Math.max(fin - totalFV, 0);
-        const monthlyNeed = rem > 0 ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months) : 0;
+    <div class="toggle-group">
+      <input type="checkbox" id="finModeToggle"/>
+      <label for="finModeToggle" id="finModeLabel">Show FIN in Today's Dollars</label>
+    </div>
 
-        els.finAmount.textContent = '$' + Math.round(fin).toLocaleString();
-        els.monthlyNeeded.textContent = '$' + Math.round(monthlyNeed).toLocaleString();
+    <div class="output-box">
+      <p><strong>FIN Required:</strong> <span id="finAmount">$0</span></p>
+      <p><strong>Monthly FIN Shortfall:</strong> <span id="monthlyNeeded">$0</span></p>
+    </div>
 
-        // Chart data
-        const labels = [], balances = [];
-        let balance = ci;
+    <div id="ageWarning" style="display:none;color:red;font-weight:bold;">
+      Retirement age must be after start age, and end age after retirement age.
+    </div>
 
-        for(let age=sa; age<=ra; age++){
-          if(age > sa){
-            balance += mc * 12;
-            balance *= 1 + pre;
-          }
-          labels.push(age);
-          balances.push(balance);
-        }
+    <canvas id="finChart" width="800" height="300"></canvas>
 
-        for(let age=ra+1; age<=ea; age++){
-          balance *= 1 + post;
-          balance -= futureIncome * 12;
-          if(balance < 0) balance = 0;
-          labels.push(age);
-          balances.push(balance);
-        }
+    <footer>Team Canada Financial Tool — Version 2.2t</footer>
+  </div>
 
-        if(finChart) finChart.destroy();
-        const ctx = document.getElementById('finChart').getContext('2d');
-        finChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Portfolio Value',
-              data: balances,
-              fill: true,
-              borderColor: '#007bff',
-              backgroundColor: 'rgba(0,123,255,0.2)',
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                labels: {
-                  usePointStyle: true,
-                  pointStyle: 'line'
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: ctx => '$' + ctx.parsed.y.toLocaleString()
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  callback: v => '$' + v.toLocaleString()
-                }
-              }
+  <script>
+    const els = {};
+    ['currentInvestment','desiredIncome','monthlyContribution',
+     'inflationRate','inflationRateText','preReturn','preReturnText',
+     'postReturn','postReturnText','startAge','startAgeText',
+     'retireAge','retireAgeText','endAge','endAgeText',
+     'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
+      els[id]=document.getElementById(id);
+    });
+
+    function sync(id1, id2) {
+      els[id1].addEventListener('input', ()=>{ els[id2].value = els[id1].value; calculateFIN(); });
+      els[id2].addEventListener('input', ()=>{ els[id1].value = els[id2].value; calculateFIN(); });
+    }
+    ['inflationRate','preReturn','postReturn','startAge','retireAge','endAge'].forEach(base=> sync(base, base + 'Text'));
+
+    document.getElementById("drawdownToggle").addEventListener("change", () => {
+      document.getElementById("modeLabel").textContent = document.getElementById("drawdownToggle").checked ? "Forever (FIRE style)" : "End at End Age";
+      calculateFIN();
+    });
+
+    document.getElementById("finModeToggle").addEventListener("change", () => {
+      document.getElementById("finModeLabel").textContent = document.getElementById("finModeToggle").checked ? "Show FIN in Today's Dollars" : "Show FIN in Future Dollars";
+      calculateFIN();
+    });
+
+    function validateAges(){
+      let sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value, warn=false;
+      if(ra<=sa){ ra=sa+1; els.retireAge.value=ra; els.retireAgeText.value=ra; warn=true; }
+      if(ea<=ra){ ea=ra+1; els.endAge.value=ea; els.endAgeText.value=ea; warn=true; }
+      els.ageWarning.style.display = warn?'block':'none';
+    }
+
+    const ctx = document.getElementById('finChart').getContext('2d');
+    const finChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Projected Balance',
+          data: [],
+          borderColor: '#4285f4',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.1,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              usePointStyle: true,
+              pointStyle: 'line'
             }
           }
-        });
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: v => '$'+v.toLocaleString()
+            }
+          }
+        }
+      }
+    });
+
+    function calculateFIN() {
+      validateAges();
+
+      const ci = +els.currentInvestment.value || 0;
+      const di = +els.desiredIncome.value || 0;
+      const mc = +els.monthlyContribution.value || 0;
+      const inf = +els.inflationRate.value / 100 || 0;
+      const pre = +els.preReturn.value / 100 || 0;
+      const post = +els.postReturn.value / 100 || 0;
+      const sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value;
+      const yrsTo = ra - sa, yrsIn = ea - ra;
+      const future = !document.getElementById("finModeToggle").checked;
+      const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
+
+      const infIncome = future ? di * Math.pow(1 + inf, yrsTo) : di;
+
+      let fin;
+      if (drawdownType === "finite") {
+        fin = post > 0
+          ? infIncome * 12 * ((1 - Math.pow(1 + post, -yrsIn)) / post)
+          : infIncome * 12 * yrsIn;
+      } else {
+        const realRate = post - inf;
+        fin = realRate > 0
+          ? infIncome * 12 / realRate
+          : infIncome * 12 * 50;
       }
 
-      ['input', 'change'].forEach(evt => {
-        document.querySelectorAll('input').forEach(el => {
-          el.addEventListener(evt, () => {
-            if(el.id.endsWith('Text')) return;
-            const mirror = document.getElementById(el.id + 'Text');
-            if(mirror) mirror.textContent = el.value;
-            calculateFIN();
-          });
-        });
-      });
+      const fvCurr = ci * Math.pow(1 + pre, yrsTo);
+      const mRate = pre / 12, months = yrsTo * 12;
+      const fvCont = mRate > 0 ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate) : mc * months;
+      const totalFV = fvCurr + fvCont;
+      const rem = Math.max(fin - totalFV, 0);
+      const monthlyNeed = rem > 0 ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months) : 0;
 
-      window.addEventListener('DOMContentLoaded', () => {
-        calculateFIN();
-      });
-    </script>
-  </div>
+      els.finAmount.textContent = '$' + fin.toLocaleString(undefined, {maximumFractionDigits:0});
+      els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, {maximumFractionDigits:0});
+
+      const yearLabels = [], balances = [];
+      let balance = fvCurr;
+      for (let age = sa; age <= ra; age++) {
+        if (age > sa) {
+          balance += mc * 12;
+          balance *= 1 + pre;
+        }
+        yearLabels.push(age);
+        balances.push(balance);
+      }
+      for (let age = ra + 1; age <= ea; age++) {
+        balance *= 1 + post;
+        balance -= infIncome * 12;
+        if (balance < 0) balance = 0;
+        yearLabels.push(age);
+        balances.push(balance);
+      }
+
+      finChart.data.labels = yearLabels;
+      finChart.data.datasets[0].data = balances;
+      finChart.update();
+    }
+
+    document.addEventListener("DOMContentLoaded", calculateFIN);
+  </script>
 </body>
 </html>
 
