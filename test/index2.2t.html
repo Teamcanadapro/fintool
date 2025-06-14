@@ -288,8 +288,8 @@ if (drawdownType === "finite") {
   // FIRE-style perpetual drawdown using real rate of return
   const realRate = post - inf;
   fin = realRate > 0
-    ? (di * 12) / realRate
-    : di * 12 * 50; // fallback large number if ROR too low
+  ? infIncome * 12 / realRate
+  : infIncome * 12 * 50; // fallback large number if ROR too low
 }
 
 
@@ -408,6 +408,10 @@ finChart.update();
 
       // Initial load
       loadSettings();
+      // Set correct label on toggle
+const drawdownInitial = document.getElementById("drawdownToggle").checked;
+document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "End at End Age";
+
       calculateFIN();
 
       // FINAL FIX — expose functions to window so buttons work:
