@@ -88,18 +88,21 @@ input:checked + .slider:before {
   white-space: nowrap;
 }
 
- .main-layout {
+.main-layout {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 20px;
-  margin: 20px 0;
 }
 
-.inputs-container, .results-container {
-  flex: 1 1 300px;
-  padding: 10px;
-  box-sizing: border-box;
+.inputs-container,
+.results-container {
+  flex: 1;
+  min-width: 300px;
+  max-width: 600px;
 }
+
 
 .graph-container {
   width: 100%;
