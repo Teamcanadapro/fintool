@@ -91,10 +91,9 @@ input:checked + .slider:before {
 .main-layout {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-start; /* Or use 'center' if you'd like centered look */
   align-items: flex-start;
-  gap: 20px;
-}
+  gap: 40px; /* Adjust spacing between left and right panes */}
 
 .inputs-container,
 .results-container {
@@ -221,9 +220,6 @@ input:checked + .slider:before {
 </div>
 
   </div> <!--end of results-container-->
-
-</div> <!--end of main-container-->
-
 <div class="graph-container"> <!--graph container starting-->
 
   <canvas id="finChart" style="max-height: 400px;"></canvas>
@@ -239,6 +235,10 @@ input:checked + .slider:before {
   <div id="downloadLinkContainer"></div>
 
 </div><!-- end of the graph-container-->
+
+</div> <!--end of main-container-->
+
+
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
