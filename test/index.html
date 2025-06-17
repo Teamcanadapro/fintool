@@ -123,7 +123,7 @@ input:checked + .slider:before {
   <h1>Team Canada FIN# Calculator</h1>
   
   <div class="version-container">
-    <div class="version">v2.0.10t (Online)</div>
+    <div class="version">v2.0.11t (Online)</div>
     <div class="last-updated">Last updated: June 16, 2025</div>
   </div>
 
@@ -151,12 +151,14 @@ input:checked + .slider:before {
         <input type="text" id="inflationRateText">
       </div>
     </div>
+    
     <div class="slider-group"><label>Pre-Retirement Return (%)</label>
       <div class="slider-container">
         <input type="range" id="preReturn" min="0" max="18" step="1">
         <input type="text" id="preReturnText">
       </div>
     </div>
+    
     <div class="slider-group"><label>Post-Retirement Return (%)</label>
       <div class="slider-container">
         <input type="range" id="postReturn" min="0" max="15" step="1">
@@ -170,18 +172,21 @@ input:checked + .slider:before {
         <input type="text" id="startAgeText">
       </div>
     </div>
+    
     <div class="slider-group"><label>Retirement Age</label>
       <div class="slider-container">
         <input type="range" id="retireAge" min="30" max="75" step="5">
         <input type="text" id="retireAgeText">
       </div>
     </div>
+    
     <div class="slider-group"><label>End Age</label>
       <div class="slider-container">
         <input type="range" id="endAge" min="75" max="110" step="5">
         <input type="text" id="endAgeText">
       </div>
     </div>
+    
   <div class="form-group">
   <label for="drawdownToggle">
     Retirement Mode 
@@ -192,19 +197,21 @@ input:checked + .slider:before {
     <span class="slider"></span>
   </label>
   <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
-</div>
+</div> <!-- end of drawdowntoggle-->
 
-  </div>
-</div>
-<!-- end of the input container-->
+</div> <!-- end of the input container-->
 
  <div class="results-container"> <!--Outputs: FIN, Monthly FIN, Fully Funded, toggles -->
   
   <div class="output">Financial Independence Number (FIN): <strong id="finAmount">$0</strong></div>
-  <div class="form-group" style="text-align:center; margin-bottom:10px;">
+  
+
+  <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
+  
+  <div class="form-group">
   <label for="finDisplayToggle">
     Show FIN in 
-    <span title="Toggle between future dollars (inflation-adjusted at retirement) and today's value.">🛈</span>
+    <span title="Choose between showing your Financial Independence Number (FIN) in today's dollars or inflated future dollars.">🛈</span>
   </label><br>
   <label class="switch">
     <input type="checkbox" id="finDisplayToggle" checked>
@@ -213,8 +220,9 @@ input:checked + .slider:before {
   <div style="margin-top:5px;">Display Mode: <span id="finDisplayLabel">Future $</span></div>
 </div>
 
-  <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
-</div> <!--end of results-container-->
+  </div> <!--end of results-container-->
+
+</div> <!--end of main-container-->
 
 <div class="graph-container"> <!--graph container starting-->
 
