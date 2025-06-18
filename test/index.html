@@ -14,7 +14,9 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Team Canada FIN Tool (Online)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.1"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',sans-serif;background:#f4f7fb;color:#222;display:flex;flex-direction:column;align-items:center;padding:20px;}
@@ -27,7 +29,7 @@ No part of the source code, design, or content may be copied, reproduced, modifi
     input[type=number],input[type=text]{width:100%;padding:6px;margin-bottom:4px;border:1px solid #aaa;border-radius:4px;}
     .slider-container{display:flex;align-items:center;gap:8px;}
     .output{font-size:1.2rem;font-weight:600;margin:16px 0;text-align:center;}
-    #finChart{width:100%;max-width:900px;height:350px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:20px;}
+    #finChart{width:100%;max-width:900px;height:400px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:20px;}
     .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px;}
     .btn{padding:10px 20px;font-size:1rem;color:#fff;border:none;border-radius:4px;cursor:pointer;}
     .btn-red{background:#d32f2f;} .btn-red:hover{background:#b71c1c;}
@@ -91,29 +93,89 @@ input:checked + .slider:before {
 .main-layout {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start; /* Or use 'center' if you'd like centered look */
+  justify-content: center;       /* ✅ Keeps it centered */
   align-items: flex-start;
-  gap: 40px; /* Adjust spacing between left and right panes */}
+  gap: 24px;                      /* ✅ Less space between panels */
+  max-width: 1100px;              /* ✅ Restrains excessive spread */
+  margin: 0 auto;                 /* ✅ Center on page */
+}
+
 
 .inputs-container,
 .results-container {
-  flex: 1;
-  min-width: 300px;
-  max-width: 600px;
+  flex: 1 1 400px;
+  max-width: 480px;
 }
+
 
 
 .graph-container {
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
+  justify-content: center;
+  display: flex;
   margin-top: 20px;
 }
+
+.main-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.fin-toggle-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 
 @media (max-width: 768px) {
   .main-layout {
     flex-direction: column;
   }
+}
+
+body.dark {
+  background: #121212;
+  color: #eee;
+}
+
+body.dark .input-group,
+body.dark .slider-group,
+body.dark .results-container,
+body.dark .graph-container,
+body.dark .buttons {
+  background: #1e1e1e;
+  color: #eee;
+}
+
+body.dark input[type=number],
+body.dark input[type=text],
+body.dark input[type=range] {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+body.dark .btn-red,
+body.dark .btn-blue,
+body.dark .btn-green {
+  opacity: 0.9;
+}
+
+body.dark table {
+  color: #ddd;
+}
+
+body.dark th {
+  background: #333;
+}
+
+body.dark td {
+  background: #1e1e1e;
 }
 
  </style>
@@ -122,12 +184,12 @@ input:checked + .slider:before {
   <h1>Team Canada FIN# Calculator</h1>
   
   <div class="version-container">
-    <div class="version">v2.0.13t (Online)</div>
+    <div class="version">v2.0.19t (Online)</div>
     <div class="last-updated">Last updated: June 17, 2025</div>
   </div>
 
 <div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
-
+<div class="main-wrapper"> <!-- full body wrapper-->
 <div class="main-layout"> <!-- the entire main page layout-->
   <div class="inputs-container"> <!-- Input sliders, toggles, dropdowns -->
 
@@ -167,21 +229,21 @@ input:checked + .slider:before {
 
     <div class="slider-group"><label>Start Age</label>
       <div class="slider-container">
-        <input type="range" id="startAge" min="0" max="60" step="5">
+        <input type="range" id="startAge" min="0" max="60" step="1">
         <input type="text" id="startAgeText">
       </div>
     </div>
     
     <div class="slider-group"><label>Retirement Age</label>
       <div class="slider-container">
-        <input type="range" id="retireAge" min="30" max="75" step="5">
+        <input type="range" id="retireAge" min="30" max="75" step="1">
         <input type="text" id="retireAgeText">
       </div>
     </div>
     
     <div class="slider-group"><label>End Age</label>
       <div class="slider-container">
-        <input type="range" id="endAge" min="75" max="110" step="5">
+        <input type="range" id="endAge" min="75" max="110" step="1">
         <input type="text" id="endAgeText">
       </div>
     </div>
@@ -202,12 +264,13 @@ input:checked + .slider:before {
 
  <div class="results-container"> <!--Outputs: FIN, Monthly FIN, Fully Funded, toggles -->
   
-  <div class="output">Financial Independence Number (FIN): <strong id="finAmount">$0</strong></div>
+  <div class="output">Financial Independence Number <br>(FIN): <strong id="finAmount">$0</strong></div>
   
 
   <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
   
-  <div class="form-group">
+  <div class="form-group fin-toggle-centered">
+
   <label for="finDisplayToggle">
     Show FIN in 
     <span title="Choose between showing your Financial Independence Number (FIN) in today's dollars or inflated future dollars.">🛈</span>
@@ -218,6 +281,14 @@ input:checked + .slider:before {
   </label>
   <div style="margin-top:5px;">Display Mode: <span id="finDisplayLabel">Future $</span></div>
 </div>
+<div class="form-group dark-mode-toggle" style="margin-top:20px;">
+  <label for="darkModeToggle">Dark Mode 🌙</label><br>
+  <label class="switch">
+    <input type="checkbox" id="darkModeToggle">
+    <span class="slider"></span>
+  </label>
+</div>
+
 
   </div> <!--end of results-container-->
 <div class="graph-container"> <!--graph container starting-->
@@ -225,20 +296,26 @@ input:checked + .slider:before {
   <canvas id="finChart" style="max-height: 400px;"></canvas>
 
 
+
+</div><!-- end of the graph-container-->
+
+<!-- table view of the accumulation and decumulation -->
+<div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
+
+
+</div> <!--end of main-container-->
+
+</div> <!-- end of the main-wrapper, full page-->
   <div class="buttons">
+    <!--
     <button class="btn btn-red" onclick="exportPDF()">Export PDF</button>
+ -->
     <button class="btn btn-blue" onclick="resetDefaults()">Reset Defaults</button>
     <button id="downloadHTMLBtn" class="btn btn-green" onclick="downloadHTML()" style="display:none;">Download HTML</button>
 
     <!-- <button class="btn btn-green" onclick="downloadHTML()">Download HTML</button> -->
   </div>
   <div id="downloadLinkContainer"></div>
-
-</div><!-- end of the graph-container-->
-
-</div> <!--end of main-container-->
-
-
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -269,6 +346,24 @@ input:checked + .slider:before {
         } else resetDefaults();
       }
 
+// DARK MODE PERSISTENCE
+const darkToggle = document.getElementById('darkModeToggle');
+if (localStorage.getItem('darkMode') === 'enabled') {
+  document.body.classList.add('dark');
+  darkToggle.checked = true;
+}
+
+darkToggle.addEventListener('change', () => {
+  if (darkToggle.checked) {
+    document.body.classList.add('dark');
+    localStorage.setItem('darkMode', 'enabled');
+  } else {
+    document.body.classList.remove('dark');
+    localStorage.setItem('darkMode', 'disabled');
+  }
+});
+
+
       function saveSettings(){
         const data={};
         Object.keys(els).forEach(k=>{
@@ -278,22 +373,37 @@ input:checked + .slider:before {
         localStorage.setItem('finToolSettings',JSON.stringify(data));
       }
 
-    const ctx = document.getElementById('finChart').getContext('2d');
-    const finChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-    labels: [], // years (to be filled in calculateFIN)
-    datasets: [{
-      label: 'Portfolio Value $',
-      data: [], // balances (to be filled in calculateFIN)
-      borderColor: '#1a73e8',
-      backgroundColor: 'rgba(26,115,232,0.1)',
-      fill: true,
-      pointRadius: 3,
-      pointHoverRadius: 6,
-      tension: 0.25 // smooth line
-    }]
+// old chart definition
+ 
+const ctx = document.getElementById('finChart').getContext('2d');
+const finChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'Target Plan (Required)',
+        data: [],
+        borderColor: '#1a73e8',
+        backgroundColor: 'rgba(26,115,232,0.1)',
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        tension: 0.25
+      },
+      {
+        label: 'Your Current Plan',
+        data: [],
+        borderColor: '#fb8c00',
+        backgroundColor: 'rgba(251,140,0,0.1)',
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        tension: 0.25
+      }
+    ]
   },
+
   options: {
     responsive: true,
     maintainAspectRatio: true,
@@ -320,8 +430,7 @@ input:checked + .slider:before {
     labels: {
       usePointStyle: true,
       pointStyle: 'line'
-    },
-    
+    }
   },
   tooltip: {
     callbacks: {
@@ -331,6 +440,9 @@ input:checked + .slider:before {
   title: {
     display: true,
     text: 'Portfolio Growth & Drawdown'
+  },
+  annotation: {
+    annotations: {} // will be filled dynamically in calculateFIN()
   }
 }
 
@@ -346,97 +458,240 @@ input:checked + .slider:before {
       }
 
 
-function calculateFIN(){
-        validateAges();
-       const ci = +els.currentInvestment.value || 0;
-const di = +els.desiredIncome.value || 0;
-const mc = +els.monthlyContribution.value || 0;
-const inf = +els.inflationRate.value / 100 || 0;
-const pre = +els.preReturn.value / 100 || 0;
-const post = +els.postReturn.value / 100 || 0;
+function calculateFIN() {
+  validateAges();
 
-        const sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value;
-        const yrsTo=ra-sa, yrsIn=ea-ra;
-        const infIncome=di*Math.pow(1+inf,yrsTo);
-       // const fin = post>0?infIncome*12*((1-Math.pow(1+post,-yrsIn))/post):infIncome*12*yrsIn;
-       const drawdownType = document.getElementById("drawdownToggle")?.checked ? "perpetual" : "finite";
-const showFuture = document.getElementById("finDisplayToggle")?.checked;
-     
-       
+  const ci = +els.currentInvestment.value || 0;
+  const di = +els.desiredIncome.value || 0;
+  const mc = +els.monthlyContribution.value || 0;
+  const inf = +els.inflationRate.value / 100 || 0;
+  const pre = +els.preReturn.value / 100 || 0;
+  const post = +els.postReturn.value / 100 || 0;
 
-let fin;
+  const sa = +els.startAge.value,
+        ra = +els.retireAge.value,
+        ea = +els.endAge.value;
 
-if (drawdownType === "finite") {
-  // Standard drawdown to end age
-  fin = post > 0
-    ? infIncome * 12 * ((1 - Math.pow(1 + post, -yrsIn)) / post)
-    : infIncome * 12 * yrsIn;
+  const yrsTo = ra - sa,
+        yrsIn = ea - ra,
+        mRate = pre / 12,
+        months = yrsTo * 12;
+
+  const infIncome = di * Math.pow(1 + inf, yrsTo);
+  const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
+  const showFuture = document.getElementById("finDisplayToggle").checked;
+
+  // FIN amount needed at retirement
+  let fin;
+  if (drawdownType === "finite") {
+  const r = post / 12; // monthly rate
+  const n = yrsIn * 12;
+  fin = r > 0
+    ? infIncome * ((1 - Math.pow(1 + r, -n)) / r)
+    : infIncome * n;
 } else {
-  // FIRE-style perpetual drawdown using real rate of return
-  const realRate = post - inf;
-  fin = realRate > 0
-    ? (di * 12) / realRate
-    : di * 12 * 50; // fallback large number if ROR too low
-}
+    const realRate = post - inf;
+    fin = realRate > 0
+      ? (di * 12) / realRate
+      : di * 12 * 50;
+  }
 
+  // Ideal path: from $0
+  const monthlyNeedIdeal = fin > 0
+    ? (mRate > 0 ? fin / ((Math.pow(1 + mRate, months) - 1) / mRate) : fin / months)
+    : 0;
 
-        const fvCurr=ci*Math.pow(1+pre,yrsTo);
-        const mRate=pre/12, months=yrsTo*12;
-        const fvCont=mRate>0?mc*((Math.pow(1+mRate,months)-1)/mRate):mc*months;
-        const totalFV=fvCurr+fvCont;
-        const rem=Math.max(fin-totalFV,0);
-        const monthlyNeed=rem>0?(mRate>0?rem/((Math.pow(1+mRate,months)-1)/mRate):rem/months):0;
-        els.monthlyNeeded.textContent='$'+monthlyNeed.toLocaleString(undefined,{maximumFractionDigits:0});
-        const displayFIN = showFuture ? fin : fin / Math.pow(1 + inf, yrsTo);
-els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  // Actual user forecast
+  const fvCurr = ci * Math.pow(1 + pre, yrsTo);
+  const fvCont = mRate > 0
+    ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate)
+    : mc * months;
 
+  const totalFV = fvCurr + fvCont;
+  const rem = Math.max(fin - totalFV, 0);
+  const monthlyNeed = rem > 0
+    ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months)
+    : 0;
 
-// Build balances per year
-const yearLabels = [];
-const balances = [];
+  // Update outputs
+  els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  const displayFIN = showFuture ? fin : fin / Math.pow(1 + inf, yrsTo);
+  els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
-// Use effective contribution:
-// If user invests less than Monthly Needed → show shortfall
-// If user invests >= Monthly Needed → use their value
-const mn = monthlyNeed;
-const effectiveMC = Math.max(mc, mn);
+  // Chart data
+  const yearLabels = [];
+  const balancesTarget = [];
+  const balancesCurrent = [];
 
-// Start with current investment
-let balance = fvCurr;
-
-// Accumulation phase (Start Age to Retirement Age)
-for (let age = sa; age <= ra; age++) {
-  if (age > sa) {
-    // Add contributions for the year
-    balance += effectiveMC * 12;
-    // Apply pre-retirement return
-    balance *= (1 + pre);
+  let balTarget = 0;
+  for (let age = sa; age <= ra; age++) {
+    if (age > sa) {
+      balTarget += monthlyNeedIdeal * 12;
+      balTarget *= (1 + pre);
+    }
+    yearLabels.push(age);
+    balancesTarget.push(balTarget);
+  }
+  for (let age = ra + 1; age <= ea; age++) {
+  for (let m = 0; m < 12; m++) {
+    balTarget *= (1 + post / 12);
+    balTarget -= infIncome;
+    if (balTarget < 0) balTarget = 0;
   }
   yearLabels.push(age);
-  balances.push(balance);
+  balancesTarget.push(balTarget);
 }
 
-// Decumulation phase (Retirement Age to End Age)
-for (let age = ra + 1; age <= ea; age++) {
-  // Apply post-retirement return first
-  balance *= (1 + post);
-  // Subtract desired income for the year
-  balance -= infIncome * 12;
-  // Prevent negative balance
-  if (balance < 0) balance = 0;
 
-  yearLabels.push(age);
-  balances.push(balance);
+  let balCurrent = ci;
+  for (let age = sa; age <= ra; age++) {
+    if (age > sa) {
+      balCurrent += mc * 12;
+      balCurrent *= (1 + pre);
+    }
+    balancesCurrent.push(balCurrent);
+  }
+  for (let age = ra + 1; age <= ea; age++) {
+  for (let m = 0; m < 12; m++) {
+    balCurrent *= (1 + post / 12);
+    balCurrent -= infIncome;
+    if (balCurrent < 0) balCurrent = 0;
+  }
+  balancesCurrent.push(balCurrent);
 }
 
-// Update chart
-finChart.data.labels = yearLabels;
-finChart.data.datasets[0].data = balances;
-finChart.update();
+  // 🧠 Adjust both lines for display toggle
+  const adjustedTarget = [];
+  const adjustedCurrent = [];
 
+  for (let i = 0; i < yearLabels.length; i++) {
+    const offset = yearLabels[i] - sa;
+    const factor = showFuture ? 1 : Math.pow(1 + inf, offset);
+    adjustedTarget.push(balancesTarget[i] / factor);
+    adjustedCurrent.push(balancesCurrent[i] / factor);
+  }
 
-        saveSettings();
+  // Update chart
+  finChart.data.labels = yearLabels;
+  finChart.data.datasets[0].data = adjustedTarget;
+  finChart.data.datasets[1].data = adjustedCurrent;
+  
+    // Add dynamic chart annotations
+    const annotations = {
+    startAgeLine: {
+      type: 'line',
+      xMin: sa,
+xMax: sa,
+
+      borderColor: 'green',
+      borderDash: [6, 6],
+      borderWidth: 2,
+      label: {
+        content: 'Start Age',
+        enabled: true,
+        position: 'center'
       }
+    },
+    retireAgeLine: {
+      type: 'line',
+      xMin: ra,
+      xMax: ra,
+
+      borderColor: 'blue',
+      borderDash: [6, 6],
+      borderWidth: 2,
+      label: {
+        content: 'Retire Age',
+        enabled: true,
+        position: 'center'
+      }
+    },
+    endAgeLine: {
+      type: 'line',
+      xMin: ea,
+      xMax: ea,
+
+      borderColor: 'red',
+      borderDash: [6, 6],
+      borderWidth: 2,
+      label: {
+        content: 'End Age',
+        enabled: true,
+        position: 'center'
+      }
+    },
+    modeLabel: {
+      type: 'label',
+      xValue: sa,
+      
+      yValue: Math.max(...adjustedTarget),
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      content: showFuture ? 'Future $' : "Today's $",
+      color: 'white',
+      font: { weight: 'bold' },
+      padding: 6,
+      position: 'top',
+      xAdjust: 10,
+      yAdjust: -20
+    }
+  };
+
+  // Break-even point marker
+function findBreakEvenIndex(arr, threshold = 0.01) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] <= threshold) return i;
+  }
+  return -1;
+}
+
+const breakEvenIndex = findBreakEvenIndex(adjustedCurrent);
+
+if (breakEvenIndex !== -1) {
+  annotations.breakEvenPoint = {
+    type: 'point',
+    xValue: yearLabels[breakEvenIndex],
+    yValue: 0.01, // slight lift so it shows above x-axis
+    backgroundColor: 'black',
+    radius: 5,
+    label: {
+      content: 'Funds Depleted',
+      enabled: true,
+      position: 'top'
+    }
+  };
+}
+
+
+
+  finChart.options.plugins.annotation.annotations = annotations;
+console.log("Applying annotations:", annotations);
+  finChart.update();
+
+// Generate Table View
+let tableHTML = '<table style="width:100%;border-collapse:collapse;">';
+tableHTML += '<thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
+
+const tableEndAge = drawdownType === 'perpetual' ? Math.max(ea, 100) : ea;
+const tableStartIdx = yearLabels.findIndex(y => y === sa);
+const tableEndIdx = yearLabels.findIndex(y => y === tableEndAge);
+
+for (let i = tableStartIdx; i <= tableEndIdx; i++) {
+  const y = yearLabels[i];
+  const tp = adjustedTarget[i] || 0;
+  const cp = adjustedCurrent[i] || 0;
+  tableHTML += `<tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#fff'};">
+    <td style="padding:8px;text-align:center;">${y}</td>
+    <td style="padding:8px;text-align:right;">$${tp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+    <td style="padding:8px;text-align:right;">$${cp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+  </tr>`;
+}
+tableHTML += '</tbody></table>';
+
+document.getElementById("tableView").innerHTML = tableHTML;
+
+  saveSettings();
+}
+
 
       [['inflationRate','inflationRateText'],
        ['preReturn','preReturnText'],
