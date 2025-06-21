@@ -178,15 +178,97 @@ body.dark td {
   background: #1e1e1e;
 }
 
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+.dark-mode-header-toggle {
+  text-align: right;
+  font-size: 0.95rem;
+}
+
+.header-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.header-title {
+  font-size: 1.8rem;
+  text-align: center;
+  flex: 1;
+}
+
+.dark-mode-inline {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.1rem;
+}
+.header-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.header-title {
+  font-size: 1.8rem;
+  text-align: center;
+  flex: 1;
+}
+
+.dark-mode-inline {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+
  </style>
 </head>
 <body>
-  <h1>Team Canada FIN# Calculator</h1>
-  
-  <div class="version-container">
-    <div class="version">v2.0.19t (Online)</div>
-    <div class="last-updated">Last updated: June 17, 2025</div>
+<div class="header-flex">
+  <h1 class="header-title">FIN Calculator</h1>
+  <div class="dark-mode-inline">
+    <span>Dark Mode 🌙</span>
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider"></span>
+    </label>
   </div>
+</div>
+
+
+
+<div class="version-container">
+  <div class="version">v2.0.21t (Online)</div>
+  <div class="last-updated">Last updated: June 21, 2025</div>
+</div>
+
 
 <div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
 <div class="main-wrapper"> <!-- full body wrapper-->
@@ -477,9 +559,12 @@ function calculateFIN() {
         mRate = pre / 12,
         months = yrsTo * 12;
 
-  const infIncome = di * Math.pow(1 + inf, yrsTo);
   const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
   const showFuture = document.getElementById("finDisplayToggle").checked;
+  const futureIncome = di * Math.pow(1 + inf / 12, yrsTo * 12);
+  const incomeUsed = showFuture ? futureIncome : di;
+  
+
 
   // FIN amount needed at retirement
   let fin;
@@ -487,14 +572,17 @@ function calculateFIN() {
   const r = post / 12; // monthly rate
   const n = yrsIn * 12;
   fin = r > 0
-    ? infIncome * ((1 - Math.pow(1 + r, -n)) / r)
-    : infIncome * n;
+    ? incomeUsed * ((1 - Math.pow(1 + r, -n)) / r)
+    : incomeUsed * n;
+
 } else {
-    const realRate = post - inf;
-    fin = realRate > 0
-      ? (di * 12) / realRate
-      : di * 12 * 50;
+  const realRate = post - inf;
+  fin = realRate > 0
+    ? (incomeUsed * 12) / realRate
+    : incomeUsed * 12 * 50;
   }
+  const finUsed = fin;
+
 
   // Ideal path: from $0
   const monthlyNeedIdeal = fin > 0
@@ -508,14 +596,17 @@ function calculateFIN() {
     : mc * months;
 
   const totalFV = fvCurr + fvCont;
-  const rem = Math.max(fin - totalFV, 0);
+  const rem = Math.max(finUsed - totalFV, 0);
   const monthlyNeed = rem > 0
     ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months)
     : 0;
 
+
   // Update outputs
   els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  const displayFIN = showFuture ? fin : fin / Math.pow(1 + inf, yrsTo);
+  const displayFIN = finUsed;
+
+
   els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
   // Chart data
@@ -535,7 +626,8 @@ function calculateFIN() {
   for (let age = ra + 1; age <= ea; age++) {
   for (let m = 0; m < 12; m++) {
     balTarget *= (1 + post / 12);
-    balTarget -= infIncome;
+    balTarget -= incomeUsed;
+
     if (balTarget < 0) balTarget = 0;
   }
   yearLabels.push(age);
@@ -554,7 +646,7 @@ function calculateFIN() {
   for (let age = ra + 1; age <= ea; age++) {
   for (let m = 0; m < 12; m++) {
     balCurrent *= (1 + post / 12);
-    balCurrent -= infIncome;
+    balCurrent -= incomeUsed;
     if (balCurrent < 0) balCurrent = 0;
   }
   balancesCurrent.push(balCurrent);
@@ -566,7 +658,7 @@ function calculateFIN() {
 
   for (let i = 0; i < yearLabels.length; i++) {
     const offset = yearLabels[i] - sa;
-    const factor = showFuture ? 1 : Math.pow(1 + inf, offset);
+    const factor = showFuture ? 1 : Math.pow(1 + inf / 12, offset * 12);
     adjustedTarget.push(balancesTarget[i] / factor);
     adjustedCurrent.push(balancesCurrent[i] / factor);
   }
@@ -626,7 +718,8 @@ xMax: sa,
       
       yValue: Math.max(...adjustedTarget),
       backgroundColor: 'rgba(0,0,0,0.7)',
-      content: showFuture ? 'Future $' : "Today's $",
+      content: showFuture ? 'Target is Future Value (inflated)' : "Target is Today's Value",
+
       color: 'white',
       font: { weight: 'bold' },
       padding: 6,
