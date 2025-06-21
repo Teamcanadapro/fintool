@@ -109,14 +109,15 @@ input:checked + .slider:before {
 
 
 
-.graph-container {
+.graph-container,
+.table-container {
   width: 100%;
-  padding: 10px;
+  max-width: 976px; /* 480 + 480 + 16 gap */
+  margin: 40px auto 0 auto;
+  padding: 20px;
   box-sizing: border-box;
-  justify-content: center;
-  display: flex;
-  margin-top: 20px;
 }
+
 
 .main-wrapper {
   display: flex;
@@ -265,7 +266,7 @@ body.dark td {
 
 
 <div class="version-container">
-  <div class="version">v2.0.21t (Online)</div>
+  <div class="version">v2.0.22t (Online)</div>
   <div class="last-updated">Last updated: June 21, 2025</div>
 </div>
 
@@ -273,6 +274,7 @@ body.dark td {
 <div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
 <div class="main-wrapper"> <!-- full body wrapper-->
 <div class="main-layout"> <!-- the entire main page layout-->
+
   <div class="inputs-container"> <!-- Input sliders, toggles, dropdowns -->
 
       <div class="input-group"><label>Desired Monthly Income ($)</label><input type="number" id="desiredIncome"></div>
@@ -323,24 +325,13 @@ body.dark td {
       </div>
     </div>
     
-    <div class="slider-group"><label>End Age</label>
+    <div class="slider-group"><label>Life Expectancy</label>
       <div class="slider-container">
         <input type="range" id="endAge" min="75" max="110" step="1">
         <input type="text" id="endAgeText">
       </div>
     </div>
     
-  <div class="form-group">
-  <label for="drawdownToggle">
-    Retirement Mode 
-    <span title="Choose how long money should last. 'End at End Age' means your money should last until the end age you selected. 'Forever (FIRE style)' means you'll withdraw a fixed % forever (inflation-adjusted).">🛈</span>
-  </label><br>
-  <label class="switch">
-    <input type="checkbox" id="drawdownToggle">
-    <span class="slider"></span>
-  </label>
-  <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
-</div> <!-- end of drawdowntoggle-->
 
 </div> <!-- end of the input container-->
 
@@ -351,18 +342,31 @@ body.dark td {
 
   <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
   
-  <div class="form-group fin-toggle-centered">
-
-  <label for="finDisplayToggle">
-    Show FIN in 
-    <span title="Choose between showing your Financial Independence Number (FIN) in today's dollars or inflated future dollars.">🛈</span>
-  </label><br>
+<!-- FIN Display Mode Toggle -->
+<div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
+  <span id="finDisplayLabelPrefix">Display:</span>
+  <span id="finDisplayLabel">Future $</span>
+  <span title="Display FIN in today's dollars or inflated future dollars." style="cursor: help;">ℹ️</span>
   <label class="switch">
     <input type="checkbox" id="finDisplayToggle" checked>
     <span class="slider"></span>
   </label>
-  <div style="margin-top:5px;">Display Mode: <span id="finDisplayLabel">Future $</span></div>
 </div>
+
+<!-- Retirement Mode Toggle -->
+<div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
+  <span id="modeLabelPrefix">Mode:</span>
+  <span id="modeLabel">Life Expectancy</span>
+  <span title="Choose how long your money should last: Life Expectancy (ends at set age) or Forever (FIRE style)." style="cursor: help;">ℹ️</span>
+  <label class="switch">
+    <input type="checkbox" id="drawdownToggle">
+    <span class="slider"></span>
+  </label>
+</div>
+
+
+
+
 
 
   </div> <!--end of results-container-->
@@ -403,7 +407,7 @@ body.dark td {
         els[id]=document.getElementById(id);
         });
         document.getElementById("drawdownToggle").addEventListener("change", function () {
-         const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
+         const label = this.checked ? "Forever (FIRE style)" : "Life Expectancy";
         document.getElementById("modeLabel").textContent = label;
         calculateFIN();
         });
@@ -700,10 +704,11 @@ xMax: sa,
       borderDash: [6, 6],
       borderWidth: 2,
       label: {
-        content: 'End Age',
+        content: 'Life Expectancy',
         enabled: true,
         position: 'center'
       }
+
     },
     modeLabel: {
       type: 'label',
@@ -840,7 +845,7 @@ document.getElementById("tableView").innerHTML = tableHTML;
       loadSettings();
       // Set correct label on toggle
 const drawdownInitial = document.getElementById("drawdownToggle").checked;
-document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "End at End Age";
+document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "Life Expectancy";
 
       calculateFIN();
 
