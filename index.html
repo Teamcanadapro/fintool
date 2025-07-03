@@ -612,34 +612,45 @@ function calculateFIN() {
   const balancesCurrent = [];
 
   let balTarget = 0;
-  for (let age = sa; age <= ra; age++) {
-    if (age > sa) {
-      balTarget += monthlyNeedIdeal * 12;
-      balTarget *= (1 + pre);
-    }
-    yearLabels.push(age);
-    balancesTarget.push(balTarget);
-  }
-  for (let age = ra + 1; age <= ea; age++) {
-  for (let m = 0; m < 12; m++) {
-    balTarget *= (1 + post / 12);
-    balTarget -= incomeUsed;
+for (let age = sa; age <= ra; age++) {
+  balTarget += monthlyNeedIdeal * 12;    // Add this year's contribution
+  balTarget *= (1 + pre);                // Apply annual growth
+  yearLabels.push(age);                  // Track age
+  balancesTarget.push(balTarget);        // Save balance for that age
+}
 
-    if (balTarget < 0) balTarget = 0;
+// 🎯 Backward drawdown: ensures funds deplete exactly at endAge
+let drawdownYears = ea - ra;
+let targetDrawdown = new Array(drawdownYears + 1);
+targetDrawdown[drawdownYears] = 0; // $0 at life expectancy
+
+const postMonthly = post / 12;
+
+for (let i = drawdownYears - 1; i >= 0; i--) {
+  let next = targetDrawdown[i + 1];
+  for (let m = 0; m < 12; m++) {
+    next = (next + incomeUsed) / (1 + postMonthly);
   }
+  targetDrawdown[i] = next;
+}
+
+// Append drawdown data to balancesTarget and yearLabels
+for (let i = 1; i <= drawdownYears; i++) {  // ✅ Start from i = 1 to skip duplicate ra
+  const age = ra + i;
   yearLabels.push(age);
-  balancesTarget.push(balTarget);
+  balancesTarget.push(targetDrawdown[i]);
 }
 
 
+
+
   let balCurrent = ci;
-  for (let age = sa; age <= ra; age++) {
-    if (age > sa) {
-      balCurrent += mc * 12;
-      balCurrent *= (1 + pre);
-    }
-    balancesCurrent.push(balCurrent);
-  }
+for (let age = sa; age <= ra; age++) {
+  balCurrent += mc * 12;
+  balCurrent *= (1 + pre);
+  balancesCurrent.push(balCurrent);
+}
+
   for (let age = ra + 1; age <= ea; age++) {
   for (let m = 0; m < 12; m++) {
     balCurrent *= (1 + post / 12);
