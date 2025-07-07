@@ -313,21 +313,21 @@ body.dark td {
 
     <div class="slider-group"><label>Start Age</label>
       <div class="slider-container">
-        <input type="range" id="startAge" min="0" max="60" step="1">
+        <input type="range" id="startAge" min="0" max="70" step="1">
         <input type="text" id="startAgeText">
       </div>
     </div>
     
     <div class="slider-group"><label>Retirement Age</label>
       <div class="slider-container">
-        <input type="range" id="retireAge" min="30" max="75" step="1">
+        <input type="range" id="retireAge" min="30" max="80" step="1">
         <input type="text" id="retireAgeText">
       </div>
     </div>
     
     <div class="slider-group"><label>Life Expectancy</label>
       <div class="slider-container">
-        <input type="range" id="endAge" min="75" max="110" step="1">
+        <input type="range" id="endAge" min="65" max="120" step="1">
         <input type="text" id="endAgeText">
       </div>
     </div>
@@ -611,35 +611,49 @@ function calculateFIN() {
   const balancesTarget = [];
   const balancesCurrent = [];
 
-  let balTarget = 0;
-for (let age = sa; age <= ra; age++) {
-  balTarget += monthlyNeedIdeal * 12;    // Add this year's contribution
-  balTarget *= (1 + pre);                // Apply annual growth
-  yearLabels.push(age);                  // Track age
-  balancesTarget.push(balTarget);        // Save balance for that age
+// === TARGET PLAN (REQUIRED) ===
+// Accumulate until retirement using ideal monthly need and starting from current investment
+let balTarget = ci;
+for (let age = sa; age < ra; age++) {
+  balTarget += monthlyNeedIdeal * 12;
+  balTarget *= (1 + pre);
+  yearLabels.push(age);
+  balancesTarget.push(balTarget);
 }
 
-// 🎯 Backward drawdown: ensures funds deplete exactly at endAge
-let drawdownYears = ea - ra;
-let targetDrawdown = new Array(drawdownYears + 1);
-targetDrawdown[drawdownYears] = 0; // $0 at life expectancy
+// Save the balance at retirement age
+const balanceAtRetirement = balTarget;
+
+// Add the retirement age entry (continuity point)
+yearLabels.push(ra);
+balancesTarget.push(balanceAtRetirement);
+
+// 🎯 Reverse drawdown from retirement to life expectancy
+const drawdownYears = ea - ra;
+const targetDrawdown = new Array(drawdownYears + 1);
 
 const postMonthly = post / 12;
 
-for (let i = drawdownYears - 1; i >= 0; i--) {
-  let next = targetDrawdown[i + 1];
+// Start drawdown from balance at retirement (continuity!)
+targetDrawdown[0] = balanceAtRetirement;
+
+// Project forward from retirement age
+for (let i = 1; i <= drawdownYears; i++) {
+  let prev = targetDrawdown[i - 1];
   for (let m = 0; m < 12; m++) {
-    next = (next + incomeUsed) / (1 + postMonthly);
+    prev *= (1 + postMonthly);
+    prev -= incomeUsed;
   }
-  targetDrawdown[i] = next;
+  targetDrawdown[i] = Math.max(prev, 0);
 }
 
-// Append drawdown data to balancesTarget and yearLabels
-for (let i = 1; i <= drawdownYears; i++) {  // ✅ Start from i = 1 to skip duplicate ra
+// Append drawdown years from ra+1 to ea
+for (let i = 1; i <= drawdownYears; i++) {
   const age = ra + i;
   yearLabels.push(age);
   balancesTarget.push(targetDrawdown[i]);
 }
+
 
 
 
