@@ -263,6 +263,43 @@ body.dark td {
   color: #fff;
 }
 
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  overflow: visible;
+}
+
+.tooltip-text {
+  font-weight: normal;
+  visibility: hidden;
+  opacity: 0;
+  background-color: #fff8b3;
+  color: #222;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e0c300;
+  position: absolute;
+  top: 100%; /* ⬇️ show below the element */
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 100;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: normal;
+  max-width: 250px;
+  width: max-content;
+  word-wrap: break-word;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+
+
 
  </style>
 </head>
@@ -281,7 +318,7 @@ body.dark td {
 
 
 <div class="version-container">
-  <div class="version">v2.0.26t (Online)</div>
+  <div class="version">v2.0.28t (Online)</div>
   <div class="last-updated">Last updated: July 9, 2025</div>
 </div>
 
@@ -292,10 +329,34 @@ body.dark td {
 
   <div class="inputs-container"> <!-- Input sliders, toggles, dropdowns -->
 
-      <div class="input-group"><label>Desired Monthly Income ($)</label><input type="number" id="desiredIncome"></div>
-      <div class="input-group"><label>Current Investment ($)</label><input type="number" id="currentInvestment"></div>
-      <div class="input-group"><label>Monthly Contribution ($)</label><input type="number" id="monthlyContribution"></div> 
-      <div class="input-group"><label for="stopAge">Stop Contributions After Age:</label><input type="number" id="stopAge" value="100" min="0"></div>
+    <div class="input-group">
+      <label for="incomeDesired" class="tooltip-container">
+        Desired Monthly Income
+        <span class="tooltip-text">Monthly income you want during retirement, in today’s dollars. That's how much you want to receive now or in the future, monthly (future value will be adjusted for inflation)</span>
+      </label>
+    <input type="number" id="desiredIncome"></div>
+
+    <div class="input-group">
+        <label for="investmentMonthly" class="tooltip-container">
+          Current Investment
+          <span class="tooltip-text">How much money have you saved so far, between all of your investment accounts, bank accounts, GICs etc?.</span>
+        </label>
+      <input type="number" id="currentInvestment"></div>
+
+    <div class="input-group">
+        <label for="contributionMonthly" class="tooltip-container">
+          Monthly Contribution
+          <span class="tooltip-text">How much money are you <strong>putting away</strong> right now monthly?</span>
+        </label>
+      <input type="number" id="monthlyContribution"></div> 
+
+    <div class="input-group">
+        <label for="contributionStop" class="tooltip-container">
+          End contributions after age
+          <span class="tooltip-text">The age at which you plan to <strong>STOP</strong> monthly investing contributions.</span>
+        </label>
+
+        <input type="number" id="stopAge" value="100" min="0"></div>
 
 
 <!--convert to slider, nix completion
@@ -307,42 +368,78 @@ body.dark td {
     </div>
 -->
       
-    <div class="slider-group"><label>Inflation (%)</label>
+    <div class="slider-group">
+    
+      <label for="infRate" class="tooltip-container">
+        Inflation (%)
+        <span class="tooltip-text">Average expected annual increase in cost of living.</span>
+    </label>
+
       <div class="slider-container">
         <input type="range" id="inflationRate" min="0" max="7" step="1">
         <input type="text" id="inflationRateText">
       </div>
     </div>
     
-    <div class="slider-group"><label>Pre-Retirement Return (%)</label>
+    <div class="slider-group">
+    <label for="ratePre" class="tooltip-container">
+      Pre-retirement return %
+      <span class="tooltip-text">Expected average annual rate of return on your investments before retirement, during accumulation phase.</span>
+    </label>
+
       <div class="slider-container">
         <input type="range" id="preReturn" min="0" max="18" step="1">
         <input type="text" id="preReturnText">
       </div>
     </div>
     
-    <div class="slider-group"><label>Post-Retirement Return (%)</label>
+    <div class="slider-group">
+    <label for="ratePost" class="tooltip-container">
+      Post-retirement return %
+      <span class="tooltip-text">Expected average annual return on your investments during retirement or the from the age you set for financial independence.</span>
+    </label>
+
       <div class="slider-container">
         <input type="range" id="postReturn" min="0" max="15" step="1">
         <input type="text" id="postReturnText">
       </div>
     </div>
 
-    <div class="slider-group"><label>Start Age</label>
+    <div class="slider-group">
+      <label for="startAge" class="tooltip-container">
+        Start Age
+        <span class="tooltip-text">Your current age or the age at which savings start.</span>
+      </label>
+
       <div class="slider-container">
         <input type="range" id="startAge" min="0" max="70" step="1">
         <input type="text" id="startAgeText">
       </div>
     </div>
     
-    <div class="slider-group"><label>Retirement Age</label>
+    <div class="slider-group">
+      <label for="retireAge" class="tooltip-container">
+        Retirement Age
+        <span class="tooltip-text">
+          The age when you stop working and begin withdrawals. For lifelong income, switch the mode to "Forever".
+        </span>
+      </label>
+
       <div class="slider-container">
         <input type="range" id="retireAge" min="30" max="80" step="1">
         <input type="text" id="retireAgeText">
       </div>
     </div>
     
-    <div class="slider-group"><label for="endAge" id="lifeLabel">Life Expectancy</label>
+    <div class="slider-group">
+      <label for="endAge" id="lifeLabel" class="tooltip-container">
+      Life Expectancy
+      <span class="tooltip-text">
+        What's your life expectancy? Default is 100. In FIRE mode, your money is set to last forever.
+      </span>
+      </label>
+
+
 
       <div class="slider-container">
         <input type="range" id="endAge" min="65" max="120" step="1">
@@ -354,25 +451,46 @@ body.dark td {
 </div> <!-- end of the input container-->
 
  <div class="results-container"> <!--Outputs: FIN, Monthly FIN, Fully Funded, toggles -->
-  
-  <div class="output">Financial Independence Number <br>(FIN): <strong id="finAmount">$0</strong></div>
-  
 
-  <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
-<div class="output">
-  Fully Funded Now:
-  <strong id="fullyFundedNow">$0</strong>
-  <span class="info-icon" title="This is how much you'd need invested today to stop contributing and still retire on track.">ℹ️</span>
-
-
-
+  <div class="output" >
+  <span class="tooltip-container">
+    <span>(FIN):</span>
+    <span class="tooltip-text"><strong>LUMP SUM</strong> needed at desired retirement age to cover all future income goals in the future (also known as Financial Independence Number).</span>
+  </span>
+  <strong id="finAmount">$0</strong>
 </div>
+
+
+  <div class="output">
+    <span class="tooltip-container">
+      Monthly FIN:
+      <span class="tooltip-text">How much extra you'd need to save monthly to meet your financial independence target.</span>
+    </span>
+    <strong id="monthlyNeeded">$0</strong>
+  </div>
+
+  <div class="output">
+    <span class="tooltip-container">
+      Fully Funded Now:
+      <span class="tooltip-text">How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal.</span>
+    </span>
+    <strong id="fullyFundedNow">$0</strong>
+  </div>
+
   
 <!-- FIN Display Mode Toggle -->
 <div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
-  <span id="finDisplayLabelPrefix">Display:</span>
-  <span id="finDisplayLabel">Future $</span>
-  <span title="Display FIN in today's dollars or inflated future dollars." style="cursor: help;">ℹ️</span>
+<span class="tooltip-container" style="cursor: help;">
+  <span>
+    <span id="finDisplayLabelPrefix">Display:</span>
+    <strong id="finDisplayLabel">Future $</strong>
+  </span>
+  <span class="tooltip-text">
+    Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong> depending on your preference.
+  </span>
+</span>
+
+
   <label class="switch">
     <input type="checkbox" id="finDisplayToggle" checked>
     <span class="slider"></span>
@@ -381,16 +499,25 @@ body.dark td {
 
 
 
+
 <!-- Retirement Mode Toggle -->
 <div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
-  <span id="modeLabelPrefix">Mode:</span>
-  <span id="modeLabel">Life Expectancy</span>
-  <span title="Choose how long your money should last: Life Expectancy (ends at set age) or Forever (FIRE style)." style="cursor: help;">ℹ️</span>
+  <span class="tooltip-container" style="cursor: help;">
+    <span>
+      <span id="modeLabelPrefix">Mode:</span>
+      <strong id="modeLabel">Life Expectancy</strong>
+    </span>
+    <span class="tooltip-text">
+      Choose how long your money should last: Life Expectancy (ends at set age) or Forever (FIRE style): FIRE= Financial Independent, Retire Early.
+    </span>
+  </span>
   <label class="switch">
     <input type="checkbox" id="drawdownToggle">
     <span class="slider"></span>
   </label>
 </div>
+
+
 
 
 
