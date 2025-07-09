@@ -248,6 +248,21 @@ body.dark td {
   font-size: 0.95rem;
 }
 
+.highlight-success {
+  color: #3df283;
+  font-weight: bold;
+}
+
+.info-icon {
+  margin-left: 6px;
+  cursor: help;
+  font-size: 14px;
+  color: #aaa;
+}
+.info-icon:hover {
+  color: #fff;
+}
+
 
  </style>
 </head>
@@ -266,7 +281,7 @@ body.dark td {
 
 
 <div class="version-container">
-  <div class="version">v2.0.24t (Online)</div>
+  <div class="version">v2.0.25t (Online)</div>
   <div class="last-updated">Last updated: July 7, 2025</div>
 </div>
 
@@ -280,6 +295,8 @@ body.dark td {
       <div class="input-group"><label>Desired Monthly Income ($)</label><input type="number" id="desiredIncome"></div>
       <div class="input-group"><label>Current Investment ($)</label><input type="number" id="currentInvestment"></div>
       <div class="input-group"><label>Monthly Contribution ($)</label><input type="number" id="monthlyContribution"></div> 
+      <div class="input-group"><label for="stopAge">Stop Contributions After Age:</label><input type="number" id="stopAge" value="100" min="0"></div>
+
 
 <!--convert to slider, nix completion
       <div class="slider-group"><label>Monthly Contribution ($)</label>
@@ -341,6 +358,14 @@ body.dark td {
   
 
   <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
+<div class="output">
+  Fully Funded Now:
+  <strong id="fullyFundedNow">$0</strong>
+  <span class="info-icon" title="This is how much you'd need invested today to stop contributing and still retire on track.">ℹ️</span>
+
+
+
+</div>
   
 <!-- FIN Display Mode Toggle -->
 <div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
@@ -352,6 +377,8 @@ body.dark td {
     <span class="slider"></span>
   </label>
 </div>
+
+
 
 <!-- Retirement Mode Toggle -->
 <div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
@@ -414,6 +441,7 @@ body.dark td {
         document.getElementById("finDisplayToggle").addEventListener("change", function () {
         const label = this.checked ? "Future $" : "Today's $";
         document.getElementById("finDisplayLabel").textContent = label;
+        
         calculateFIN();
       });
 
@@ -550,6 +578,8 @@ function calculateFIN() {
   const sa = +els.startAge.value,
         ra = +els.retireAge.value,
         ea = +els.endAge.value;
+        let stopAge = +document.getElementById("stopAge").value || ra;
+        stopAge = Math.min(stopAge, ea);
 
   const yrsTo = ra - sa,
         yrsIn = ea - ra,
@@ -579,6 +609,10 @@ function calculateFIN() {
     : incomeUsed * 12 * 50;
   }
   const finUsed = fin;
+  const fullyFundedNow = fin / Math.pow(1 + pre, ra - sa);
+  const isFullyFunded = ci >= fullyFundedNow;
+  document.getElementById("fullyFundedNow").classList.toggle("highlight-success", isFullyFunded);
+
 
 
   // Ideal path: from $0
@@ -605,6 +639,7 @@ function calculateFIN() {
 
 
   els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
+document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
   // Chart data
   const yearLabels = [];
@@ -660,10 +695,13 @@ for (let i = 1; i <= drawdownYears; i++) {
 
   let balCurrent = ci;
 for (let age = sa; age <= ra; age++) {
-  balCurrent += mc * 12;
+  if (age < stopAge) {
+    balCurrent += mc * 12;
+  }
   balCurrent *= (1 + pre);
   balancesCurrent.push(balCurrent);
 }
+
 
   for (let age = ra + 1; age <= ea; age++) {
   for (let m = 0; m < 12; m++) {
