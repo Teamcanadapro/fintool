@@ -14,15 +14,29 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Team Canada FIN Tool (Online)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.2.1"></script>
+<script>
+  Chart.register(window['chartjs-plugin-annotation']);
+</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
   
-  <style>
+</script>
+
+<style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',sans-serif;background:#f4f7fb;color:#222;display:flex;flex-direction:column;align-items:center;padding:20px;}
     h1,h2{color:#1a73e8;margin-bottom:8px;}
     .version,.last-updated{font-size:.85rem;color:#555;margin-bottom:16px;}
-    .inputs-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%;max-width:900px;}
+    .inputs-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 520px; /* changed from 900px */
+  box-sizing: border-box; /* recommended */
+}
+
     .input-group,.slider-group{background:#fff;padding:12px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
     label{display:block;margin-bottom:6px;font-weight:600;}
     input[type=number],input[type=text],input[type=range]{font-size:1rem;}
@@ -112,10 +126,15 @@ input:checked + .slider:before {
 .graph-container,
 .table-container {
   width: 100%;
-  max-width: 976px; /* 480 + 480 + 16 gap */
-  margin: 40px auto 0 auto;
+  max-width: 100%; /* 480 + 480 + 16 gap */
+  height:auto;
+  margin: 10px auto 10px auto;
   padding: 20px;
   box-sizing: border-box;
+}
+#finChart {
+  width: 100% !important;
+  height: auto !important; /* or 500px or 600px */
 }
 
 
@@ -133,11 +152,31 @@ input:checked + .slider:before {
 }
 
 
-@media (max-width: 768px) {
+@media (min-width: 540px) {
   .main-layout {
-    flex-direction: column;
+    flex-direction: row;
+  }
+
+  .left-column,
+  .inputs-container {
+    flex: 1 1 480px;
+    max-width: 520px;
+  }
+
+  .inputs-container {
+    margin-top: 0px;
   }
 }
+
+.left-column,
+.inputs-container {
+  flex: 1 1 0%;
+  min-width: 240px;
+  max-width: 520px;
+}
+
+
+
 
 body.dark {
   background: #121212;
@@ -179,74 +218,22 @@ body.dark td {
   background: #1e1e1e;
 }
 
-.header-flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 900px;
-  margin-bottom: 10px;
-}
-
-.header-title {
-  flex: 1;
-  text-align: center;
-  font-size: 1.8rem;
-}
-
-.dark-mode-header-toggle {
-  text-align: right;
-  font-size: 0.95rem;
-}
-
-.header-flex {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  max-width: 900px;
-  margin-bottom: 10px;
-  position: relative;
-}
 
 .header-title {
   font-size: 1.8rem;
-  text-align: center;
-  flex: 1;
+  color: #007bff;
+  margin: 0;
+  white-space: nowrap;  /* ⛔ Prevents line break */
 }
+
 
 .dark-mode-inline {
-  position: absolute;
-  right: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 1.1rem;
-}
-.header-flex {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  max-width: 900px;
-  margin-bottom: 10px;
-  position: relative;
-}
-
-.header-title {
-  font-size: 1.8rem;
-  text-align: center;
-  flex: 1;
-}
-
-.dark-mode-inline {
-  position: absolute;
-  right: 0;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 0.95rem;
 }
+
 
 .highlight-success {
   color: #3df283;
@@ -298,61 +285,491 @@ body.dark td {
   opacity: 1;
   transform: translateX(-50%) translateY(10px);
 }
+.summary-box {
+  background-color: var(--card-bg, #fff);
+  color: var(--text-color, #000);
+  padding: 20px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 0.95rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 24px 48px; /* vertical gap 24px, horizontal gap 48px */
+}
 
+.summary-header {
+  display: contents; /* lets summary-box handle grid */
+}
+
+.output {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  white-space: nowrap;
+  padding: 0;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.output strong {
+  font-size: 1.4rem;
+  color: #007bff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Tooltip styles can remain as is, or add margin if needed */
+.tooltip-text {
+  font-weight: normal;
+  font-size: 0.85rem;
+  max-width: 260px;
+  margin-top: 6px;
+  color: #444;
+}
+
+/* Dark mode */
+body.dark .summary-box {
+  background-color: #1a1a1a;
+  color: #eee;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+body.dark .output strong {
+  color: #3399ff;
+}
+
+body.dark .tooltip-text {
+  color: #ccc;
+}
+
+
+
+/* Only applied when .debug-layout is on <body> */
+.debug-layout .main-layout {
+  outline: 2px dashed #444;
+  position: relative;
+}
+
+.debug-layout .left-column {
+  background-color: rgba(0, 128, 255, 0.05);
+  border: 1px solid rgba(0, 128, 255, 0.2);
+  position: relative;
+}
+
+.debug-layout .inputs-container {
+  background-color: rgba(255, 128, 0, 0.05);
+  border: 1px solid rgba(255, 128, 0, 0.2);
+  position: relative;
+}
+
+.debug-layout .left-column::before,
+.debug-layout .inputs-container::before {
+  content: attr(class);
+  position: absolute;
+  top: -1.5em;
+  font-size: 12px;
+  font-family: monospace;
+  background: #222;
+  color: #0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.main-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.left-column,
+.right-column {
+  flex: 1 1 0%;
+  min-width: 240px;
+  max-width: 520px;
+}
+
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .inputs-container {
+    margin-top: 20px;
+  }
+}
+
+.fin-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+  min-width: 150px; /* ⬅️ Keep toggles equally spaced */
+  justify-content: space-between;
+}
+
+.fin-toggle label {
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  white-space: nowrap;
+}
+
+#scenario-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.scenario-btn {
+  background-color: #444;
+  color: #fff;
+  border: 1px solid #666;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.scenario-btn:hover {
+  background-color: #666;
+}
+
+.scenario-btn.active {
+  background-color: #0af;
+  color: #000;
+}
+
+.graph-expand-btn {
+  text-align: right;
+  margin-top: -20px;
+  font-size: 14px;
+  color: #007aff;
+  cursor: pointer;
+}
+
+.graph-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.graph-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90%;
+  overflow: auto;
+  position: relative;
+}
+
+.graph-modal-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.graph-modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-modal-content canvas {
+  width: 100% !important;
+  height: 500px !important;  /* Adjust height to your preference */
+}
+
+#modalChart {
+  width: 100% !important;
+  height: 500px !important;
+  max-height: 100%;
+}
+
+#futureIncomeDisplay {
+  background: #f0f0f0;
+  color: #000;
+  border: 1px solid #ccc;
+}
+
+body.dark #futureIncomeDisplay {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+}
+.readonly-box {
+  background: #f0f0f0;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  box-sizing: border-box;
+  padding: 4px 6px;
+
+  text-align: right;
+  white-space: nowrap;
+
+  font-size: clamp(0.55rem, 1vw, 0.75rem); /* ✅ responsive */
+  line-height: 1.2;
+
+  width: 100%;
+  min-width: 0;
+}
+
+
+
+
+body.dark .readonly-box {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.autoscale {
+  font-size: 1.2rem;
+  transition: font-size 0.2s ease;
+}
+
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;  /* ✅ now centers vertically */
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto 10px auto;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+.header-right {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-end;  /* 👈 pushes toggles to the right */
+}
+.toggle-bar {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.version-info {
+  font-size: 0.65rem;  /* smaller font size */
+  opacity: 0.75;
+  margin-top: 4px;     /* a little space below the title */
+  white-space: nowrap; /* prevent wrapping */
+}
+#tableSection {
+  margin-top: 20px;
+  background: var(--card-bg, #fff);
+  color: var(--text-color, #000);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 0.9rem;
+  max-width: 900px;
+  padding: 0;
+}
+
+#tableHeader {
+  cursor: pointer;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  user-select: none;
+  background: #007bff;
+  color: white;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#tableContent.open {
+  max-height: 1500px; /* enough for table */
+  padding: 16px 20px;
+}
+
+/* Dark mode */
+body.dark #tableSection {
+  background: #1a1a1a;
+  color: #eee;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+body.dark #tableHeader {
+  background: #3399ff;
+  color: #eee;
+}
+
+body.dark #tableContent {
+  background: #222;
+}
 
 
  </style>
 </head>
 <body>
+<!--<body class="debug-layout">-->
+
 <div class="header-flex">
-  <h1 class="header-title">FIN Calculator</h1>
-  <div class="dark-mode-inline">
-    <span>Dark Mode 🌙</span>
-    <label class="switch">
-      <input type="checkbox" id="darkModeToggle">
-      <span class="slider"></span>
-    </label>
+  <!-- Left side: Title + Version -->
+  <div class="header-left">
+      <h1 class="header-title">FIN Calculator</h1>
+    <div class="version-info">v2.0.29t (Online) • Updated: July 10, 2025</div>
+</div>
+<!-- Toggle Group -->
+<!-- Header Right Section -->
+<div class="header-right">
+  <div class="toggle-bar">
+    <!-- Dark Mode Toggle -->
+    <div class="toggle-item">
+      <span>Dark Mode 🌙</span>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Display Toggle -->
+    <div class="toggle-item">
+      <span class="tooltip-container">
+        <span><span id="finDisplayLabelPrefix">Display:</span> <strong id="finDisplayLabel">Future $</strong></span>
+        <span class="tooltip-text">Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong>.</span>
+      </span>
+      <label class="switch">
+        <input type="checkbox" id="finDisplayToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="toggle-item">
+      <span class="tooltip-container">
+        <span><span id="modeLabelPrefix">Mode:</span> <strong id="modeLabel">Life Expectancy</strong></span>
+        <span class="tooltip-text">Choose Life Expectancy or Forever drawdown style.</span>
+      </span>
+      <label class="switch">
+        <input type="checkbox" id="drawdownToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
+ </div>
 </div>
 
-
-
-<div class="version-container">
-  <div class="version">v2.0.28t (Online)</div>
-  <div class="last-updated">Last updated: July 9, 2025</div>
+</div><!--end of header-flex with title, version and toggles-->
+<!-- Scenario Buttons Row -->
+<div id="scenario-row" class="scenario-buttons">
+  <button class="scenario-btn active" data-scenario="default">Default</button>
+  <button class="scenario-btn" data-scenario="child-zero">Child Born</button>
+  <button class="scenario-btn" data-scenario="start-19">Start Age 19</button>
+  <button class="scenario-btn" data-scenario="start-25">Start Age 25</button>
+  <button class="scenario-btn" data-scenario="start-30">Start Age 30</button>
+  <button class="scenario-btn" data-scenario="start-40">Start Age 40</button>
+  <button class="scenario-btn" data-scenario="start-50">Start Age 50</button>
+  <button class="scenario-btn" data-scenario="start-60">Start Age 60</button>
 </div>
 
 
 <div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
 <div class="main-wrapper"> <!-- full body wrapper-->
+
+
 <div class="main-layout"> <!-- the entire main page layout-->
 
+<div class="left-column">
   <div class="inputs-container"> <!-- Input sliders, toggles, dropdowns -->
 
-    <div class="input-group">
-      <label for="incomeDesired" class="tooltip-container">
-        Desired Monthly Income
-        <span class="tooltip-text">Monthly income you want during retirement, in today’s dollars. That's how much you want to receive now or in the future, monthly (future value will be adjusted for inflation)</span>
-      </label>
-    <input type="number" id="desiredIncome"></div>
+<div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+  <div style="flex: 0.5;">
+    <label for="desiredIncome" class="tooltip-container">
+      Monthly $
+      <span class="tooltip-text">
+        Monthly income you want during retirement, in today’s dollars.
+      </span>
+    </label>
+    <input type="number" id="desiredIncome" />
+  </div>
+
+  <div style="flex: 0.5;">
+    <label class="tooltip-container">
+      Future $ 
+      <span class="tooltip-text">
+        Inflation-adjusted monthly income at retirement age to match today’s value.
+      </span>
+    </label>
+    <input type="text" id="futureIncomeDisplay" readonly />
+
+  </div>
+</div>
 
     <div class="input-group">
         <label for="investmentMonthly" class="tooltip-container">
-          Current Investment
+          Current Investments
           <span class="tooltip-text">How much money have you saved so far, between all of your investment accounts, bank accounts, GICs etc?.</span>
         </label>
       <input type="number" id="currentInvestment"></div>
 
-    <div class="input-group">
-        <label for="contributionMonthly" class="tooltip-container">
-          Monthly Contribution
-          <span class="tooltip-text">How much money are you <strong>putting away</strong> right now monthly?</span>
-        </label>
-      <input type="number" id="monthlyContribution"></div> 
+    <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+  <div style="flex: 0.5;">
+    <label for="monthlyContribution" class="tooltip-container">
+      Monthly PAC
+      <span class="tooltip-text">How much money are you <strong>putting away</strong> right now monthly?</span>
+    </label>
+    <input type="number" id="monthlyContribution" />
+  </div>
+
+  <div style="flex: 0.5;">
+    <label class="tooltip-container">
+      Future Value 
+      <span class="tooltip-text">
+        Total value of your contributions by retirement, assuming compounding growth.
+      </span>
+    </label>
+    <input type="text" id="futureValueContributionDisplay" class="readonly-box autoscale" readonly />
+  </div>
+</div>
+
 
     <div class="input-group">
         <label for="contributionStop" class="tooltip-container">
-          End contributions after age
+          End contributions age
           <span class="tooltip-text">The age at which you plan to <strong>STOP</strong> monthly investing contributions.</span>
         </label>
 
@@ -363,6 +780,7 @@ body.dark td {
       <div class="slider-group"><label>Monthly Contribution ($)</label>
       <div class="slider-container">
         <input type="range" id="monthlyContribution" min="0" max="7" step="1">
+
         <input type="number" id="monthlyContributionNumber">
       </div>
     </div>
@@ -450,109 +868,485 @@ body.dark td {
 
 </div> <!-- end of the input container-->
 
- <div class="results-container"> <!--Outputs: FIN, Monthly FIN, Fully Funded, toggles -->
-
-  <div class="output" >
-  <span class="tooltip-container">
-    <span>(FIN):</span>
-    <span class="tooltip-text"><strong>LUMP SUM</strong> needed at desired retirement age to cover all future income goals in the future (also known as Financial Independence Number).</span>
-  </span>
-  <strong id="finAmount">$0</strong>
-</div>
-
-
-  <div class="output">
-    <span class="tooltip-container">
-      Monthly FIN:
-      <span class="tooltip-text">How much extra you'd need to save monthly to meet your financial independence target.</span>
-    </span>
-    <strong id="monthlyNeeded">$0</strong>
+<section id="faq" aria-label="Frequently Asked Questions">
+  <div id="faqHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="faqContent">
+    FAQ
+    <span aria-hidden="true" id="faqToggleIcon">▼</span>
   </div>
+  <div id="faqContent" role="region" aria-hidden="true">
 
-  <div class="output">
-    <span class="tooltip-container">
-      Fully Funded Now:
-      <span class="tooltip-text">How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal.</span>
-    </span>
-    <strong id="fullyFundedNow">$0</strong>
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer1" id="question1">
+        What is the FIN (Financial Independence Number)?
+      </div>
+      <div class="faq-answer" id="answer1" aria-labelledby="question1" hidden>
+        The FIN represents the lump sum amount you need at retirement to generate your desired income for life.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer2" id="question2">
+        Why does the FIN change for different start age?
+      </div>
+      <div class="faq-answer" id="answer2" aria-labelledby="question2" hidden>
+        The FIN changes with start age because the amount you need at retirement depends on how many years you have to save and how inflation impacts the value of your desired income. Starting earlier means your desired income needs to be inflated over a longer period before retirement, which changes the lump sum required.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer3" id="question3">
+        How is the “Future $” display different from “Today's $”?
+      </div>
+      <div class="faq-answer" id="answer3" aria-labelledby="question3" hidden>
+        “Future $” adjusts your income and savings goals to account for inflation, showing the amount of money you will need in inflated future dollars. “Today's $” shows the equivalent value in today’s dollars, removing the effects of inflation to provide a clearer comparison.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer4" id="question4">
+        What does “Fully Funded” mean?
+      </div>
+      <div class="faq-answer" id="answer4" aria-labelledby="question4" hidden>
+        “Fully Funded” shows how much you’d need invested today to meet your retirement goals without adding extra monthly contributions.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer5" id="question5">
+        What is the difference between Life Expectancy and Forever (FIRE style) modes?
+      </div>
+      <div class="faq-answer" id="answer5" aria-labelledby="question5" hidden>
+        Life Expectancy mode plans your finances to last until a set age, while Forever (FIRE) mode plans for perpetual income with no set end date.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer6" id="question6">
+        How do changes in inflation or investment return rates affect my results?
+      </div>
+      <div class="faq-answer" id="answer6" aria-labelledby="question6" hidden>
+        Inflation and return rates impact how much you need to save and your investment growth, which affects your FIN and funding requirements.
+      </div>
+    </div>
+
   </div>
+</section>
 
-  
-<!-- FIN Display Mode Toggle -->
-<div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
-<span class="tooltip-container" style="cursor: help;">
-  <span>
-    <span id="finDisplayLabelPrefix">Display:</span>
-    <strong id="finDisplayLabel">Future $</strong>
-  </span>
-  <span class="tooltip-text">
-    Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong> depending on your preference.
-  </span>
-</span>
+<style>
+  /* FAQ container styles */
+  #faq {
+    margin-top: 20px;
+    background: var(--card-bg, #fff);
+    color: var(--text-color, #000);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 0.9rem;
+    padding: 0;
+    max-width: 480px;
+  }
+
+  /* FAQ main header */
+  #faqHeader {
+    cursor: pointer;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    user-select: none;
+    background: #007bff;
+    color: white;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* FAQ main content container, hidden by default */
+  #faqContent {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    background: var(--card-bg, #f9f9f9);
+    border-radius: 0 0 8px 8px;
+    padding: 0 20px;
+  }
+
+  #faqContent.open {
+    padding: 16px 20px;
+    max-height: 1000px; /* enough for content */
+  }
+
+  /* Individual question styles */
+  .faq-item {
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+  }
+
+  .faq-question {
+    cursor: pointer;
+    font-weight: 600;
+    position: relative;
+    padding-right: 24px;
+    user-select: none;
+  }
+
+  .faq-question::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: transform 0.3s ease;
+  }
+
+  .faq-question.open::after {
+    content: '-';
+    transform: rotate(180deg);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding-left: 8px;
+    color: #333;
+    font-weight: normal;
+    font-size: 0.9rem;
+  }
+
+  .faq-answer.open {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    max-height: 500px; /* large enough for most answers */
+  }
+
+  /* Dark mode tweaks */
+  body.dark #faq {
+    background: #1a1a1a;
+    color: #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  body.dark #faqHeader {
+    background: #3399ff;
+    color: #eee;
+  }
+
+  body.dark #faqContent {
+    background: #222;
+  }
+
+  body.dark .faq-item {
+    border-color: #444;
+  }
+
+  body.dark .faq-answer {
+    color: #ccc;
+  }
+</style>
+
+<script>
+  // Toggle FAQ main section
+  const faqHeader = document.getElementById('faqHeader');
+  const faqContent = document.getElementById('faqContent');
+  const faqToggleIcon = document.getElementById('faqToggleIcon');
+
+  faqHeader.addEventListener('click', () => {
+    const expanded = faqHeader.getAttribute('aria-expanded') === 'true';
+    faqHeader.setAttribute('aria-expanded', String(!expanded));
+    faqContent.classList.toggle('open');
+    faqContent.setAttribute('aria-hidden', String(expanded));
+    faqToggleIcon.textContent = expanded ? '▼' : '▲';
+  });
+  faqHeader.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      faqHeader.click();
+    }
+  });
+
+  // Toggle individual FAQ questions
+  document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+      const expanded = question.getAttribute('aria-expanded') === 'true';
+      question.setAttribute('aria-expanded', String(!expanded));
+      const answer = document.getElementById(question.getAttribute('aria-controls'));
+      if (answer) {
+        if (expanded) {
+          answer.hidden = true;
+          answer.classList.remove('open');
+        } else {
+          answer.hidden = false;
+          answer.classList.add('open');
+        }
+      }
+      question.classList.toggle('open');
+    });
+    question.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        question.click();
+      }
+    });
+  });
+</script>
 
 
-  <label class="switch">
-    <input type="checkbox" id="finDisplayToggle" checked>
-    <span class="slider"></span>
-  </label>
-</div>
-
-
-
-
-<!-- Retirement Mode Toggle -->
-<div class="form-group" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; max-width: 480px; margin: 0 auto;">
-  <span class="tooltip-container" style="cursor: help;">
-    <span>
-      <span id="modeLabelPrefix">Mode:</span>
-      <strong id="modeLabel">Life Expectancy</strong>
-    </span>
-    <span class="tooltip-text">
-      Choose how long your money should last: Life Expectancy (ends at set age) or Forever (FIRE style): FIRE= Financial Independent, Retire Early.
-    </span>
-  </span>
-  <label class="switch">
-    <input type="checkbox" id="drawdownToggle">
-    <span class="slider"></span>
-  </label>
-</div>
-
-
-
-
-
-
-
+<!--
+ <div class="results-container"> 
 
   </div> <!--end of results-container-->
+
+  
+
+
+
+
+</div> <!--end of left-column-->
+
+<div class="right-column"> <!--start of right-column-->
+
+<div class="summary-box">
+  <div class="summary-header">
+
+    <div class="output tooltip-container">
+      <div class="label-row">
+        <span class="icon">💰</span>
+        <span class="label-text">FIN</span>
+      </div>
+      <strong id="finAmount">$0</strong>
+      <span class="tooltip-text">
+        <strong>LUMP SUM</strong> needed at desired retirement age to cover all future income goals in the future (also known as Financial Independence Number).
+      </span>
+    </div>
+
+    <div class="output tooltip-container">
+      <div class="label-row">
+        <span class="icon">📅</span>
+        <span class="label-text">Monthly FIN</span>
+      </div>
+      <strong id="monthlyNeeded">$0</strong>
+      <span class="tooltip-text">
+        How much extra you'd need to save monthly to meet your financial independence target.
+      </span>
+    </div>
+
+    <div class="output tooltip-container">
+      <div class="label-row">
+        <span class="icon">🎯</span>
+        <span class="label-text">Fully Funded</span>
+      </div>
+      <strong id="fullyFundedNow">$0</strong>
+      <span class="tooltip-text">
+        How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal.
+      </span>
+    </div>
+
+    <div class="output tooltip-container">
+      <div class="label-row">
+        <span class="icon">🛡️</span>
+        <span class="label-text">IPN</span>
+      </div>
+      <strong id="incomeProtectionNumber">$0</strong>
+      <span class="tooltip-text">
+        Income Protection Number: Estimated life insurance need based on your current income requirement.
+      </span>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+
 <div class="graph-container"> <!--graph container starting-->
 
-  <canvas id="finChart" style="max-height: 400px;"></canvas>
+  <canvas id="finChart" style="width: 100%; max-height: 600px;"></canvas>
+  
+  <div class="graph-expand-btn" onclick="openGraphModal()">🔍 Expand</div>
+
+  <!-- Chart Modal -->
+  <div id="graphModal" class="graph-modal" onclick="closeGraphModal(event)">
+    <div class="graph-modal-content" onclick="event.stopPropagation()">
+      <div class="graph-modal-close" onclick="closeGraphModal()">✖</div>
+      <canvas id="modalChart"></canvas>
+    </div>
+  </div>
 
 
 
-</div><!-- end of the graph-container-->
+</div> <!-- end of the graph-container-->
+
 
 <!-- table view of the accumulation and decumulation -->
-<div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
+<section id="tableSection" aria-label="Plan Table">
+  <div id="tableHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="tableContent">
+    Plan Details
+    <span aria-hidden="true" id="tableToggleIcon">▼</span>
+  </div>
+  <div id="tableContent" role="region" aria-hidden="true" style="max-height: 0; overflow: hidden; transition: max-height 0.35s ease; border-radius: 0 0 8px 8px; padding: 0 20px;">
+    <div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
+  </div>
+</section>
+
 
 
 </div> <!--end of main-container-->
 
 </div> <!-- end of the main-wrapper, full page-->
-  <div class="buttons">
-    <!--
-    <button class="btn btn-red" onclick="exportPDF()">Export PDF</button>
- -->
-    <button class="btn btn-blue" onclick="resetDefaults()">Reset Defaults</button>
-    <button id="downloadHTMLBtn" class="btn btn-green" onclick="downloadHTML()" style="display:none;">Download HTML</button>
 
-    <!-- <button class="btn btn-green" onclick="downloadHTML()">Download HTML</button> -->
-  </div>
-  <div id="downloadLinkContainer"></div>
+<!-- script to set the default for scenarios-->
+<script>
+  const baseScenario = {
+    desiredIncome: 2000,
+    currentInvestment: 0,
+    monthlyContribution: 100,
+    stopAge: 100,
+    inflationRate: 2,
+    preReturn: 9,
+    postReturn: 7,
+    startAge: 25,
+    retireAge: 65,
+    endAge: 85
+  };
+
+  const scenarios = {
+    "default": { ...baseScenario },
+    "child-zero": { ...baseScenario, desiredIncome: 5000, startAge: 0 },
+    "start-19": { ...baseScenario, desiredIncome: 5000, startAge: 19 },
+    "start-25": { ...baseScenario, desiredIncome: 5000, startAge: 25 },
+    "start-30": { ...baseScenario, desiredIncome: 5000, startAge: 30 },
+    "start-40": { ...baseScenario, desiredIncome: 5000, startAge: 40 },
+    "start-50": { ...baseScenario, desiredIncome: 5000, startAge: 50 },
+    "start-60": { ...baseScenario, desiredIncome: 5000,startAge: 60 }
+  };
+
+  function setValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = value;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  document.querySelectorAll(".scenario-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      // UI highlight
+      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+localStorage.setItem('lastScenario', btn.dataset.scenario);
+
+      const s = scenarios[btn.dataset.scenario];
+      if (!s) return;
+
+      // Set plain inputs
+      setValue("desiredIncome", s.desiredIncome);
+      setValue("currentInvestment", s.currentInvestment);
+      setValue("monthlyContribution", s.monthlyContribution);
+      setValue("stopAge", s.stopAge);
+
+      // Set sliders + matching number inputs
+      setValue("inflationRate", s.inflationRate);
+      setValue("inflationInput", s.inflationRate);
+
+      setValue("preReturn", s.preReturn);
+      setValue("preInput", s.preReturn);
+
+      setValue("postReturn", s.postReturn);
+      setValue("postInput", s.postReturn);
+
+      setValue("startAge", s.startAge);
+      setValue("startInput", s.startAge);
+
+      setValue("retireAge", s.retireAge);
+      setValue("retireInput", s.retireAge);
+
+      setValue("endAge", s.endAge);
+      setValue("endInput", s.endAge);
+    });
+  });
+</script>
+
+
+<script>
+let modalChart;
+
+function openGraphModal() {
+  const modal = document.getElementById("graphModal");
+  const modalContent = document.querySelector(".graph-modal-content");
+  const modalCanvas = document.getElementById("modalChart");
+
+  modal.style.display = "flex";
+
+  setTimeout(() => {
+    const mainChart = Chart.getChart("finChart");
+    if (!mainChart) return;
+
+    // Clone data deeply
+    const clonedData = JSON.parse(JSON.stringify(mainChart.data));
+
+    // Start with a basic clean copy of options
+const clonedOptions = {
+  responsive: false,
+  maintainAspectRatio: false,
+  scales: mainChart.options.scales,
+  plugins: {
+    legend: {
+      labels: {
+        usePointStyle: true,
+        pointStyle: 'line'
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: ctx => '$' + ctx.parsed.y.toLocaleString()
+      }
+    },
+    title: {
+      display: true,
+      text: 'Portfolio Growth & Drawdown'
+    },
+    annotation: {
+      drawTime: 'afterDraw',
+      annotations: mainChart.options.plugins.annotation?.annotations || {}
+    }
+  }
+};
+
+
+    modalCanvas.width = modalContent.clientWidth;
+    modalCanvas.height = 500;
+    modalCanvas.style.width = '100%';
+    modalCanvas.style.height = '500px';
+
+    if (modalChart) modalChart.destroy();
+
+    const ctx = modalCanvas.getContext("2d");
+    modalChart = new Chart(ctx, {
+      type: mainChart.config.type,
+      data: clonedData,
+      options: clonedOptions
+    });
+
+    console.log("✅ Chart rendered in modal.");
+  }, 300);
+}
+
+function closeGraphModal(event) {
+  document.getElementById("graphModal").style.display = "none";
+}
+</script>
+
+
+
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      
+      
       const els = {};
       ['currentInvestment','desiredIncome','monthlyContribution',
        'inflationRate','inflationRateText','preReturn','preReturnText',
@@ -581,13 +1375,56 @@ body.dark td {
         calculateFIN();
       });
 
-      function loadSettings(){
-        const saved=localStorage.getItem('finToolSettings');
-        if(saved){
-          const s=JSON.parse(saved);
-          Object.keys(s).forEach(k=>{ if(els[k]) els[k].value=s[k];});
-        } else resetDefaults();
+function loadSettings(){
+  const saved = localStorage.getItem('finToolSettings');
+  if (saved) {
+    const s = JSON.parse(saved);
+    Object.keys(s).forEach(k => {
+      if (els[k]) els[k].value = s[k];
+    });
+
+    // 🎯 Match scenario by values
+    const mapped = {
+      desiredIncome: +s.desiredIncome,
+      currentInvestment: +s.currentInvestment,
+      monthlyContribution: +s.monthlyContribution,
+      stopAge: +s.stopAge,
+      inflationRate: +s.inflationRate,
+      preReturn: +s.preReturn,
+      postReturn: +s.postReturn,
+      startAge: +s.startAge,
+      retireAge: +s.retireAge,
+      endAge: +s.endAge
+    };
+
+    let matchedScenario = 'custom';
+    for (const [name, scenario] of Object.entries(scenarios)) {
+      const isMatch = Object.entries(scenario).every(([key, val]) =>
+        mapped.hasOwnProperty(key) && +mapped[key] === +val
+      );
+      if (isMatch) {
+        matchedScenario = name;
+        break;
       }
+    }
+
+    // ✅ Prefer last clicked scenario if stored
+    const last = localStorage.getItem('lastScenario');
+    const activeScenario = (last && scenarios[last]) ? last : matchedScenario;
+
+    // 🖱️ Apply active scenario UI
+    document.querySelectorAll(".scenario-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.scenario === activeScenario);
+    });
+
+  } else {
+    resetDefaults();
+  }
+
+  calculateFIN();
+}
+
+
 
 // DARK MODE PERSISTENCE
 const darkToggle = document.getElementById('darkModeToggle');
@@ -652,10 +1489,16 @@ const finChart = new Chart(ctx, {
     maintainAspectRatio: true,
     scales: {
       x: {
+      type: 'linear', // 🛠️ THIS is the magic that makes annotations match!
         title: {
           display: true,
           text: 'Age (Years)'
-        }
+        },
+        ticks: {
+  stepSize: 1, // show every year
+  callback: value => value.toString()
+}
+
       },
       y: {
         beginAtZero: true,
@@ -685,6 +1528,7 @@ const finChart = new Chart(ctx, {
     text: 'Portfolio Growth & Drawdown'
   },
   annotation: {
+  drawTime: 'afterDraw',
     annotations: {} // will be filled dynamically in calculateFIN()
   }
 }
@@ -707,6 +1551,10 @@ function calculateFIN() {
   const ci = +els.currentInvestment.value || 0;
   const di = +els.desiredIncome.value || 0;
   const mc = +els.monthlyContribution.value || 0;
+// Calculate Income Protection Number (IPN)
+const incomeProtectionNumber = di * 12 * 12;
+document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtectionNumber.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
   const inf = +els.inflationRate.value / 100 || 0;
   const pre = +els.preReturn.value / 100 || 0;
   const post = +els.postReturn.value / 100 || 0;
@@ -721,17 +1569,35 @@ function calculateFIN() {
         yrsIn = ea - ra,
         mRate = pre / 12,
         months = yrsTo * 12;
+        
+const mcFutureMonths = (ra - sa) * 12;
+const mcMonthlyRate = pre / 12;
+const mcFutureValue =
+  mcMonthlyRate > 0
+    ? mc * ((Math.pow(1 + mcMonthlyRate, mcFutureMonths) - 1) / mcMonthlyRate)
+    : mc * mcFutureMonths;
+const fvDisplay = document.getElementById("futureValueContributionDisplay");
+if (fvDisplay) {
+  fvDisplay.value = `$${mcFutureValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+}
+
 
   const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
   const showFuture = document.getElementById("finDisplayToggle").checked;
 
   // In FIRE mode, assume perpetual retirement to age 100
   const effectiveEndAge = drawdownType === "perpetual" ? 100 : ea;
-  const drawdownYears = effectiveEndAge - ra;
+  const drawdownYears = effectiveEndAge - ra + 1;
 
   // Update future income calculation to match correct drawdown span
   const futureIncome = di * Math.pow(1 + inf / 12, yrsTo * 12);
   const incomeUsed = showFuture ? futureIncome : di;
+  const futureIncomeAnnual = di * Math.pow(1 + inf, yrsTo); // Simpler annual inflation
+  document.getElementById("futureIncomeDisplay").value = showFuture
+    ? `$${futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+    : `$${di.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
+  <!--document.getElementById("futureAgeLabel").textContent = ra;-->
 
   
 
@@ -802,9 +1668,6 @@ for (let age = sa; age < ra; age++) {
 // Save the balance at retirement age
 const balanceAtRetirement = balTarget;
 
-// Add the retirement age entry (continuity point)
-yearLabels.push(ra);
-balancesTarget.push(balanceAtRetirement);
 
 // 🎯 Reverse drawdown from retirement to life expectancy
 // Already calculated above
@@ -816,21 +1679,23 @@ const postMonthly = post / 12;
 // Start drawdown from balance at retirement (continuity!)
 targetDrawdown[0] = balanceAtRetirement;
 
-// Project forward from retirement age
-for (let i = 1; i <= drawdownYears; i++) {
-  let prev = targetDrawdown[i - 1];
+for (let i = 0; i < drawdownYears; i++) {
+  let prev = targetDrawdown[i];
   for (let m = 0; m < 12; m++) {
     prev *= (1 + postMonthly);
     prev -= incomeUsed;
   }
-  targetDrawdown[i] = Math.max(prev, 0);
+  targetDrawdown[i + 1] = Math.max(prev, 0);
 }
 
-// Append drawdown years from ra+1 to ea
-for (let i = 1; i <= drawdownYears; i++) {
-  const age = ra + i;
+
+
+// Append drawdown years from ra to ea inclusive, even if $0
+for (let age = ra; age <= ea; age++) {
+  const i = age - ra;
   yearLabels.push(age);
-  balancesTarget.push(targetDrawdown[i]);
+  const val = targetDrawdown[i] !== undefined ? targetDrawdown[i] : 0;
+  balancesTarget.push(val);
 }
 
 
@@ -847,7 +1712,7 @@ for (let age = sa; age <= ra; age++) {
 }
 
 
-  for (let age = ra + 1; age <= ea; age++) {
+ for (let i = 0; i <= drawdownYears; i++) {
   for (let m = 0; m < 12; m++) {
     balCurrent *= (1 + post / 12);
     balCurrent -= incomeUsed;
@@ -855,6 +1720,7 @@ for (let age = sa; age <= ra; age++) {
   }
   balancesCurrent.push(balCurrent);
 }
+
 
   // 🧠 Adjust both lines for display toggle
   const adjustedTarget = [];
@@ -873,66 +1739,75 @@ for (let age = sa; age <= ra; age++) {
   finChart.data.datasets[1].data = adjustedCurrent;
   
     // Add dynamic chart annotations
-    const annotations = {
-    startAgeLine: {
-      type: 'line',
-      xMin: sa,
-xMax: sa,
-
-      borderColor: 'green',
-      borderDash: [6, 6],
-      borderWidth: 2,
-      label: {
-        content: 'Start Age',
-        enabled: true,
-        position: 'center'
-      }
-    },
-    retireAgeLine: {
-      type: 'line',
-      xMin: ra,
-      xMax: ra,
-
-      borderColor: 'blue',
-      borderDash: [6, 6],
-      borderWidth: 2,
-      label: {
-        content: 'Retire Age',
-        enabled: true,
-        position: 'center'
-      }
-    },
-    endAgeLine: {
-      type: 'line',
-      xMin: ea,
-      xMax: ea,
-
-      borderColor: 'red',
-      borderDash: [6, 6],
-      borderWidth: 2,
-      label: {
-        content: 'Life Expectancy',
-        enabled: true,
-        position: 'center'
-      }
-
-    },
-    modeLabel: {
-      type: 'label',
-      xValue: sa,
-      
-      yValue: Math.max(...adjustedTarget),
-      backgroundColor: 'rgba(0,0,0,0.7)',
-      content: showFuture ? 'Target is Future Value (inflated)' : "Target is Today's Value",
-
-      color: 'white',
-      font: { weight: 'bold' },
-      padding: 6,
-      position: 'top',
-      xAdjust: 10,
-      yAdjust: -20
+const annotations = {
+  startAgeLine: {
+    type: 'line',
+    xMin: sa,
+    xMax: sa,
+    borderColor: 'green',
+    borderDash: [6, 6],
+    borderWidth: 2,
+    label: {
+      content: 'Start Age',
+      enabled: true,
+      position: 'start',
+      yAdjust: -20,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      color: 'white'
     }
-  };
+  },
+  retireAgeLine: {
+    type: 'line',
+    xMin: ra,
+    xMax: ra,
+    borderColor: 'blue',
+    borderDash: [6, 6],
+    borderWidth: 2,
+    label: {
+      content: 'Retire Age',
+      enabled: true,
+      position: 'start',
+      yAdjust: -20,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      color: 'white'
+    }
+  },
+  endAgeLine: {
+    type: 'line',
+    xMin: ea,
+    xMax: ea,
+    borderColor: 'red',
+    borderDash: [6, 6],
+    borderWidth: 2,
+    label: {
+      content: 'Life Expectancy',
+      enabled: true,
+      position: 'start',
+      yAdjust: -20,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      color: 'white'
+    }
+  },
+modeLabel: {
+  type: 'label',
+  xValue: sa + Math.floor((ea - sa) / 2), // midpoint between startAge and endAge
+  yValue: Math.max(...adjustedTarget) * 1.1, // a bit above the top of the graph
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  content: showFuture ? 'Future $ (inflated)' : "Today's $",
+  color: 'white',
+  font: { weight: 'bold', size: 12 },
+  padding: 6,
+  position: {
+    x: 'center',
+    y: 'start'
+  },
+  xAdjust: 0,
+  yAdjust: 0
+}
+
+
+};
+
 
   // Break-even point marker
 function findBreakEvenIndex(arr, threshold = 0.01) {
@@ -962,7 +1837,8 @@ if (breakEvenIndex !== -1) {
 
 
   finChart.options.plugins.annotation.annotations = annotations;
-console.log("Applying annotations:", annotations);
+console.log("ANNOTATIONS NOW SET:", finChart.options.plugins.annotation.annotations);
+
   finChart.update();
 
 // Generate Table View
@@ -1066,5 +1942,39 @@ document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (F
     });
 
   </script>
+  <script>
+function autoscaleInputs() {
+  const inputs = document.querySelectorAll('.autoscale');
+  inputs.forEach(input => {
+    const maxWidth = input.clientWidth;
+    const testSpan = document.createElement('span');
+    testSpan.style.visibility = 'hidden';
+    testSpan.style.position = 'absolute';
+    testSpan.style.whiteSpace = 'nowrap';
+    testSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
+
+    const maxFontSize = 19; // px, matches 1.2rem roughly
+    let fontSize = maxFontSize;
+    testSpan.style.fontSize = fontSize + 'px';
+    testSpan.textContent = input.value;
+
+    document.body.appendChild(testSpan);
+
+    // Shrink font size if wider than box, but never grow larger than maxFontSize
+    while (testSpan.offsetWidth > maxWidth && fontSize > 10) {
+      fontSize--;
+      testSpan.style.fontSize = fontSize + 'px';
+    }
+
+    input.style.fontSize = fontSize + 'px';
+
+    document.body.removeChild(testSpan);
+  });
+}
+
+// Run on initial load and whenever values update
+setInterval(autoscaleInputs, 500);
+</script>
+
 </body>
 </html>
