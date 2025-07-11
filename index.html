@@ -648,6 +648,27 @@ body.dark #tableContent {
  </style>
 </head>
 <body>
+<!-- PASSWORD OVERLAY -->
+  <div id="passwordOverlay" style="
+    position: fixed; 
+    top:0; left:0; right:0; bottom:0; 
+    background: #222; 
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    z-index: 9999;
+  ">
+    <label for="passwordInput" style="margin-bottom: 10px; font-size: 1.2rem;">Enter Password:</label>
+    <input type="password" id="passwordInput" style="font-size:1rem; padding: 6px;" autocomplete="off" />
+    <button id="passwordBtn" style="margin-top: 10px; padding: 8px 16px; font-size:1rem; cursor:pointer;">Submit</button>
+    <div id="passwordError" style="color: #f44336; margin-top: 10px; display:none;">Wrong password, try again.</div>
+  </div>
+
+  <!-- PAGE CONTENT (initially hidden) -->
+  <div id="content" style="display:none;">
+
 <!--<body class="debug-layout">-->
 
 <div class="header-flex">
@@ -1184,23 +1205,62 @@ body.dark #tableContent {
 </div> <!-- end of the graph-container-->
 
 
-<!-- table view of the accumulation and decumulation -->
-<section id="tableSection" aria-label="Plan Table">
-  <div id="tableHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="tableContent">
-    Plan Details
-    <span aria-hidden="true" id="tableToggleIcon">▼</span>
-  </div>
-  <div id="tableContent" role="region" aria-hidden="true" style="max-height: 0; overflow: hidden; transition: max-height 0.35s ease; border-radius: 0 0 8px 8px; padding: 0 20px;">
-    <div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
-  </div>
-</section>
+          <!-- table view of the accumulation and decumulation -->
+          <section id="tableSection" aria-label="Plan Table">
+            <div id="tableHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="tableContent">
+              Plan Details
+              <span aria-hidden="true" id="tableToggleIcon">▼</span>
+            </div>
+            <div id="tableContent" role="region" aria-hidden="true" style="max-height: 0; overflow: hidden; transition: max-height 0.35s ease; border-radius: 0 0 8px 8px; padding: 0 20px;">
+              <div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
+            </div>
+          </section>
 
 
 
-</div> <!--end of main-container-->
+    </div> <!--end of main-container-->
 
-</div> <!-- end of the main-wrapper, full page-->
+  </div> <!-- end of the main-wrapper, full page-->
 
+</div> <!-- end of #content -->
+
+<!-- PASSWORD CHECK SCRIPT (must be the first script on the list)-->
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
+  const correctPassword = 'fna4success';
+  const overlay = document.getElementById('passwordOverlay');
+  const content = document.getElementById('content');
+  const input = document.getElementById('passwordInput');
+  const btn = document.getElementById('passwordBtn');
+  const errorMsg = document.getElementById('passwordError');
+
+  // Check sessionStorage on load
+  if (sessionStorage.getItem('accessGranted') === 'true') {
+    overlay.style.display = 'none';
+    content.style.display = 'block';
+    return;
+  }
+
+  btn.addEventListener('click', checkPassword);
+  input.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  function checkPassword() {
+    if (input.value === correctPassword) {
+      sessionStorage.setItem('accessGranted', 'true');
+      overlay.style.display = 'none';
+      content.style.display = 'block';
+      errorMsg.style.display = 'none';
+    } else {
+      errorMsg.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+});
+
+  </script>
 <!-- script to set the default for scenarios-->
 <script>
   const baseScenario = {
