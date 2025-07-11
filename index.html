@@ -623,10 +623,6 @@ body.dark .readonly-box {
   align-items: center;
 }
 
-#tableContent.open {
-  max-height: 1500px; /* enough for table */
-  padding: 16px 20px;
-}
 
 /* Dark mode */
 body.dark #tableSection {
@@ -643,6 +639,16 @@ body.dark #tableHeader {
 body.dark #tableContent {
   background: #222;
 }
+#tableContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+#tableContent.open {
+  max-height: 1500px;
+}
+
 
 
  </style>
@@ -675,7 +681,7 @@ body.dark #tableContent {
   <!-- Left side: Title + Version -->
   <div class="header-left">
       <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.30t (Online) • Updated: July 10, 2025</div>
+    <div class="version-info">v2.0.31t (Online) • Updated: July 10, 2025</div>
 </div>
 <!-- Toggle Group -->
 <!-- Header Right Section -->
@@ -1204,17 +1210,9 @@ body.dark #tableContent {
 
 </div> <!-- end of the graph-container-->
 
-
-          <!-- table view of the accumulation and decumulation -->
-          <section id="tableSection" aria-label="Plan Table">
-            <div id="tableHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="tableContent">
-              Plan Details
-              <span aria-hidden="true" id="tableToggleIcon">▼</span>
-            </div>
-            <div id="tableContent" role="region" aria-hidden="true" style="max-height: 0; overflow: hidden; transition: max-height 0.35s ease; border-radius: 0 0 8px 8px; padding: 0 20px;">
-              <div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
-            </div>
-          </section>
+<!-- table view of the accumulation and decumulation -->
+<div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
+          
 
 
 
@@ -1261,6 +1259,8 @@ body.dark #tableContent {
 });
 
   </script>
+  
+  
 <!-- script to set the default for scenarios-->
 <script>
   const baseScenario = {
@@ -1333,7 +1333,7 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
   });
 </script>
 
-
+<!--script to expand the chart in modal format for bigger view-->
 <script>
 let modalChart;
 
@@ -1405,7 +1405,7 @@ function closeGraphModal(event) {
 
 
 
-
+<!--script to load/save settings locally-->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       
@@ -2016,7 +2016,7 @@ function autoscaleInputs() {
     testSpan.style.whiteSpace = 'nowrap';
     testSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
 
-    const maxFontSize = 19; // px, matches 1.2rem roughly
+    const maxFontSize = 18; // px, matches 1.2rem roughly
     let fontSize = maxFontSize;
     testSpan.style.fontSize = fontSize + 'px';
     testSpan.textContent = input.value;
@@ -2038,6 +2038,7 @@ function autoscaleInputs() {
 // Run on initial load and whenever values update
 setInterval(autoscaleInputs, 500);
 </script>
+
 
 </body>
 </html>
