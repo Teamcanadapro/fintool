@@ -538,17 +538,21 @@ body.dark #futureIncomeDisplay {
   border-radius: 4px;
 
   box-sizing: border-box;
-  padding: 4px 6px;
+  padding: 2px 4px;
 
   text-align: right;
   white-space: nowrap;
 
-  font-size: clamp(0.55rem, 1vw, 0.75rem); /* ✅ responsive */
+  font-size: 1rem; 
   line-height: 1.2;
 
   width: 100%;
   min-width: 0;
+  max-width: 100%;
+
+  overflow: hidden; /* ✅ stops scrollbars if value is still too large momentarily */
 }
+
 
 
 
@@ -779,7 +783,7 @@ body.dark #tableContent {
     <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
   <div style="flex: 0.5;">
     <label for="monthlyContribution" class="tooltip-container">
-      Monthly PAC
+      Monthly PAC $
       <span class="tooltip-text">How much money are you <strong>putting away</strong> right now monthly?</span>
     </label>
     <input type="number" id="monthlyContribution" />
@@ -787,7 +791,7 @@ body.dark #tableContent {
 
   <div style="flex: 0.5;">
     <label class="tooltip-container">
-      Future Value 
+      Future Value $
       <span class="tooltip-text">
         Total value of your contributions by retirement, assuming compounding growth.
       </span>
@@ -977,19 +981,24 @@ body.dark #tableContent {
 
   /* FAQ main header */
   #faqHeader {
-    cursor: pointer;
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    user-select: none;
-    background: #007bff;
-    color: white;
-    border-radius: 8px 8px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  cursor: pointer;
+  padding: 8px 12px;                /* smaller padding */
+  font-weight: 600;
+  font-size: 1rem;                  /* smaller font */
+  user-select: none;
+  background: #e0e7ff;              /* soft blue background */
+  color: #1a237e;                   /* navy text */
+  border-radius: 6px;
+  border: 1px solid #c5cae9;        /* subtle border */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+}
 
+#faqHeader:hover {
+  background: #d0d8ff;
+}
   /* FAQ main content container, hidden by default */
   #faqContent {
     max-height: 0;
@@ -1059,10 +1068,13 @@ body.dark #tableContent {
   }
 
   body.dark #faqHeader {
-    background: #3399ff;
-    color: #eee;
-  }
-
+  background: #1e1e1e;
+  color: #ddd;
+  border: 1px solid #333;
+}
+body.dark #faqHeader:hover {
+  background: #2a2a2a;
+}
   body.dark #faqContent {
     background: #222;
   }
@@ -1641,7 +1653,9 @@ const mcFutureValue =
     : mc * mcFutureMonths;
 const fvDisplay = document.getElementById("futureValueContributionDisplay");
 if (fvDisplay) {
-  fvDisplay.value = `$${mcFutureValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  fvDisplay.value = mcFutureValue.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  autoscaleInputs(); // 🚀 Re-scale instantly so value fits!
+
 }
 
 
@@ -1657,9 +1671,8 @@ if (fvDisplay) {
   const incomeUsed = showFuture ? futureIncome : di;
   const futureIncomeAnnual = di * Math.pow(1 + inf, yrsTo); // Simpler annual inflation
   document.getElementById("futureIncomeDisplay").value = showFuture
-    ? `$${futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-    : `$${di.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-
+  ? futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  : di.toLocaleString(undefined, { maximumFractionDigits: 0 });
   <!--document.getElementById("futureAgeLabel").textContent = ra;-->
 
   
@@ -2010,34 +2023,51 @@ function autoscaleInputs() {
   const inputs = document.querySelectorAll('.autoscale');
   inputs.forEach(input => {
     const maxWidth = input.clientWidth;
+
     const testSpan = document.createElement('span');
+    const computed = window.getComputedStyle(input);
+
+    // 🧠 Clone exact font styling from input
     testSpan.style.visibility = 'hidden';
     testSpan.style.position = 'absolute';
     testSpan.style.whiteSpace = 'nowrap';
-    testSpan.style.fontFamily = window.getComputedStyle(input).fontFamily;
+    testSpan.style.fontFamily = computed.fontFamily;
+    testSpan.style.fontWeight = computed.fontWeight;
+    testSpan.style.letterSpacing = computed.letterSpacing;
+    testSpan.style.fontStyle = computed.fontStyle;
+    testSpan.style.padding = computed.padding;
+    testSpan.style.border = computed.border;
+    testSpan.style.boxSizing = computed.boxSizing;
 
-    const maxFontSize = 18; // px, matches 1.2rem roughly
+    const maxFontSize = 18;
+    const minFontSize = 6;
     let fontSize = maxFontSize;
-    testSpan.style.fontSize = fontSize + 'px';
-    testSpan.textContent = input.value;
 
+    testSpan.textContent = input.value;
+    testSpan.style.fontSize = fontSize + 'px';
     document.body.appendChild(testSpan);
 
-    // Shrink font size if wider than box, but never grow larger than maxFontSize
-    while (testSpan.offsetWidth > maxWidth && fontSize > 10) {
+    while ((testSpan.offsetWidth + 1) > maxWidth && fontSize > minFontSize) {
       fontSize--;
       testSpan.style.fontSize = fontSize + 'px';
     }
 
     input.style.fontSize = fontSize + 'px';
-
     document.body.removeChild(testSpan);
+
+    // Optional: Show full value on hover
+    input.title = input.value;
   });
 }
 
-// Run on initial load and whenever values update
-setInterval(autoscaleInputs, 500);
+// ✅ Run initially and keep rechecking every 500ms
+document.addEventListener('DOMContentLoaded', () => {
+  autoscaleInputs();
+  setInterval(autoscaleInputs, 500);
+});
 </script>
+
+
 
 
 </body>
