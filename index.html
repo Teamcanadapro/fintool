@@ -19,10 +19,12 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   Chart.register(window['chartjs-plugin-annotation']);
 </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-  
-</script>
 
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css" />
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+
+  
 <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',sans-serif;background:#f4f7fb;color:#222;display:flex;flex-direction:column;align-items:center;padding:20px;}
@@ -37,13 +39,33 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   box-sizing: border-box; /* recommended */
 }
 
-    .input-group,.slider-group{background:#fff;padding:12px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+    .input-group, .slider-group {
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* 🔥 Light Mode Styling (default if NOT dark) */
+body:not(.dark) .input-group,
+body:not(.dark) .slider-group {
+  background-color: #f9f9fc;
+  border: 1px solid #bbb;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
     label{display:block;margin-bottom:6px;font-weight:600;}
     input[type=number],input[type=text],input[type=range]{font-size:1rem;}
     input[type=number],input[type=text]{width:100%;padding:6px;margin-bottom:4px;border:1px solid #aaa;border-radius:4px;}
     .slider-container{display:flex;align-items:center;gap:8px;}
     .output{font-size:1.2rem;font-weight:600;margin:16px 0;text-align:center;}
-    #finChart{width:100%;max-width:900px;height:400px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:20px;}
+   #finChart{
+    width:100%;
+    max-width:900px;
+    height:400px;
+    background:#fff;
+    border-radius:6px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    /* margin-bottom removed */
+}
     .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px;}
     .btn{padding:10px 20px;font-size:1rem;color:#fff;border:none;border-radius:4px;cursor:pointer;}
     .btn-red{background:#d32f2f;} .btn-red:hover{background:#b71c1c;}
@@ -117,7 +139,7 @@ input:checked + .slider:before {
   flex: 1 1 auto;
   min-width: 300px;
   width: 100%;
-  padding: 0 0 20px;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -237,9 +259,13 @@ body.dark td {
 .tooltip-container {
   position: relative;
   display: inline-block;
-  cursor: help;
+  
   overflow: visible;
 }
+.tooltip-container::after {
+  content: none !important;
+}
+
 
 .tooltip-text {
   font-weight: normal;
@@ -304,6 +330,7 @@ body.dark td {
 }
 
 .icon {
+
   font-size: 1.3rem;
   line-height: 1;
 }
@@ -380,7 +407,7 @@ body.dark .tooltip-text {
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
-  gap: 24px;
+  gap: 10px;
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
@@ -406,13 +433,22 @@ body.dark .tooltip-text {
 
 @media (max-width: 768px) {
   .main-layout {
-    flex-direction: column;
-  }
-
-  .inputs-container {
-    margin-top: 20px;
+    flex-direction: row;
+    row-gap: 10px; /* Adjust this value to your liking, or set to 0 to remove the gap completely */
   }
 }
+
+  .inputs-container {
+    margin-top: 0px;
+  }
+
+  /* Reduces side padding on the whole page */
+  body {
+    padding: 10px;
+  }
+}
+
+
 
 .fin-toggle {
   display: inline-flex;
@@ -771,6 +807,57 @@ body.debug-layout #tableView::before {
   z-index: 1000;
 }
 
+/* Light Theme */
+.tippy-box[data-theme~='light'] {
+  background-color: #fffbe7;
+  color: #222;
+  border: 1px solid #e0c300;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme */
+.tippy-box[data-theme~='dark'] {
+  background-color: #2e2e2e;
+  color: #f8f8a3;
+  border: 1px solid #888800;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: left;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+#tableView table tbody tr:nth-child(even) {
+  background-color: #e9f1fb; /* Soft sky blue for better contrast */
+}
+
+
+body.dark #tableView table tbody tr:nth-child(even) {
+  background-color: #1f1f1f; /* a notch lighter than pure black */
+}
+#tableView table td {
+  border-bottom: 1px solid #ccc;
+}
+
+body.dark #tableView table td {
+  border-bottom: 1px solid #444;
+}
+#tableView table .retirement-row {
+  background-color: #fff9db !important; /* Light golden highlight */
+  font-weight: 600;
+}
+body.dark #tableView table .retirement-row {
+  background-color: #3a3200 !important; /* Deep amber */
+  font-weight: 600;
+  color: #ffe082; /* Warm yellow text for contrast */
+}
+
+
+
  </style>
 </head>
 <body>
@@ -802,7 +889,7 @@ body.debug-layout #tableView::before {
 
 <!-- Left side: Title + Version underneath -->
   <div class="header-left"> <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.33t (Online) • Updated: July 11, 2025</div>
+    <div class="version-info">v2.0.34t (Online) • Updated: July 12, 2025</div>
 </div>
 
 <!-- Header Center Section -->
@@ -822,30 +909,42 @@ body.debug-layout #tableView::before {
 
     <!-- Display Toggle -->
     <div class="toggle-item">
-      <span class="tooltip-container">
-        <span><span id="finDisplayLabelPrefix">Display:</span> <strong id="finDisplayLabel">Future $</strong></span>
-        <span class="tooltip-text">Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong>.</span>
-      </span>
-      <label class="switch">
-        <input type="checkbox" id="finDisplayToggle" checked>
-        <span class="slider"></span>
-      </label>
-    </div>
+  <span
+    id="finDisplayLabelContainer"
+    data-tooltip="Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong>. Due to inflation, the amount you will need in the future to buy the same things you buy today will be much higher."
+  
+  >
+    <span id="finDisplayLabelPrefix">Display:</span>
+    <strong id="finDisplayLabel">Future $</strong>
+  </span>
+
+  <label class="switch">
+    <input type="checkbox" id="finDisplayToggle" checked>
+    <span class="slider"></span>
+  </label>
+</div>
+
 
     <!-- Mode Toggle -->
-    <div class="toggle-item">
-      <span class="tooltip-container">
-        <span><span id="modeLabelPrefix">Mode:</span> <strong id="modeLabel">Life Expectancy</strong></span>
-        <span class="tooltip-text">Choose Life Expectancy or Forever drawdown style.</span>
-      </span>
-      <label class="switch">
-        <input type="checkbox" id="drawdownToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
- </div>
+<div class="toggle-item">
+  <span
+    id="modeLabelWrapper"
+    data-tooltip="Choose Life Expectancy mode (investments are expected to last up to this age) or Forever drawdown style (the money lasts forever in the hands of your beneficiaries)."
+  
+  >
+    <span id="modeLabelPrefix">Mode:</span>
+    <strong id="modeLabel">Life Expectancy</strong>
+  </span>
+
+  <label class="switch">
+    <input type="checkbox" id="drawdownToggle">
+    <span class="slider"></span>
+  </label>
 </div>
+
+</div> <!-- Closes: <div class="toggles-row"> -->
+</div> <!-- Closes: <div class="toggles-container"> -->
+</div> <!-- Closes: <div class="header-flex"> -->
 
 
 <!-- Scenario Buttons Row -->
@@ -858,55 +957,66 @@ body.debug-layout #tableView::before {
   <button class="scenario-btn" data-scenario="start-40">Start Age 40</button>
   <button class="scenario-btn" data-scenario="start-50">Start Age 50</button>
   <button class="scenario-btn" data-scenario="start-60">Start Age 60</button>
-</div>
-</div>
+</div> <!-- Closes: <div id="scenario-row" class="scenario-buttons"> -->
+</div> <!-- Closes: <div class="header-section"> -->
+
+
+
 
 
 <div class="summary-bar">
-  <div class="output tooltip-container">
-    <div class="label-row">
-      <span class="icon">💰</span>
-      <span class="label-text">FIN</span>
-    </div>
-    <strong id="finAmount">$0</strong>
-    <span class="tooltip-text">
-      Lump sum needed at desired retirement age to cover all future income goals in the future (also known as Financial Independence Number).
-    </span>
-  </div>
 
-  <div class="output tooltip-container">
-    <div class="label-row">
-      <span class="icon">📅</span>
-      <span class="label-text">Monthly FIN</span>
-    </div>
-    <strong id="monthlyNeeded">$0</strong>
-    <span class="tooltip-text">
-      How much extra you'd need to save monthly to meet your financial independence target.
-    </span>
+<div
+  class="output tooltip-container"
+  data-tooltip="Lump sum needed at desired retirement age to cover all future income goals in the future (also known as Financial Independence Number)."
+>
+  <div class="label-row">
+    <span class="icon">💰</span>
+    <span class="label-text">FIN</span>
   </div>
-
-  <div class="output tooltip-container">
-    <div class="label-row">
-      <span class="icon">🎯</span>
-      <span class="label-text">Fully Funded</span>
-    </div>
-    <strong id="fullyFundedNow">$0</strong>
-    <span class="tooltip-text">
-      How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal.
-    </span>
-  </div>
-
-  <div class="output tooltip-container">
-    <div class="label-row">
-      <span class="icon">🛡️</span>
-      <span class="label-text">IPN</span>
-    </div>
-    <strong id="incomeProtectionNumber">$0</strong>
-    <span class="tooltip-text">
-      Income Protection Number: Estimated life insurance need based on your current income requirement.
-    </span>
-  </div>
+  <strong id="finAmount">$0</strong>
 </div>
+
+
+<div
+  class="output tooltip-container"
+  data-tooltip="How much extra you'd need to save monthly to meet your financial independence target."
+>
+  <div class="label-row">
+    <span class="icon">📅</span>
+    <span class="label-text">Monthly FIN</span>
+  </div>
+  <strong id="monthlyNeeded">$0</strong>
+</div>
+
+
+<div
+  class="output tooltip-container"
+  data-tooltip="How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal."
+>
+  <div class="label-row">
+    <span class="icon">🎯</span>
+    <span class="label-text">Fully Funded</span>
+  </div>
+  <strong id="fullyFundedNow">$0</strong>
+</div>
+
+
+  <div
+  class="output tooltip-container"
+  data-tooltip="Income Protection Number: Estimated life insurance need based on your current income requirement."
+>
+  <div class="label-row">
+    <span class="icon">🛡️</span>
+    <span class="label-text">IPN</span>
+  </div>
+  <strong id="incomeProtectionNumber">$0</strong>
+</div>
+
+  
+</div>
+
+
 
 </div><!--end of header-flex with title, version and toggles-->
 
@@ -920,162 +1030,101 @@ body.debug-layout #tableView::before {
 <div class="main-layout"> <!-- the entire main page layout-->
 
 <div class="left-column">
-  <div class="inputs-container"> <!-- Input sliders, toggles, dropdowns -->
 
-<div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
-  <div style="flex: 0.5;">
-    <label for="desiredIncome" class="tooltip-container">
-      Monthly $
-      <span class="tooltip-text">
-        Monthly income you want during retirement, in today’s dollars.
-      </span>
-    </label>
-    <input type="number" id="desiredIncome" />
+<div class="inputs-container"> <!-- Input boxes, sliders -->
+
+  <!-- Row 1 -->
+  <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+    <div style="flex: 0.5;">
+      <label for="desiredIncome" data-tooltip="Monthly income you want during retirement, in today’s dollars." class="tooltip-label">Income $</label>
+      <input type="number" id="desiredIncome" />
+    </div>
+    <div style="flex: 0.5;">
+      <label for="futureIncomeDisplay" data-tooltip="Inflation-adjusted monthly income at retirement age to match today’s value.">Future $</label>
+      <input type="text" id="futureIncomeDisplay" readonly />
+    </div>
   </div>
 
-  <div style="flex: 0.5;">
-    <label class="tooltip-container">
-      Future $ 
-      <span class="tooltip-text">
-        Inflation-adjusted monthly income at retirement age to match today’s value.
-      </span>
-    </label>
-    <input type="text" id="futureIncomeDisplay" readonly />
-
-  </div>
-</div>
-
-    <div class="input-group">
-        <label for="investmentMonthly" class="tooltip-container">
-          Current Investments
-          <span class="tooltip-text">How much money have you saved so far, between all of your investment accounts, bank accounts, GICs etc?.</span>
-        </label>
-      <input type="number" id="currentInvestment"></div>
-
-    <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
-  <div style="flex: 0.5;">
-    <label for="monthlyContribution" class="tooltip-container">
-      Monthly PAC $
-      <span class="tooltip-text">How much money are you <strong>putting away</strong> right now monthly?</span>
-    </label>
-    <input type="number" id="monthlyContribution" />
+  <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+    <div style="flex: 0.5;">
+      <label for="currentInvestment" data-tooltip="How much money have you saved so far, in the bank, mutual funds, stocks, GICs, CASH?">Current $</label>
+      <input type="number" id="currentInvestment" />
+    </div>
+    <div style="flex: 0.5;">
+      <label for="futureValueInvestmentDisplay" data-tooltip="Future value of your existing investments by retirement.">Future $</label>
+      <input type="text" id="futureValueInvestmentDisplay" class="readonly-box autoscale" readonly />
+    </div>
   </div>
 
-  <div style="flex: 0.5;">
-    <label class="tooltip-container">
-      Future Value $
-      <span class="tooltip-text">
-        Total value of your contributions by retirement, assuming compounding growth.
-      </span>
-    </label>
-    <input type="text" id="futureValueContributionDisplay" class="readonly-box autoscale" readonly />
+  <!-- Row 2 -->
+  <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+    <div style="flex: 0.5;">
+      <label for="monthlyContribution" data-tooltip="How much money are you putting away right now monthly?">PAC/mo</label>
+      <input type="number" id="monthlyContribution" />
+    </div>
+    <div style="flex: 0.5;">
+      <label for="futureValueContributionDisplay" data-tooltip="Total value of your contributions by retirement, assuming compounding growth.">Future $</label>
+      <input type="text" id="futureValueContributionDisplay" class="readonly-box autoscale" readonly />
+    </div>
   </div>
-</div>
 
+  <div class="input-group">
+    <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions.">End contributions age</label>
+    <input type="number" id="stopAge" value="100" min="0">
+  </div>
 
-    <div class="input-group">
-        <label for="contributionStop" class="tooltip-container">
-          End contributions age
-          <span class="tooltip-text">The age at which you plan to <strong>STOP</strong> monthly investing contributions.</span>
-        </label>
-
-        <input type="number" id="stopAge" value="100" min="0"></div>
-
-
-<!--convert to slider, nix completion
-      <div class="slider-group"><label>Monthly Contribution ($)</label>
-      <div class="slider-container">
-        <input type="range" id="monthlyContribution" min="0" max="7" step="1">
-
-        <input type="number" id="monthlyContributionNumber">
-      </div>
+  <!-- Row 3 -->
+  <div class="slider-group">
+    <label for="startAge" data-tooltip="Your current age or the age at which savings start.">Start Age</label>
+    <div class="slider-container">
+      <input type="range" id="startAge" min="0" max="100" step="1">
+      <input type="text" id="startAgeText">
     </div>
--->
-      
-    <div class="slider-group">
-    
-      <label for="infRate" class="tooltip-container">
-        Inflation (%)
-        <span class="tooltip-text">Average expected annual increase in cost of living.</span>
-    </label>
+  </div>
 
-      <div class="slider-container">
-        <input type="range" id="inflationRate" min="0" max="7" step="1">
-        <input type="text" id="inflationRateText">
-      </div>
+  <div class="slider-group">
+    <label for="preReturn" data-tooltip="Expected average annual rate of return on your investments before retirement, during accumulation phase.">Pre-ret. return %</label>
+    <div class="slider-container">
+      <input type="range" id="preReturn" min="0" max="18" step="1">
+      <input type="text" id="preReturnText">
     </div>
-    
-    <div class="slider-group">
-    <label for="ratePre" class="tooltip-container">
-      Pre-retirement return %
-      <span class="tooltip-text">Expected average annual rate of return on your investments before retirement, during accumulation phase.</span>
-    </label>
+  </div>
 
-      <div class="slider-container">
-        <input type="range" id="preReturn" min="0" max="18" step="1">
-        <input type="text" id="preReturnText">
-      </div>
+  <!-- Row 4 -->
+  <div class="slider-group">
+    <label for="retireAge" data-tooltip="The age when you stop working and begin withdrawals. For lifelong income, switch the mode to &quot;Forever&quot;.">Retirement Age</label>
+    <div class="slider-container">
+      <input type="range" id="retireAge" min="20" max="95" step="1">
+      <input type="text" id="retireAgeText">
     </div>
-    
-    <div class="slider-group">
-    <label for="ratePost" class="tooltip-container">
-      Post-retirement return %
-      <span class="tooltip-text">Expected average annual return on your investments during retirement or the from the age you set for financial independence.</span>
-    </label>
+  </div>
 
-      <div class="slider-container">
-        <input type="range" id="postReturn" min="0" max="15" step="1">
-        <input type="text" id="postReturnText">
-      </div>
+  <div class="slider-group">
+    <label for="postReturn" data-tooltip="Expected average annual return on your investments during retirement or the from the age you set for financial independence.">Post-ret. return %</label>
+    <div class="slider-container">
+      <input type="range" id="postReturn" min="0" max="15" step="1">
+      <input type="text" id="postReturnText">
     </div>
+  </div>
 
-    <div class="slider-group">
-      <label for="startAge" class="tooltip-container">
-        Start Age
-        <span class="tooltip-text">Your current age or the age at which savings start.</span>
-      </label>
-
-      <div class="slider-container">
-        <input type="range" id="startAge" min="0" max="70" step="1">
-        <input type="text" id="startAgeText">
-      </div>
+  <!-- Row 5 -->
+  <div class="slider-group">
+    <label for="endAge" id="lifeLabel" data-tooltip="What's your life expectancy? Default is 100. In FIRE mode, your money is set to last forever.">Life Expectancy</label>
+    <div class="slider-container">
+      <input type="range" id="endAge" min="55" max="120" step="1">
+      <input type="text" id="endAgeText">
     </div>
-    
-    <div class="slider-group">
-      <label for="retireAge" class="tooltip-container">
-        Retirement Age
-        <span class="tooltip-text">
-          The age when you stop working and begin withdrawals. For lifelong income, switch the mode to "Forever".
-        </span>
-      </label>
+  </div>
 
-      <div class="slider-container">
-        <input type="range" id="retireAge" min="30" max="80" step="1">
-        <input type="text" id="retireAgeText">
-      </div>
+  <div class="slider-group">
+    <label for="infRate" data-tooltip="Average expected annual increase in cost of living.">Expected Inflation (%)</label>
+    <div class="slider-container">
+      <input type="range" id="inflationRate" min="0" max="7" step="1">
+      <input type="text" id="inflationRateText">
     </div>
-    
-    <div class="slider-group">
-      <label for="endAge" id="lifeLabel" class="tooltip-container">
-      Life Expectancy
-      <span class="tooltip-text">
-        What's your life expectancy? Default is 100. In FIRE mode, your money is set to last forever.
-      </span>
-      </label>
+  </div>
 
-
-
-      <div class="slider-container">
-        <input type="range" id="endAge" min="65" max="120" step="1">
-        <input type="text" id="endAgeText">
-      </div>
-    </div>
-    
-
-</div> <!-- end of the input container-->
-
-
-
+</div> <!-- end of the input container -->
 
 <!--
  <div class="results-container"> 
@@ -1088,7 +1137,10 @@ body.debug-layout #tableView::before {
 
   <div class="graph-container"> <!--graph container starting-->
 
-    <canvas id="finChart" style="width: 100%; max-height: 600px;"></canvas>
+    <div id="finChartContainer">
+  <canvas id="finChart" style="width: 100%; max-height: 600px;"></canvas>
+</div>
+
     
     <div class="graph-expand-btn" onclick="openGraphModal()">🔍 Expand</div>
 
@@ -1100,69 +1152,7 @@ body.debug-layout #tableView::before {
       </div>
     </div>
   </div> <!-- end of the graph-container-->
-<section id="faq" aria-label="Frequently Asked Questions">
-  <div id="faqHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="faqContent">
-    Frequently Asked Questions
-    <span aria-hidden="true" id="faqToggleIcon">▼</span>
-  </div>
-  <div id="faqContent" role="region" aria-hidden="true">
 
-    <div class="faq-item">
-      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer1" id="question1">
-        What is the FIN (Financial Independence Number)?
-      </div>
-      <div class="faq-answer" id="answer1" aria-labelledby="question1" hidden>
-        The FIN represents the lump sum amount you need at retirement to generate your desired income for life.
-      </div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer2" id="question2">
-        Why does the FIN change for different start age?
-      </div>
-      <div class="faq-answer" id="answer2" aria-labelledby="question2" hidden>
-        The FIN changes with start age because the amount you need at retirement depends on how many years you have to save and how inflation impacts the value of your desired income. Starting earlier means your desired income needs to be inflated over a longer period before retirement, which changes the lump sum required.
-      </div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer3" id="question3">
-        How is the “Future $” display different from “Today's $”?
-      </div>
-      <div class="faq-answer" id="answer3" aria-labelledby="question3" hidden>
-        “Future $” adjusts your income and savings goals to account for inflation, showing the amount of money you will need in inflated future dollars. “Today's $” shows the equivalent value in today’s dollars, removing the effects of inflation to provide a clearer comparison.
-      </div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer4" id="question4">
-        What does “Fully Funded” mean?
-      </div>
-      <div class="faq-answer" id="answer4" aria-labelledby="question4" hidden>
-        “Fully Funded” shows how much you’d need invested today to meet your retirement goals without adding extra monthly contributions.
-      </div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer5" id="question5">
-        What is the difference between Life Expectancy and Forever (FIRE style) modes?
-      </div>
-      <div class="faq-answer" id="answer5" aria-labelledby="question5" hidden>
-        Life Expectancy mode plans your finances to last until a set age, while Forever (FIRE) mode plans for perpetual income with no set end date.
-      </div>
-    </div>
-
-    <div class="faq-item">
-      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer6" id="question6">
-        How do changes in inflation or investment return rates affect my results?
-      </div>
-      <div class="faq-answer" id="answer6" aria-labelledby="question6" hidden>
-        Inflation and return rates impact how much you need to save and your investment growth, which affects your FIN and funding requirements.
-      </div>
-    </div>
-
-  </div>
-</section>
 
 <style>
   /* FAQ container styles */
@@ -1329,7 +1319,11 @@ body.dark .summary-item strong {
   color: #3399ff;
 }
 
-
+/* Removes top padding from only the first item in the inputs column */
+.inputs-container > .input-group:first-child,
+.inputs-container > .slider-group:first-child {
+  padding-top: 0;
+}
 
 .summary-bar .output {
   display: flex;
@@ -1348,11 +1342,40 @@ body.dark .summary-item strong {
 body.dark .summary-bar {
   background-color: transparent;
 }
+.scenario-btn.active:hover {
+  background-color: #007bff !important;
+  color: white !important;
+  border-color: #007bff !important;
+}
+
+#finChartContainer {
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  border-radius: 8px;
+  
+  display: block;
+  overflow: hidden;
+}
+
+/* Light Mode Styling */
+body:not(.dark) #finChartContainer {
+  background-color: #f9f9fc;
+  border: 1px solid #bbb;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional Dark Mode */
+body.dark #finChartContainer {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+}
 
 
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
   // Toggle FAQ main section
   const faqHeader = document.getElementById('faqHeader');
   const faqContent = document.getElementById('faqContent');
@@ -1396,6 +1419,7 @@ body.dark .summary-bar {
       }
     });
   });
+  });
 </script>
 
 </div>
@@ -1406,7 +1430,69 @@ body.dark .summary-bar {
 
 <!-- table view of the accumulation and decumulation -->
 <div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
-          
+<section id="faq" aria-label="Frequently Asked Questions">
+  <div id="faqHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="faqContent">
+    Frequently Asked Questions
+    <span aria-hidden="true" id="faqToggleIcon">▼</span>
+  </div>
+  <div id="faqContent" role="region" aria-hidden="true">
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer1" id="question1">
+        What is the FIN (Financial Independence Number)?
+      </div>
+      <div class="faq-answer" id="answer1" aria-labelledby="question1" hidden>
+        The FIN represents the lump sum amount you need at retirement to generate your desired income for life.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer2" id="question2">
+        Why does the FIN change for different start age?
+      </div>
+      <div class="faq-answer" id="answer2" aria-labelledby="question2" hidden>
+        The FIN changes with start age because the amount you need at retirement depends on how many years you have to save and how inflation impacts the value of your desired income. Starting earlier means your desired income needs to be inflated over a longer period before retirement, which changes the lump sum required.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer3" id="question3">
+        How is the “Future $” display different from “Today's $”?
+      </div>
+      <div class="faq-answer" id="answer3" aria-labelledby="question3" hidden>
+        “Future $” adjusts your income and savings goals to account for inflation, showing the amount of money you will need in inflated future dollars. “Today's $” shows the equivalent value in today’s dollars, removing the effects of inflation to provide a clearer comparison.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer4" id="question4">
+        What does “Fully Funded” mean?
+      </div>
+      <div class="faq-answer" id="answer4" aria-labelledby="question4" hidden>
+        “Fully Funded” shows how much you’d need invested today to meet your retirement goals without adding extra monthly contributions.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer5" id="question5">
+        What is the difference between Life Expectancy and Forever (FIRE style) modes?
+      </div>
+      <div class="faq-answer" id="answer5" aria-labelledby="question5" hidden>
+        Life Expectancy mode plans your finances to last until a set age, while Forever (FIRE) mode plans for perpetual income with no set end date.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer6" id="question6">
+        How do changes in inflation or investment return rates affect my results?
+      </div>
+      <div class="faq-answer" id="answer6" aria-labelledby="question6" hidden>
+        Inflation and return rates impact how much you need to save and your investment growth, which affects your FIN and funding requirements.
+      </div>
+    </div>
+
+  </div>
+</section>          
 </div> <!--end of right-container-->
     
 
@@ -1476,6 +1562,7 @@ body.dark .summary-bar {
     "start-30": { ...baseScenario, desiredIncome: 5000, startAge: 30 },
     "start-40": { ...baseScenario, desiredIncome: 5000, startAge: 40 },
     "start-50": { ...baseScenario, desiredIncome: 5000, startAge: 50 },
+
     "start-60": { ...baseScenario, desiredIncome: 5000,startAge: 60 }
   };
 
@@ -1849,6 +1936,7 @@ if (fvDisplay) {
   // Update future income calculation to match correct drawdown span
   const futureIncome = di * Math.pow(1 + inf / 12, yrsTo * 12);
   const incomeUsed = showFuture ? futureIncome : di;
+
   const futureIncomeAnnual = di * Math.pow(1 + inf, yrsTo); // Simpler annual inflation
   document.getElementById("futureIncomeDisplay").value = showFuture
   ? futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })
@@ -1887,9 +1975,15 @@ if (fvDisplay) {
 
   // Actual user forecast
   const fvCurr = ci * Math.pow(1 + pre, yrsTo);
-  const fvCont = mRate > 0
+    const fvCont = mRate > 0
     ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate)
     : mc * months;
+
+const fviDisplay = document.getElementById("futureValueInvestmentDisplay");
+if (fviDisplay) {
+  fviDisplay.value = fvCurr.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
 
   const totalFV = fvCurr + fvCont;
   const rem = Math.max(finUsed - totalFV, 0);
@@ -2120,11 +2214,13 @@ for (let i = tableStartIdx; i <= tableEndIdx; i++) {
 
   const tp = adjustedTarget[i] || 0;
   const cp = adjustedCurrent[i] || 0;
-  tableHTML += `<tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#fff'};">
-    <td style="padding:8px;text-align:center;">${y}</td>
-    <td style="padding:8px;text-align:right;">$${tp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-    <td style="padding:8px;text-align:right;">$${cp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-  </tr>`;
+  const isRetirement = y === ra;
+tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
+  <td style="padding:8px;text-align:center;">${y}</td>
+  <td style="padding:8px;text-align:right;">$${tp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+  <td style="padding:8px;text-align:right;">$${cp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+</tr>`;
+
 }
 tableHTML += '</tbody></table>';
 
@@ -2201,6 +2297,7 @@ document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (F
 
       // FINAL FIX — expose functions to window so buttons work:
       window.exportPDF = exportPDF;
+
       window.resetDefaults = resetDefaults;
       window.downloadHTML = downloadHTML;
 
@@ -2256,8 +2353,71 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- tooltip tippy-->
+<script>
+  function applyTippyTheme() {
+    const tippyTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+
+    tippy('[data-tooltip]', {
+      content(reference) {
+        return reference.getAttribute('data-tooltip');
+      },
+      theme: tippyTheme,
+      placement: 'top',
+      maxWidth: 240,
+      allowHTML: true,
+      animation: 'shift-away',
+      delay: [100, 100],
+      offset: [0, 10],
+      inlinePositioning: true,
+      popperOptions: {
+        modifiers: [
+          {
+            name: 'preventOverflow',
+            options: {
+              boundary: 'window'
+            }
+          }
+        ]
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTippyTheme();
+
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('[data-tippy-root]').forEach(el => el.remove());
+      applyTippyTheme();
+    });
+
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  });
+</script>
 
 
 
+
+<script>
+  // This script creates a small box to display the window width.
+  const widthDisplay = document.createElement('div');
+  widthDisplay.style.position = 'fixed';
+  widthDisplay.style.bottom = '10px';
+  widthDisplay.style.right = '10px';
+  widthDisplay.style.padding = '5px 10px';
+  widthDisplay.style.background = 'rgba(0, 0, 0, 0.7)';
+  widthDisplay.style.color = 'white';
+  widthDisplay.style.fontFamily = 'sans-serif';
+  widthDisplay.style.borderRadius = '5px';
+  widthDisplay.style.zIndex = '9999';
+  document.body.appendChild(widthDisplay);
+
+  function updateWidth() {
+    widthDisplay.textContent = `Width: ${window.innerWidth}px`;
+  }
+
+  window.addEventListener('resize', updateWidth);
+  updateWidth(); // Show initial width
+</script>
 </body>
 </html>
