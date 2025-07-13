@@ -139,13 +139,13 @@ input:checked + .slider:before {
   flex: 1 1 auto;
   min-width: 300px;
   width: 100%;
-  padding: 0;
+  padding: 0 0 10px;
   box-sizing: border-box;
 }
 
 #finChart {
   width: 100% !important;
-  height: 300px !important;
+  height: auto !important;  /* Let it scale naturally */
   display: block;
 }
 
@@ -330,7 +330,6 @@ body.dark td {
 }
 
 .icon {
-
   font-size: 1.3rem;
   line-height: 1;
 }
@@ -415,12 +414,14 @@ body.dark .tooltip-text {
 }
 
 .middle-column {
-  flex: 1 1 480px;
+  flex: 1 1 580px;
   min-width: 320px;
-  max-width: 560px;
+  max-width: 700px;
 }
 
-
+.main-layout.chart-is-expanded .middle-column {
+  max-width: none;
+}
 
 .right-column {
   flex: 0 1 340px;
@@ -436,7 +437,7 @@ body.dark .tooltip-text {
     flex-direction: row;
     row-gap: 10px; /* Adjust this value to your liking, or set to 0 to remove the gap completely */
   }
-}
+
 
   .inputs-container {
     margin-top: 0px;
@@ -521,57 +522,47 @@ body.light-mode .scenario-btn.active {
 }
 
 
+/* --- Modern Expand Button --- */
 .graph-expand-btn {
-  text-align: right;
-  margin-top: -20px;
-  font-size: 14px;
-  color: #007aff;
+  /* Positioning and Shape */
+  display: block;
+  text-align: center;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin: 12px auto 0; /* Centers the button horizontally */
+  padding: 6px 16px;
+  border-radius: 99px; /* Creates the pill shape */
+  
+  /* Font and Appearance */
+  font-size: 0.8rem; /* 13px */
+  font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-.graph-modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+/* Light Mode Colors */
+body:not(.dark) .graph-expand-btn {
+  background-color: #f1f3f4;
+  color: #3c4043;
 }
 
-.graph-modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 900px;
-  max-height: 90%;
-  overflow: auto;
-  position: relative;
+/* Dark Mode Colors */
+body.dark .graph-expand-btn {
+  background-color: #3c4043;
+  color: #e8eaed;
 }
 
-.graph-modal-close {
-  position: absolute;
-  top: 10px; right: 10px;
-  cursor: pointer;
-  font-size: 18px;
-}
-.graph-modal-content {
-  display: flex;
-  flex-direction: column;
+/* Hover Effect */
+.graph-expand-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.graph-modal-content canvas {
-  width: 100% !important;
-  height: 500px !important;  /* Adjust height to your preference */
+body.dark .graph-expand-btn:hover {
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-#modalChart {
-  width: 100% !important;
-  height: 500px !important;
-  max-height: 100%;
-}
 
 #futureIncomeDisplay {
   background: #f0f0f0;
@@ -856,6 +847,83 @@ body.dark #tableView table .retirement-row {
   color: #ffe082; /* Warm yellow text for contrast */
 }
 
+/* --- Final Styles for Expanded Chart --- */
+
+.main-layout.chart-is-expanded .middle-column {
+  /* Make the column take up most of the available space */
+  flex: 1; 
+  height: 75vh; /* Set height to 80% of the browser window's height */
+}
+
+.main-layout.chart-is-expanded .graph-container {
+  /* Make the container fill the new height of the column */
+  height: auto;
+  display: flex;
+  flex-direction: column;
+
+}
+
+
+.main-layout.chart-is-expanded .right-column {
+  /* Hide the table column */
+  display: none;
+}
+.graph-container {
+  display: inline-block;
+  width: fit-content;
+  height: fit-content;
+  padding: 0;
+  margin: 0 auto;
+  padding-bottom: 6px; /* Tweak this value until heights match */
+  
+}
+
+#finChartContainer {
+  display: inline-block;
+  width: fit-content;
+  height: fit-content;
+}
+
+#finChart {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+@media (max-width: 1530px) {
+  .main-layout.chart-is-expanded {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .main-layout.chart-is-expanded .middle-column {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .main-layout.chart-is-expanded .graph-container {
+    width: fit-content;
+    height: 500px; /* or whatever fixed height you want */
+    margin-top: 20px;
+  }
+}
+@media (max-width: 600px) {
+  .summary-bar {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+    gap: 20px;
+    justify-items: center;
+    width: 100%;
+  }
+
+  .summary-bar .output {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    text-align: center;
+  }
+}
 
 
  </style>
@@ -889,7 +957,7 @@ body.dark #tableView table .retirement-row {
 
 <!-- Left side: Title + Version underneath -->
   <div class="header-left"> <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.34t (Online) • Updated: July 12, 2025</div>
+    <div class="version-info">v2.0.35t (Online) • Updated: July 13, 2025</div>
 </div>
 
 <!-- Header Center Section -->
@@ -1138,19 +1206,17 @@ body.dark #tableView table .retirement-row {
   <div class="graph-container"> <!--graph container starting-->
 
     <div id="finChartContainer">
-  <canvas id="finChart" style="width: 100%; max-height: 600px;"></canvas>
+  <canvas id="finChart" style="width: 100%; max-height: 100%;"></canvas>
 </div>
 
     
-    <div class="graph-expand-btn" onclick="openGraphModal()">🔍 Expand</div>
+    <div style="display: flex; justify-content: center; gap: 15px;">
+  <div class="graph-expand-btn-2" onclick="toggleGraphSize()">↔️ Expand the Chart</div>
+</div>
+<p class="chart-disclaimer">
+    This illustrative calculator is designed to be an informational and educational tool only. This illustration is a hypothetical and does not represent an actual investment. This illustration uses a constant rate, compounded on a monthly basis, unlike actual investments which will fluctuate in value and could be significantly impacted by periods of negative returns. It does not include fees, taxes, expenses, or withdrawals, which if included, would lower results. There is no guarantee you will achieve these results. The historical inflation rate is 3%.
+  </p>
 
-    <!-- Chart Modal -->
-    <div id="graphModal" class="graph-modal" onclick="closeGraphModal(event)">
-      <div class="graph-modal-content" onclick="event.stopPropagation()">
-        <div class="graph-modal-close" onclick="closeGraphModal()">✖</div>
-        <canvas id="modalChart"></canvas>
-      </div>
-    </div>
   </div> <!-- end of the graph-container-->
 
 
@@ -1349,11 +1415,10 @@ body.dark .summary-bar {
 }
 
 #finChartContainer {
-  width: 100%;
-  max-width: 900px;
+  width: auto;
+  max-width: none;
   height: auto;
   border-radius: 8px;
-  
   display: block;
   overflow: hidden;
 }
@@ -1371,6 +1436,60 @@ body.dark #finChartContainer {
   border: 1px solid #444;
 }
 
+.chart-disclaimer {
+  font-size: 0.70rem; 
+  color: #555;
+  text-align: center;
+  margin-top: 15px;
+  line-height: 1.4;
+  max-width: auto; /* Prevents it from becoming too wide */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.dark .chart-disclaimer {
+  color: #aaa;
+}
+
+/* --- Style for the new "Expand in Place" button --- */
+.graph-expand-btn-2 {
+  /* Positioning and Shape */
+  display: block;
+  text-align: center;
+  width: fit-content;
+  margin: 12px 0 0; /* Aligns with the other button */
+  padding: 6px 16px;
+  border-radius: 99px; /* Pill shape */
+  
+  /* Font and Appearance */
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Light Mode Colors */
+body:not(.dark) .graph-expand-btn-2 {
+  background-color: #e8f0fe;
+  color: #1967d2;
+}
+
+/* Dark Mode Colors */
+body.dark .graph-expand-btn-2 {
+  background-color: #2e3a47;
+  color: #8ab4f8;
+}
+
+/* Hover Effect */
+.graph-expand-btn-2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .graph-expand-btn-2:hover {
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
 
 </style>
 
@@ -1400,6 +1519,7 @@ document.addEventListener('DOMContentLoaded', function() {
     question.addEventListener('click', () => {
       const expanded = question.getAttribute('aria-expanded') === 'true';
       question.setAttribute('aria-expanded', String(!expanded));
+
       const answer = document.getElementById(question.getAttribute('aria-controls'));
       if (answer) {
         if (expanded) {
@@ -1412,10 +1532,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       question.classList.toggle('open');
     });
+
     question.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         question.click();
+
       }
     });
   });
@@ -1525,6 +1647,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function checkPassword() {
     if (input.value === correctPassword) {
       sessionStorage.setItem('accessGranted', 'true');
+
       overlay.style.display = 'none';
       content.style.display = 'block';
       errorMsg.style.display = 'none';
@@ -1562,7 +1685,6 @@ document.addEventListener('DOMContentLoaded', function() {
     "start-30": { ...baseScenario, desiredIncome: 5000, startAge: 30 },
     "start-40": { ...baseScenario, desiredIncome: 5000, startAge: 40 },
     "start-50": { ...baseScenario, desiredIncome: 5000, startAge: 50 },
-
     "start-60": { ...baseScenario, desiredIncome: 5000,startAge: 60 }
   };
 
@@ -1594,6 +1716,7 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
       setValue("inflationRate", s.inflationRate);
       setValue("inflationInput", s.inflationRate);
 
+
       setValue("preReturn", s.preReturn);
       setValue("preInput", s.preReturn);
 
@@ -1612,76 +1735,67 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
   });
 </script>
 
-<!--script to expand the chart in modal format for bigger view-->
+
 <script>
-let modalChart;
-
-function openGraphModal() {
-  const modal = document.getElementById("graphModal");
-  const modalContent = document.querySelector(".graph-modal-content");
-  const modalCanvas = document.getElementById("modalChart");
-
-  modal.style.display = "flex";
-
-  setTimeout(() => {
-    const mainChart = Chart.getChart("finChart");
-    if (!mainChart) return;
-
-    // Clone data deeply
-    const clonedData = JSON.parse(JSON.stringify(mainChart.data));
-
-    // Start with a basic clean copy of options
-const clonedOptions = {
-  responsive: false,
-  maintainAspectRatio: false,
-  scales: mainChart.options.scales,
-  plugins: {
-    legend: {
-      labels: {
-        usePointStyle: true,
-        pointStyle: 'line'
-      }
-    },
-    tooltip: {
-      callbacks: {
-        label: ctx => '$' + ctx.parsed.y.toLocaleString()
-      }
-    },
-    title: {
-      display: true,
-      text: 'Portfolio Growth & Drawdown'
-    },
-    annotation: {
-      drawTime: 'afterDraw',
-      annotations: mainChart.options.plugins.annotation?.annotations || {}
-    }
-  }
-};
-
-
-    modalCanvas.width = modalContent.clientWidth;
-    modalCanvas.height = 500;
-    modalCanvas.style.width = '100%';
-    modalCanvas.style.height = '500px';
-
-    if (modalChart) modalChart.destroy();
-
-    const ctx = modalCanvas.getContext("2d");
-    modalChart = new Chart(ctx, {
-      type: mainChart.config.type,
-      data: clonedData,
-      options: clonedOptions
-    });
-
-    console.log("✅ Chart rendered in modal.");
-  }, 300);
-}
-
-function closeGraphModal(event) {
-  document.getElementById("graphModal").style.display = "none";
-}
+  let finChart;
 </script>
 
+<script>
+  // Final, direct function for in-place graph expansion
+  let isChartExpanded = false;
+
+function toggleGraphSize() {
+  const mainLayout = document.querySelector('.main-layout');
+  const expandButton = document.querySelector('.graph-expand-btn-2');
+  const chartContainer = document.getElementById('finChartContainer');
+  const canvas = document.getElementById('finChart');
+  const inputsContainer = document.querySelector('.inputs-container');
+
+  if (!finChart || !mainLayout || !chartContainer || !inputsContainer) {
+    return;
+  }
+
+  mainLayout.classList.toggle('chart-is-expanded');
+  isChartExpanded = mainLayout.classList.contains('chart-is-expanded');
+
+  if (isChartExpanded) {
+    // ✅ EXPAND view to match inputs column height
+    const inputsHeight = inputsContainer.offsetHeight;
+    chartContainer.style.height = `${inputsHeight}px`;
+
+    finChart.options.maintainAspectRatio = false;
+    finChart.options.responsive = false;
+    expandButton.innerHTML = '↔️ Shrink View';
+
+    finChart.resize();
+
+  } else {
+    // 🔄 FULL RESET: Destroy & recreate chart to restore original responsive behavior
+    const chartData = JSON.parse(JSON.stringify(finChart.data));
+    const chartOptions = JSON.parse(JSON.stringify(finChart.options));
+
+    finChart.destroy();
+
+    // Restore container + canvas dimensions
+    chartContainer.style.removeProperty('height');
+    canvas.style.removeProperty('height');
+    canvas.style.removeProperty('width');
+
+    chartOptions.responsive = true;
+    chartOptions.maintainAspectRatio = true;
+
+    finChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: chartData,
+      options: chartOptions
+    });
+
+    expandButton.innerHTML = '↔️ Expand the Chart';
+  }
+}
+
+
+</script>
 
 
 <!--script to load/save settings locally-->
@@ -1704,6 +1818,7 @@ function closeGraphModal(event) {
         // Also change the slider label for Life Expectancy
         const lifeLabel = document.querySelector('label[for="endAge"]');
         if (lifeLabel) {
+
           lifeLabel.textContent = isFire ? "Life Expectancy: Perpetual" : "Life Expectancy";
         }
 
@@ -1743,6 +1858,7 @@ function loadSettings(){
     for (const [name, scenario] of Object.entries(scenarios)) {
       const isMatch = Object.entries(scenario).every(([key, val]) =>
         mapped.hasOwnProperty(key) && +mapped[key] === +val
+
       );
       if (isMatch) {
         matchedScenario = name;
@@ -1768,37 +1884,47 @@ function loadSettings(){
 
 
 
+
 // DARK MODE PERSISTENCE
 const darkToggle = document.getElementById('darkModeToggle');
+
 if (localStorage.getItem('darkMode') === 'enabled') {
   document.body.classList.add('dark');
   darkToggle.checked = true;
 }
 
+
 darkToggle.addEventListener('change', () => {
   if (darkToggle.checked) {
     document.body.classList.add('dark');
+
     localStorage.setItem('darkMode', 'enabled');
   } else {
     document.body.classList.remove('dark');
     localStorage.setItem('darkMode', 'disabled');
+
   }
 });
+
 
 
       function saveSettings(){
         const data={};
         Object.keys(els).forEach(k=>{
           if(['monthlyNeeded','finAmount','ageWarning'].includes(k)) return;
+
           data[k]=els[k].value;
         });
         localStorage.setItem('finToolSettings',JSON.stringify(data));
       }
 
-// old chart definition
+
+// chart definition
+
  
 const ctx = document.getElementById('finChart').getContext('2d');
-const finChart = new Chart(ctx, {
+
+ finChart = new Chart(ctx, {
   type: 'line',
   data: {
     labels: [],
@@ -1855,12 +1981,14 @@ const finChart = new Chart(ctx, {
     },
   plugins: {
   legend: {
+
     labels: {
       usePointStyle: true,
       pointStyle: 'line'
     }
   },
   tooltip: {
+
     callbacks: {
       label: ctx => '$' + ctx.parsed.y.toLocaleString()
     }
@@ -1871,6 +1999,7 @@ const finChart = new Chart(ctx, {
   },
   annotation: {
   drawTime: 'afterDraw',
+
     annotations: {} // will be filled dynamically in calculateFIN()
   }
 }
@@ -1898,6 +2027,7 @@ const incomeProtectionNumber = di * 12 * 12;
 document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtectionNumber.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
   const inf = +els.inflationRate.value / 100 || 0;
+
   const pre = +els.preReturn.value / 100 || 0;
   const post = +els.postReturn.value / 100 || 0;
 
@@ -1910,8 +2040,10 @@ document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtec
   const yrsTo = ra - sa,
         yrsIn = ea - ra,
         mRate = pre / 12,
+
         months = yrsTo * 12;
         
+
 const mcFutureMonths = (ra - sa) * 12;
 const mcMonthlyRate = pre / 12;
 const mcFutureValue =
@@ -1933,10 +2065,11 @@ if (fvDisplay) {
   const effectiveEndAge = drawdownType === "perpetual" ? 100 : ea;
   const drawdownYears = effectiveEndAge - ra + 1;
 
+
   // Update future income calculation to match correct drawdown span
   const futureIncome = di * Math.pow(1 + inf / 12, yrsTo * 12);
-  const incomeUsed = showFuture ? futureIncome : di;
 
+  const incomeUsed = showFuture ? futureIncome : di;
   const futureIncomeAnnual = di * Math.pow(1 + inf, yrsTo); // Simpler annual inflation
   document.getElementById("futureIncomeDisplay").value = showFuture
   ? futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })
@@ -1998,233 +2131,134 @@ if (fviDisplay) {
 
 
   els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
 document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
-  // Chart data
+// Chart and Table Data Generation
   const yearLabels = [];
   const balancesTarget = [];
   const balancesCurrent = [];
+  const mPreRate = pre / 12;
 
-// === TARGET PLAN (REQUIRED) ===
-// Accumulate until retirement using ideal monthly need and starting from current investment
-let balTarget = ci;
-for (let age = sa; age < ra; age++) {
-  balTarget += monthlyNeedIdeal * 12;
-  balTarget *= (1 + pre);
-  yearLabels.push(age);
-  balancesTarget.push(balTarget);
-}
-
-// Save the balance at retirement age
-const balanceAtRetirement = balTarget;
-
-
-// 🎯 Reverse drawdown from retirement to life expectancy
-// Already calculated above
-const targetDrawdown = new Array(drawdownYears + 1);
-
-
-const postMonthly = post / 12;
-
-// Start drawdown from balance at retirement (continuity!)
-targetDrawdown[0] = balanceAtRetirement;
-
-for (let i = 0; i < drawdownYears; i++) {
-  let prev = targetDrawdown[i];
-  for (let m = 0; m < 12; m++) {
-    prev *= (1 + postMonthly);
-    prev -= incomeUsed;
-  }
-  targetDrawdown[i + 1] = Math.max(prev, 0);
-}
-
-
-
-// Append drawdown years from ra to ea inclusive, even if $0
-for (let age = ra; age <= ea; age++) {
-  const i = age - ra;
-  yearLabels.push(age);
-  const val = targetDrawdown[i] !== undefined ? targetDrawdown[i] : 0;
-  balancesTarget.push(val);
-}
-
-
-
-
-
+  // --- ACCUMULATION SIMULATION (Month by Month) ---
   let balCurrent = ci;
-for (let age = sa; age <= ra; age++) {
-  if (age < stopAge) {
-    balCurrent += mc * 12;
-  }
-  balCurrent *= (1 + pre);
-  balancesCurrent.push(balCurrent);
-}
+  let balTarget = ci;
+  const requiredMonthlySaving = mc + monthlyNeed;
 
+  for (let age = sa; age < ra; age++) {
+    let yearEndCurrent = balCurrent;
+    let yearEndTarget = balTarget;
 
- for (let i = 0; i <= drawdownYears; i++) {
-  for (let m = 0; m < 12; m++) {
-    balCurrent *= (1 + post / 12);
-    balCurrent -= incomeUsed;
-    if (balCurrent < 0) balCurrent = 0;
-  }
-  balancesCurrent.push(balCurrent);
-}
-
-
-  // 🧠 Adjust both lines for display toggle
-  const adjustedTarget = [];
-  const adjustedCurrent = [];
-
-  for (let i = 0; i < yearLabels.length; i++) {
-    const offset = yearLabels[i] - sa;
-    const factor = showFuture ? 1 : Math.pow(1 + inf / 12, offset * 12);
-    adjustedTarget.push(balancesTarget[i] / factor);
-    adjustedCurrent.push(balancesCurrent[i] / factor);
-  }
-
-  // Update chart
-  finChart.data.labels = yearLabels;
-  finChart.data.datasets[0].data = adjustedTarget;
-  finChart.data.datasets[1].data = adjustedCurrent;
-  
-    // Add dynamic chart annotations
-const annotations = {
-  startAgeLine: {
-    type: 'line',
-    xMin: sa,
-    xMax: sa,
-    borderColor: 'green',
-    borderDash: [6, 6],
-    borderWidth: 2,
-    label: {
-  content: 'Start Age',
-  enabled: true,
-  position: {
-    x: 'center',
-    y: 'end'   // 👈 aligns to X-axis bottom
-  },
-  yAdjust: 8, // ✅ pushes below chart line slightly
-  xAdjust: 0,  // optional: small nudge if misaligned
-  backgroundColor: '#444',
-  color: '#fff',
-  font: {
-    size: 10,
-    weight: 'bold'
-  },
-  padding: 4,
-  borderRadius: 4
-}
-
-
-  },
-  retireAgeLine: {
-    type: 'line',
-    xMin: ra,
-    xMax: ra,
-    borderColor: 'blue',
-    borderDash: [6, 6],
-    borderWidth: 2,
-    label: {
-  content: 'Retire Age',
-  enabled: true,
-  position: {
-    x: 'center',
-    y: 'end'
-  },
-  yAdjust: 8,     // ⬇️ slightly below the chart
-  xAdjust: -14,   // ⬅️ nudges it left of the dot/tick
-  backgroundColor: '#444',
-  color: '#fff',
-  font: {
-    size: 10,
-    weight: 'bold'
-  },
-  padding: 4,
-  borderRadius: 4
-}
-
-  },
-  endAgeLine: {
-    type: 'line',
-    xMin: ea,
-    xMax: ea,
-    borderColor: 'red',
-    borderDash: [6, 6],
-    borderWidth: 2,
-    label: {
-      content: 'Life Expectancy',
-      enabled: true,
-      position: 'start',
-      yAdjust: -20,
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      color: 'white'
+    for (let month = 1; month <= 12; month++) {
+      // Assuming beginning-of-month contributions
+      yearEndCurrent = (yearEndCurrent + (age < stopAge ? mc : 0)) * (1 + mPreRate);
+      yearEndTarget = (yearEndTarget + requiredMonthlySaving) * (1 + mPreRate);
     }
-  },
-
-
-};
-
-
-  // Break-even point marker
-function findBreakEvenIndex(arr, threshold = 0.01) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] <= threshold) return i;
+    
+    yearLabels.push(age);
+    balancesCurrent.push(yearEndCurrent);
+    balancesTarget.push(yearEndTarget);
+    
+    balCurrent = yearEndCurrent;
+    balTarget = yearEndTarget;
   }
-  return -1;
-}
 
-const breakEvenIndex = findBreakEvenIndex(adjustedCurrent);
+  // --- DRAWDOWN SIMULATION (Month by Month) ---
+  const simulateDrawdown = (startingBalance) => {
+    let balance = startingBalance;
+    const drawdownBalances = [balance]; // Start with the balance at retirement age
+    let monthlyWithdrawal = di * Math.pow(1 + inf / 12, (ra - sa) * 12);
 
-if (breakEvenIndex !== -1) {
-  annotations.breakEvenPoint = {
-    type: 'point',
-    xValue: yearLabels[breakEvenIndex],
-    yValue: 0.01, // slight lift so it shows above x-axis
-    backgroundColor: 'black',
-    radius: 5,
-    label: {
-      content: 'Funds Depleted',
-      enabled: true,
-      position: 'top'
+    for (let year = ra; year < ea; year++) {
+      for (let month = 1; month <= 12; month++) {
+        balance = balance * (1 + post / 12) - monthlyWithdrawal;
+      }
+      drawdownBalances.push(Math.max(0, balance));
+      monthlyWithdrawal *= (1 + inf); // Increase withdrawal amount for the next year
     }
+    return drawdownBalances;
   };
-}
 
+  const currentDrawdown = simulateDrawdown(balCurrent);
+  const targetDrawdown = simulateDrawdown(balTarget);
 
+  for (let i = 0; i < currentDrawdown.length; i++) {
+    const currentAge = ra + i;
+    yearLabels.push(currentAge);
+    balancesCurrent.push(currentDrawdown[i]);
+    balancesTarget.push(targetDrawdown[i]);
+  }
 
-  finChart.options.plugins.annotation.annotations = annotations;
-console.log("ANNOTATIONS NOW SET:", finChart.options.plugins.annotation.annotations);
+  // --- FINAL CHART & TABLE UPDATE ---
+  const uniqueLabels = [...new Set(yearLabels)].sort((a,b) => a-b);
+  const endOfChart = drawdownType === 'perpetual' ? 100 : ea;
+  finChart.data.labels = uniqueLabels.filter(y => y <= endOfChart);
+
+  const dataMap = new Map();
+  uniqueLabels.forEach(label => {
+      const idx = yearLabels.indexOf(label);
+      if (idx !== -1) {
+          dataMap.set(label, {
+              target: balancesTarget[idx],
+              current: balancesCurrent[idx]
+          });
+      }
+  });
+
+  const factor = (age) => showFuture ? 1 : Math.pow(1 + inf, age - sa);
+
+  finChart.data.datasets[0].data = finChart.data.labels.map(age => dataMap.get(age).target / factor(age));
+  finChart.data.datasets[1].data = finChart.data.labels.map(age => dataMap.get(age).current / factor(age));
+
+  finChart.options.plugins.annotation.annotations = {
+    startAgeLine: { type: 'line', xMin: sa, xMax: sa, borderColor: 'green', borderDash: [6, 6], borderWidth: 2, label: { content: 'Start Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, backgroundColor: '#444', color: '#fff', font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
+    retireAgeLine: { type: 'line', xMin: ra, xMax: ra, borderColor: 'blue', borderDash: [6, 6], borderWidth: 2, label: { content: 'Retire Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, xAdjust: -14, backgroundColor: '#444', color: '#fff', font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
+    endAgeLine: { type: 'line', xMin: ea, xMax: ea, borderColor: 'red', borderDash: [6, 6], borderWidth: 2, label: { content: 'Life Expectancy', enabled: true, position: 'start', yAdjust: -20, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white' }}
+  };
+  
+  const breakEvenIndex = findBreakEvenIndex(finChart.data.datasets[1].data);
+  if (breakEvenIndex !== -1 && finChart.data.labels[breakEvenIndex] < ea) {
+    finChart.options.plugins.annotation.annotations.breakEvenPoint = {
+      type: 'point',
+      xValue: finChart.data.labels[breakEvenIndex],
+      yValue: finChart.data.datasets[1].data[breakEvenIndex],
+      backgroundColor: 'black', radius: 5,
+      label: { content: 'Funds Depleted', enabled: true, position: 'top' }
+    };
+  } else if (finChart.options.plugins.annotation.annotations.breakEvenPoint) {
+      delete finChart.options.plugins.annotation.annotations.breakEvenPoint;
+  }
+  
+  function findBreakEvenIndex(arr, threshold = 1) {
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] <= threshold) return i;
+      }
+      return -1;
+  }
 
   finChart.update();
 
-// Generate Table View
-let tableHTML = '<table style="width:100%;border-collapse:collapse;">';
-tableHTML += '<thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
+  // Update Table View
+  let tableHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
+  
+  finChart.data.labels.forEach(age => {
+      if ((age - sa) % 5 !== 0 && age !== sa && age !== ra && age !== ea) return;
 
-const tableEndAge = drawdownType === 'perpetual' ? 100 : ea;
-const tableStartIdx = yearLabels.findIndex(y => y === sa);
-let tableEndIdx = yearLabels.findIndex(y => y === tableEndAge);
-if (tableEndIdx === -1) tableEndIdx = yearLabels.length - 1;
+      const dataPoint = dataMap.get(age);
+      if(!dataPoint) return;
+      
+      const tp = dataPoint.target / factor(age);
+      const cp = dataPoint.current / factor(age);
+      const isRetirement = age === ra;
 
-
-for (let i = tableStartIdx; i <= tableEndIdx; i++) {
-  const y = yearLabels[i];
-  if ((y - sa) % 5 !== 0 && y !== sa && y !== ra && y !== ea) continue;
-
-  const tp = adjustedTarget[i] || 0;
-  const cp = adjustedCurrent[i] || 0;
-  const isRetirement = y === ra;
-tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
-  <td style="padding:8px;text-align:center;">${y}</td>
-  <td style="padding:8px;text-align:right;">$${tp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-  <td style="padding:8px;text-align:right;">$${cp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-</tr>`;
-
-}
-tableHTML += '</tbody></table>';
-
-document.getElementById("tableView").innerHTML = tableHTML;
+      tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
+          <td style="padding:8px;text-align:center;">${age}</td>
+          <td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+          <td style="padding:8px;text-align:right;">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+      </tr>`;
+  });
+  tableHTML += '</tbody></table>';
+  document.getElementById("tableView").innerHTML = tableHTML;
 
   saveSettings();
 }
@@ -2297,7 +2331,6 @@ document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (F
 
       // FINAL FIX — expose functions to window so buttons work:
       window.exportPDF = exportPDF;
-
       window.resetDefaults = resetDefaults;
       window.downloadHTML = downloadHTML;
 
@@ -2310,6 +2343,7 @@ function autoscaleInputs() {
   inputs.forEach(input => {
     const maxWidth = input.clientWidth;
 
+
     const testSpan = document.createElement('span');
     const computed = window.getComputedStyle(input);
 
@@ -2317,6 +2351,7 @@ function autoscaleInputs() {
     testSpan.style.visibility = 'hidden';
     testSpan.style.position = 'absolute';
     testSpan.style.whiteSpace = 'nowrap';
+
     testSpan.style.fontFamily = computed.fontFamily;
     testSpan.style.fontWeight = computed.fontWeight;
     testSpan.style.letterSpacing = computed.letterSpacing;
