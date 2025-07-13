@@ -14,22 +14,58 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Team Canada FIN Tool (Online)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.2.1"></script>
+<script>
+  Chart.register(window['chartjs-plugin-annotation']);
+</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css" />
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+
   
-  <style>
+<style>
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',sans-serif;background:#f4f7fb;color:#222;display:flex;flex-direction:column;align-items:center;padding:20px;}
     h1,h2{color:#1a73e8;margin-bottom:8px;}
     .version,.last-updated{font-size:.85rem;color:#555;margin-bottom:16px;}
-    .inputs-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%;max-width:900px;}
-    .input-group,.slider-group{background:#fff;padding:12px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+    .inputs-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 520px; /* changed from 900px */
+  box-sizing: border-box; /* recommended */
+}
+
+    .input-group, .slider-group {
+  padding: 12px;
+  border-radius: 8px;
+}
+
+/* 🔥 Light Mode Styling (default if NOT dark) */
+body:not(.dark) .input-group,
+body:not(.dark) .slider-group {
+  background-color: #f9f9fc;
+  border: 1px solid #bbb;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
     label{display:block;margin-bottom:6px;font-weight:600;}
     input[type=number],input[type=text],input[type=range]{font-size:1rem;}
     input[type=number],input[type=text]{width:100%;padding:6px;margin-bottom:4px;border:1px solid #aaa;border-radius:4px;}
     .slider-container{display:flex;align-items:center;gap:8px;}
     .output{font-size:1.2rem;font-weight:600;margin:16px 0;text-align:center;}
-    #finChart{width:100%;max-width:900px;height:400px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:20px;}
+   #finChart{
+    width:100%;
+    max-width:900px;
+    height:400px;
+    background:#fff;
+    border-radius:6px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    /* margin-bottom removed */
+}
     .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px;}
     .btn{padding:10px 20px;font-size:1rem;color:#fff;border:none;border-radius:4px;cursor:pointer;}
     .btn-red{background:#d32f2f;} .btn-red:hover{background:#b71c1c;}
@@ -41,10 +77,11 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 .switch {
   position: relative;
   display: inline-block;
-  width: 48px;
-  height: 24px;
+  width: 30px;
+  height: 12px;
   margin-top: 4px;
 }
+
 
 .switch input { display: none; }
 
@@ -57,12 +94,13 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   border-radius: 24px;
 }
 
-.slider:before {
+..slider:before {
   position: absolute;
   content: "";
-  height: 18px; width: 18px;
-  left: 3px;
-  bottom: 3px;
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
   background-color: white;
   transition: 0.4s;
   border-radius: 50%;
@@ -73,7 +111,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(24px);
+  transform: translateX(18px);
 }
 
 .version-container {
@@ -90,16 +128,6 @@ input:checked + .slider:before {
   white-space: nowrap;
 }
 
-.main-layout {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;       /* ✅ Keeps it centered */
-  align-items: flex-start;
-  gap: 24px;                      /* ✅ Less space between panels */
-  max-width: 1100px;              /* ✅ Restrains excessive spread */
-  margin: 0 auto;                 /* ✅ Center on page */
-}
-
 
 .inputs-container,
 .results-container {
@@ -107,16 +135,21 @@ input:checked + .slider:before {
   max-width: 480px;
 }
 
-
-
 .graph-container {
+  flex: 1 1 auto;
+  min-width: 300px;
   width: 100%;
-  padding: 10px;
+  padding: 0;
   box-sizing: border-box;
-  justify-content: center;
-  display: flex;
-  margin-top: 20px;
 }
+
+#finChart {
+  width: 100% !important;
+  height: 300px !important;
+  display: block;
+}
+
+
 
 .main-wrapper {
   display: flex;
@@ -132,11 +165,24 @@ input:checked + .slider:before {
 }
 
 
-@media (max-width: 768px) {
+@media (min-width: 540px) {
   .main-layout {
-    flex-direction: column;
+    flex-direction: row;
   }
+
+ .left-column,
+.inputs-container {
+  flex: 1 1 480px;
+  min-width: 240px;
+  max-width: 520px;
 }
+
+.inputs-container {
+  margin-top: 0px;
+}
+
+}
+
 
 body.dark {
   background: #121212;
@@ -178,147 +224,1471 @@ body.dark td {
   background: #1e1e1e;
 }
 
+
+.header-title {
+  font-size: 1.8rem;
+  color: #007bff;
+  margin: 0;
+  white-space: nowrap;  /* ⛔ Prevents line break */
+}
+
+
+.dark-mode-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+
+.highlight-success {
+  color: #3df283;
+  font-weight: bold;
+}
+
+.info-icon {
+  margin-left: 6px;
+  cursor: help;
+  font-size: 14px;
+  color: #aaa;
+}
+.info-icon:hover {
+  color: #fff;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  
+  overflow: visible;
+}
+.tooltip-container::after {
+  content: none !important;
+}
+
+
+.tooltip-text {
+  font-weight: normal;
+  visibility: hidden;
+  opacity: 0;
+  background-color: #fff8b3;
+  color: #222;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e0c300;
+  position: absolute;
+  top: 100%; /* ⬇️ show below the element */
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 100;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: normal;
+  max-width: 250px;
+  width: max-content;
+  word-wrap: break-word;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+.summary-box {
+  background-color: var(--card-bg, #fff);
+  color: var(--text-color, #000);
+  padding: 20px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 0.95rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 24px 48px; /* vertical gap 24px, horizontal gap 48px */
+}
+
+.summary-header {
+  display: contents; /* lets summary-box handle grid */
+}
+
+.output {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  white-space: nowrap;
+  padding: 0;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.icon {
+
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.output strong {
+  font-size: 1.4rem;
+  color: #007bff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Tooltip styles can remain as is, or add margin if needed */
+.tooltip-text {
+  font-weight: normal;
+  font-size: 0.85rem;
+  max-width: 260px;
+  margin-top: 6px;
+  color: #444;
+}
+
+/* Dark mode */
+body.dark .summary-box {
+  background-color: #1a1a1a;
+  color: #eee;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+body.dark .output strong {
+  color: #3399ff;
+}
+
+body.dark .tooltip-text {
+  background-color: #444c00;  /* darker yellow/olive */
+  color: #fff;                /* white text for contrast */
+  border-color: #666600;      /* darker border to match */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.8); /* subtle shadow for legibility */
+}
+
+
+
+/* Only applied when .debug-layout is on <body> */
+.debug-layout .main-layout {
+  outline: 2px dashed #444;
+  position: relative;
+}
+
+.debug-layout .left-column {
+  background-color: rgba(0, 128, 255, 0.05);
+  border: 1px solid rgba(0, 128, 255, 0.2);
+  position: relative;
+}
+
+.debug-layout .inputs-container {
+  background-color: rgba(255, 128, 0, 0.05);
+  border: 1px solid rgba(255, 128, 0, 0.2);
+  position: relative;
+}
+
+.debug-layout .left-column::before,
+.debug-layout .inputs-container::before {
+  content: attr(class);
+  position: absolute;
+  top: -1.5em;
+  font-size: 12px;
+  font-family: monospace;
+  background: #222;
+  color: #0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.main-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.middle-column {
+  flex: 1 1 480px;
+  min-width: 320px;
+  max-width: 560px;
+}
+
+
+
+.right-column {
+  flex: 0 1 340px;
+  max-width: 400px;
+  min-width: 240px;
+}
+
+
+
+
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: row;
+    row-gap: 10px; /* Adjust this value to your liking, or set to 0 to remove the gap completely */
+  }
+}
+
+  .inputs-container {
+    margin-top: 0px;
+  }
+
+  /* Reduces side padding on the whole page */
+  body {
+    padding: 10px;
+  }
+}
+
+
+
+.fin-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+  min-width: 150px; /* ⬅️ Keep toggles equally spaced */
+  justify-content: space-between;
+}
+
+.fin-toggle label {
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+#scenario-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);  /* 🧱 4 equal columns */
+  gap: 10px;
+  max-width: 100%;
+  margin: 12px auto;
+  padding: 0 10px;
+}
+
+
+
+/* 🔁 Base (dark mode default) */
+.scenario-btn {
+  background-color: #444;
+  color: white;
+  border: 1px solid #888;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.scenario-btn.active {
+  background-color: #0094ff;
+  border-color: #0094ff;
+}
+
+
+.scenario-btn:hover {
+  background-color: #666;
+}
+
+
+body.light-mode .scenario-btn:not(.active) {
+  background-color: #eee !important;
+  color: #222 !important;
+  border-color: #ccc !important;
+}
+
+body.light-mode .scenario-btn.active {
+  background-color: #007bff !important;
+  color: white !important;
+  border-color: #007bff !important;
+}
+
+
+.graph-expand-btn {
+  text-align: right;
+  margin-top: -20px;
+  font-size: 14px;
+  color: #007aff;
+  cursor: pointer;
+}
+
+.graph-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.graph-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90%;
+  overflow: auto;
+  position: relative;
+}
+
+.graph-modal-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.graph-modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-modal-content canvas {
+  width: 100% !important;
+  height: 500px !important;  /* Adjust height to your preference */
+}
+
+#modalChart {
+  width: 100% !important;
+  height: 500px !important;
+  max-height: 100%;
+}
+
+#futureIncomeDisplay {
+  background: #f0f0f0;
+  color: #000;
+  border: 1px solid #ccc;
+}
+
+body.dark #futureIncomeDisplay {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+}
+.readonly-box {
+  background: #f0f0f0;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  box-sizing: border-box;
+  padding: 2px 4px;
+
+  text-align: left;
+  white-space: nowrap;
+
+  font-size: 1rem; 
+  line-height: 1.2;
+
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+
+  overflow: hidden; /* ✅ stops scrollbars if value is still too large momentarily */
+}
+
+
+
+
+
+body.dark .readonly-box {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.autoscale {
+  font-size: 1.2rem;
+  transition: font-size 0.2s ease;
+}
+
+.header-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+.header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;  /* ✅ now centers vertically */
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto 10px auto;
+}
+@media (max-width: 600px) {
+  .header-flex {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .header-title {
+    margin-bottom: 2px;
+  }
+}
+.header-center {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-end;  /* 👈 pushes toggles to the right */
+}
+.toggle-bar {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .toggle-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .toggle-item {
+    font-size: 13px;
+    flex: 1 1 30%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .switch {
+    transform: scale(0.75);
+  }
+}
+
+.version-info {
+  font-size: 0.65rem;  /* smaller font size */
+  opacity: 0.75;
+  margin-top: 4px;     /* a little space below the title */
+  white-space: nowrap; /* prevent wrapping */
+}
+#tableSection {
+  margin-top: 20px;
+  background: var(--card-bg, #fff);
+  color: var(--text-color, #000);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 0.9rem;
+  max-width: 900px;
+  padding: 0;
+}
+
+#tableHeader {
+  cursor: pointer;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  user-select: none;
+  background: #007bff;
+  color: white;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+/* Dark mode */
+body.dark #tableSection {
+  background: #1a1a1a;
+  color: #eee;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+body.dark #tableHeader {
+  background: #3399ff;
+  color: #eee;
+}
+
+body.dark #tableContent {
+  background: #222;
+}
+#tableContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+#tableContent.open {
+  max-height: 1500px;
+}
+
+
+body.debug-layout .header-flex,
+body.debug-layout .main-wrapper,
+body.debug-layout .main-layout,
+body.debug-layout .header-flex,
+body.debug-layout .header-left,        /* ⬅️ ADD THIS */
+body.debug-layout .main-wrapper,
+body.debug-layout .left-column,
+body.debug-layout .middle-column,
+body.debug-layout .right-column,
+body.debug-layout .inputs-container,
+body.debug-layout .graph-container,
+body.debug-layout .summary-bar,
+body.debug-layout .summary-box,
+body.debug-layout .graph-modal-content,
+body.debug-layout #scenario-row,
+body.debug-layout #faq,
+body.debug-layout #tableView {
+  position: relative;
+}
+
+body.debug-layout .header-flex::before,
+body.debug-layout .header-flex::before,
+body.debug-layout .header-left::before, /* ⬅️ ADD THIS */
+body.debug-layout .main-wrapper::before,
+body.debug-layout .main-wrapper::before,
+body.debug-layout .main-layout::before,
+body.debug-layout .left-column::before,
+body.debug-layout .middle-column::before,
+body.debug-layout .right-column::before,
+body.debug-layout .inputs-container::before,
+body.debug-layout .graph-container::before,
+body.debug-layout .summary-bar::before,
+body.debug-layout .summary-box::before,
+body.debug-layout .graph-modal-content::before,
+body.debug-layout #scenario-row::before,
+body.debug-layout #faq::before,
+body.debug-layout #tableView::before {
+  content: attr(class);
+  position: absolute;
+  top: -1.5em;
+  left: 0;
+  font-size: 12px;
+  font-family: monospace;
+  background: #222;
+  color: #0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+/* Light Theme */
+.tippy-box[data-theme~='light'] {
+  background-color: #fffbe7;
+  color: #222;
+  border: 1px solid #e0c300;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme */
+.tippy-box[data-theme~='dark'] {
+  background-color: #2e2e2e;
+  color: #f8f8a3;
+  border: 1px solid #888800;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-align: left;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+#tableView table tbody tr:nth-child(even) {
+  background-color: #e9f1fb; /* Soft sky blue for better contrast */
+}
+
+
+body.dark #tableView table tbody tr:nth-child(even) {
+  background-color: #1f1f1f; /* a notch lighter than pure black */
+}
+#tableView table td {
+  border-bottom: 1px solid #ccc;
+}
+
+body.dark #tableView table td {
+  border-bottom: 1px solid #444;
+}
+#tableView table .retirement-row {
+  background-color: #fff9db !important; /* Light golden highlight */
+  font-weight: 600;
+}
+body.dark #tableView table .retirement-row {
+  background-color: #3a3200 !important; /* Deep amber */
+  font-weight: 600;
+  color: #ffe082; /* Warm yellow text for contrast */
+}
+
+
+
  </style>
 </head>
 <body>
-  <h1>Team Canada FIN# Calculator</h1>
-  
-  <div class="version-container">
-    <div class="version">v2.0.19t (Online)</div>
-    <div class="last-updated">Last updated: June 17, 2025</div>
+<!-- PASSWORD OVERLAY -->
+  <div id="passwordOverlay" style="
+    position: fixed; 
+    top:0; left:0; right:0; bottom:0; 
+    background: #222; 
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    z-index: 9999;
+  ">
+    <label for="passwordInput" style="margin-bottom: 10px; font-size: 1.2rem;">Enter Password:</label>
+    <input type="password" id="passwordInput" style="font-size:1rem; padding: 6px;" autocomplete="off" />
+    <button id="passwordBtn" style="margin-top: 10px; padding: 8px 16px; font-size:1rem; cursor:pointer;">Submit</button>
+    <div id="passwordError" style="color: #f44336; margin-top: 10px; display:none;">Wrong password, try again.</div>
   </div>
 
-<div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
-<div class="main-wrapper"> <!-- full body wrapper-->
-<div class="main-layout"> <!-- the entire main page layout-->
-  <div class="inputs-container"> <!-- Input sliders, toggles, dropdowns -->
+  <!-- PAGE CONTENT (initially hidden) -->
+  <div id="content" style="display:none;">
 
-      <div class="input-group"><label>Desired Monthly Income ($)</label><input type="number" id="desiredIncome"></div>
-      <div class="input-group"><label>Current Investment ($)</label><input type="number" id="currentInvestment"></div>
-      <div class="input-group"><label>Monthly Contribution ($)</label><input type="number" id="monthlyContribution"></div> 
+<!--<body class="debug-layout">-->
+<div class="header">
 
-<!--convert to slider, nix completion
-      <div class="slider-group"><label>Monthly Contribution ($)</label>
-      <div class="slider-container">
-        <input type="range" id="monthlyContribution" min="0" max="7" step="1">
-        <input type="number" id="monthlyContributionNumber">
-      </div>
-    </div>
--->
-      
-    <div class="slider-group"><label>Inflation (%)</label>
-      <div class="slider-container">
-        <input type="range" id="inflationRate" min="0" max="7" step="1">
-        <input type="text" id="inflationRateText">
-      </div>
-    </div>
-    
-    <div class="slider-group"><label>Pre-Retirement Return (%)</label>
-      <div class="slider-container">
-        <input type="range" id="preReturn" min="0" max="18" step="1">
-        <input type="text" id="preReturnText">
-      </div>
-    </div>
-    
-    <div class="slider-group"><label>Post-Retirement Return (%)</label>
-      <div class="slider-container">
-        <input type="range" id="postReturn" min="0" max="15" step="1">
-        <input type="text" id="postReturnText">
-      </div>
-    </div>
+<div class="header-flex">
 
-    <div class="slider-group"><label>Start Age</label>
-      <div class="slider-container">
-        <input type="range" id="startAge" min="0" max="60" step="1">
-        <input type="text" id="startAgeText">
-      </div>
-    </div>
-    
-    <div class="slider-group"><label>Retirement Age</label>
-      <div class="slider-container">
-        <input type="range" id="retireAge" min="30" max="75" step="1">
-        <input type="text" id="retireAgeText">
-      </div>
-    </div>
-    
-    <div class="slider-group"><label>End Age</label>
-      <div class="slider-container">
-        <input type="range" id="endAge" min="75" max="110" step="1">
-        <input type="text" id="endAgeText">
-      </div>
-    </div>
-    
-  <div class="form-group">
-  <label for="drawdownToggle">
-    Retirement Mode 
-    <span title="Choose how long money should last. 'End at End Age' means your money should last until the end age you selected. 'Forever (FIRE style)' means you'll withdraw a fixed % forever (inflation-adjusted).">🛈</span>
-  </label><br>
-  <label class="switch">
-    <input type="checkbox" id="drawdownToggle">
-    <span class="slider"></span>
-  </label>
-  <div style="margin-top:5px;">Mode: <span id="modeLabel">End at End Age</span></div>
-</div> <!-- end of drawdowntoggle-->
+<!-- Left side: Title + Version underneath -->
+  <div class="header-left"> <h1 class="header-title">FIN Calculator</h1>
+    <div class="version-info">v2.0.34t (Online) • Updated: July 12, 2025</div>
+</div>
 
-</div> <!-- end of the input container-->
-
- <div class="results-container"> <!--Outputs: FIN, Monthly FIN, Fully Funded, toggles -->
+<!-- Header Center Section -->
+<div class="header-center">
   
-  <div class="output">Financial Independence Number <br>(FIN): <strong id="finAmount">$0</strong></div>
-  
+<!-- Toggle Bar -->
+  <div class="toggle-bar">
+   
+   <!-- Dark Mode Toggle -->
+    <div class="toggle-item">
+      <span>Dark Mode 🌙</span>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
 
-  <div class="output">Monthly FIN: <strong id="monthlyNeeded">$0</strong></div>
+    <!-- Display Toggle -->
+    <div class="toggle-item">
+  <span
+    id="finDisplayLabelContainer"
+    data-tooltip="Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong>. Due to inflation, the amount you will need in the future to buy the same things you buy today will be much higher."
   
-  <div class="form-group fin-toggle-centered">
+  >
+    <span id="finDisplayLabelPrefix">Display:</span>
+    <strong id="finDisplayLabel">Future $</strong>
+  </span>
 
-  <label for="finDisplayToggle">
-    Show FIN in 
-    <span title="Choose between showing your Financial Independence Number (FIN) in today's dollars or inflated future dollars.">🛈</span>
-  </label><br>
   <label class="switch">
     <input type="checkbox" id="finDisplayToggle" checked>
     <span class="slider"></span>
   </label>
-  <div style="margin-top:5px;">Display Mode: <span id="finDisplayLabel">Future $</span></div>
 </div>
-<div class="form-group dark-mode-toggle" style="margin-top:20px;">
-  <label for="darkModeToggle">Dark Mode 🌙</label><br>
+
+
+    <!-- Mode Toggle -->
+<div class="toggle-item">
+  <span
+    id="modeLabelWrapper"
+    data-tooltip="Choose Life Expectancy mode (investments are expected to last up to this age) or Forever drawdown style (the money lasts forever in the hands of your beneficiaries)."
+  
+  >
+    <span id="modeLabelPrefix">Mode:</span>
+    <strong id="modeLabel">Life Expectancy</strong>
+  </span>
+
   <label class="switch">
-    <input type="checkbox" id="darkModeToggle">
+    <input type="checkbox" id="drawdownToggle">
     <span class="slider"></span>
   </label>
 </div>
 
+</div> <!-- Closes: <div class="toggles-row"> -->
+</div> <!-- Closes: <div class="toggles-container"> -->
+</div> <!-- Closes: <div class="header-flex"> -->
+
+
+<!-- Scenario Buttons Row -->
+<div id="scenario-row" class="scenario-buttons">
+  <button class="scenario-btn active" data-scenario="default">Default</button>
+  <button class="scenario-btn" data-scenario="child-zero">Child Born</button>
+  <button class="scenario-btn" data-scenario="start-19">Start Age 19</button>
+  <button class="scenario-btn" data-scenario="start-25">Start Age 25</button>
+  <button class="scenario-btn" data-scenario="start-30">Start Age 30</button>
+  <button class="scenario-btn" data-scenario="start-40">Start Age 40</button>
+  <button class="scenario-btn" data-scenario="start-50">Start Age 50</button>
+  <button class="scenario-btn" data-scenario="start-60">Start Age 60</button>
+</div> <!-- Closes: <div id="scenario-row" class="scenario-buttons"> -->
+</div> <!-- Closes: <div class="header-section"> -->
+
+
+
+
+
+<div class="summary-bar">
+
+<div
+  class="output tooltip-container"
+  data-tooltip="Lump sum needed at desired retirement age to cover all future income goals in the future (also known as Financial Independence Number)."
+>
+  <div class="label-row">
+    <span class="icon">💰</span>
+    <span class="label-text">FIN</span>
+  </div>
+  <strong id="finAmount">$0</strong>
+</div>
+
+
+<div
+  class="output tooltip-container"
+  data-tooltip="How much extra you'd need to save monthly to meet your financial independence target."
+>
+  <div class="label-row">
+    <span class="icon">📅</span>
+    <span class="label-text">Monthly FIN</span>
+  </div>
+  <strong id="monthlyNeeded">$0</strong>
+</div>
+
+
+<div
+  class="output tooltip-container"
+  data-tooltip="How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal."
+>
+  <div class="label-row">
+    <span class="icon">🎯</span>
+    <span class="label-text">Fully Funded</span>
+  </div>
+  <strong id="fullyFundedNow">$0</strong>
+</div>
+
+
+  <div
+  class="output tooltip-container"
+  data-tooltip="Income Protection Number: Estimated life insurance need based on your current income requirement."
+>
+  <div class="label-row">
+    <span class="icon">🛡️</span>
+    <span class="label-text">IPN</span>
+  </div>
+  <strong id="incomeProtectionNumber">$0</strong>
+</div>
+
+  
+</div>
+
+
+
+</div><!--end of header-flex with title, version and toggles-->
+
+
+</div>
+
+<div id="ageWarning">⚠️ Invalid ages auto-adjusted.</div>
+<div class="main-wrapper"> <!-- full body wrapper-->
+
+
+<div class="main-layout"> <!-- the entire main page layout-->
+
+<div class="left-column">
+
+<div class="inputs-container"> <!-- Input boxes, sliders -->
+
+  <!-- Row 1 -->
+  <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+    <div style="flex: 0.5;">
+      <label for="desiredIncome" data-tooltip="Monthly income you want during retirement, in today’s dollars." class="tooltip-label">Income $</label>
+      <input type="number" id="desiredIncome" />
+    </div>
+    <div style="flex: 0.5;">
+      <label for="futureIncomeDisplay" data-tooltip="Inflation-adjusted monthly income at retirement age to match today’s value.">Future $</label>
+      <input type="text" id="futureIncomeDisplay" readonly />
+    </div>
+  </div>
+
+  <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+    <div style="flex: 0.5;">
+      <label for="currentInvestment" data-tooltip="How much money have you saved so far, in the bank, mutual funds, stocks, GICs, CASH?">Current $</label>
+      <input type="number" id="currentInvestment" />
+    </div>
+    <div style="flex: 0.5;">
+      <label for="futureValueInvestmentDisplay" data-tooltip="Future value of your existing investments by retirement.">Future $</label>
+      <input type="text" id="futureValueInvestmentDisplay" class="readonly-box autoscale" readonly />
+    </div>
+  </div>
+
+  <!-- Row 2 -->
+  <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+    <div style="flex: 0.5;">
+      <label for="monthlyContribution" data-tooltip="How much money are you putting away right now monthly?">PAC/mo</label>
+      <input type="number" id="monthlyContribution" />
+    </div>
+    <div style="flex: 0.5;">
+      <label for="futureValueContributionDisplay" data-tooltip="Total value of your contributions by retirement, assuming compounding growth.">Future $</label>
+      <input type="text" id="futureValueContributionDisplay" class="readonly-box autoscale" readonly />
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions.">End contributions age</label>
+    <input type="number" id="stopAge" value="100" min="0">
+  </div>
+
+  <!-- Row 3 -->
+  <div class="slider-group">
+    <label for="startAge" data-tooltip="Your current age or the age at which savings start.">Start Age</label>
+    <div class="slider-container">
+      <input type="range" id="startAge" min="0" max="100" step="1">
+      <input type="text" id="startAgeText">
+    </div>
+  </div>
+
+  <div class="slider-group">
+    <label for="preReturn" data-tooltip="Expected average annual rate of return on your investments before retirement, during accumulation phase.">Pre-ret. return %</label>
+    <div class="slider-container">
+      <input type="range" id="preReturn" min="0" max="18" step="1">
+      <input type="text" id="preReturnText">
+    </div>
+  </div>
+
+  <!-- Row 4 -->
+  <div class="slider-group">
+    <label for="retireAge" data-tooltip="The age when you stop working and begin withdrawals. For lifelong income, switch the mode to &quot;Forever&quot;.">Retirement Age</label>
+    <div class="slider-container">
+      <input type="range" id="retireAge" min="20" max="95" step="1">
+      <input type="text" id="retireAgeText">
+    </div>
+  </div>
+
+  <div class="slider-group">
+    <label for="postReturn" data-tooltip="Expected average annual return on your investments during retirement or the from the age you set for financial independence.">Post-ret. return %</label>
+    <div class="slider-container">
+      <input type="range" id="postReturn" min="0" max="15" step="1">
+      <input type="text" id="postReturnText">
+    </div>
+  </div>
+
+  <!-- Row 5 -->
+  <div class="slider-group">
+    <label for="endAge" id="lifeLabel" data-tooltip="What's your life expectancy? Default is 100. In FIRE mode, your money is set to last forever.">Life Expectancy</label>
+    <div class="slider-container">
+      <input type="range" id="endAge" min="55" max="120" step="1">
+      <input type="text" id="endAgeText">
+    </div>
+  </div>
+
+  <div class="slider-group">
+    <label for="infRate" data-tooltip="Average expected annual increase in cost of living.">Expected Inflation (%)</label>
+    <div class="slider-container">
+      <input type="range" id="inflationRate" min="0" max="7" step="1">
+      <input type="text" id="inflationRateText">
+    </div>
+  </div>
+
+</div> <!-- end of the input container -->
+
+<!--
+ <div class="results-container"> 
 
   </div> <!--end of results-container-->
-<div class="graph-container"> <!--graph container starting-->
 
-  <canvas id="finChart" style="max-height: 400px;"></canvas>
+</div> <!--end of left-column-->
+
+<div class="middle-column">
+
+  <div class="graph-container"> <!--graph container starting-->
+
+    <div id="finChartContainer">
+  <canvas id="finChart" style="width: 100%; max-height: 600px;"></canvas>
+</div>
+
+    
+    <div class="graph-expand-btn" onclick="openGraphModal()">🔍 Expand</div>
+
+    <!-- Chart Modal -->
+    <div id="graphModal" class="graph-modal" onclick="closeGraphModal(event)">
+      <div class="graph-modal-content" onclick="event.stopPropagation()">
+        <div class="graph-modal-close" onclick="closeGraphModal()">✖</div>
+        <canvas id="modalChart"></canvas>
+      </div>
+    </div>
+  </div> <!-- end of the graph-container-->
+
+
+<style>
+  /* FAQ container styles */
+  #faq {
+  margin-top: 20px;
+  background: var(--card-bg, #fff);
+  color: var(--text-color, #000);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 0.9rem;
+  padding: 0;
+  width: 100%;
+  max-width: 700px;         /* Match .middle-column width */
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+/* FAQ main header */
+  #faqHeader {
+  cursor: pointer;
+  padding: 8px 12px;                /* smaller padding */
+  font-weight: 600;
+  font-size: 1rem;                  /* smaller font */
+  user-select: none;
+  background: #e0e7ff;              /* soft blue background */
+  color: #1a237e;                   /* navy text */
+  border-radius: 6px;
+  border: 1px solid #c5cae9;        /* subtle border */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+#faqHeader:hover {
+  background: #d0d8ff;
+}
+  /* FAQ main content container, hidden by default */
+  #faqContent {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    background: var(--card-bg, #f9f9f9);
+    border-radius: 0 0 8px 8px;
+    padding: 0 20px;
+  }
+
+  #faqContent.open {
+    padding: 16px 20px;
+    max-height: 1000px; /* enough for content */
+  }
+
+  /* Individual question styles */
+  .faq-item {
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+  }
+
+  .faq-question {
+    cursor: pointer;
+    font-weight: 600;
+    position: relative;
+    padding-right: 24px;
+    user-select: none;
+  }
+
+  .faq-question::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: transform 0.3s ease;
+  }
+
+  .faq-question.open::after {
+    content: '-';
+    transform: rotate(180deg);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding-left: 8px;
+    color: #333;
+    font-weight: normal;
+    font-size: 0.9rem;
+  }
+
+  .faq-answer.open {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    max-height: 500px; /* large enough for most answers */
+  }
+
+  /* Dark mode tweaks */
+  body.dark #faq {
+    background: #1a1a1a;
+    color: #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  body.dark #faqHeader {
+  background: #1e1e1e;
+  color: #ddd;
+  border: 1px solid #333;
+}
+body.dark #faqHeader:hover {
+  background: #2a2a2a;
+}
+  body.dark #faqContent {
+    background: #222;
+  }
+
+  body.dark .faq-item {
+    border-color: #444;
+  }
+
+  body.dark .faq-answer {
+    color: #ccc;
+  }
+  
+  .summary-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  margin: 10px auto 10px;
+  font-size: 0.95rem;
+  max-width: 960px;
+}
+
+.summary-item {
+  text-align: center;
+  position: relative;
+  min-width: 130px;
+}
+
+.summary-item strong {
+  font-size: 1.4rem;
+  color: #007bff;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.summary-item .label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.summary-item .icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+body.dark .summary-item strong {
+  color: #3399ff;
+}
+
+/* Removes top padding from only the first item in the inputs column */
+.inputs-container > .input-group:first-child,
+.inputs-container > .slider-group:first-child {
+  padding-top: 0;
+}
+
+.summary-bar .output {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+@media (max-width: 540px) {
+  .summary-bar {
+    justify-content: center;
+    gap: 24px;
+    margin-top: 12px;
+  }
+}
+
+body.dark .summary-bar {
+  background-color: transparent;
+}
+.scenario-btn.active:hover {
+  background-color: #007bff !important;
+  color: white !important;
+  border-color: #007bff !important;
+}
+
+#finChartContainer {
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  border-radius: 8px;
+  
+  display: block;
+  overflow: hidden;
+}
+
+/* Light Mode Styling */
+body:not(.dark) #finChartContainer {
+  background-color: #f9f9fc;
+  border: 1px solid #bbb;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional Dark Mode */
+body.dark #finChartContainer {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+}
+
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Toggle FAQ main section
+  const faqHeader = document.getElementById('faqHeader');
+  const faqContent = document.getElementById('faqContent');
+  const faqToggleIcon = document.getElementById('faqToggleIcon');
+
+  faqHeader.addEventListener('click', () => {
+    const expanded = faqHeader.getAttribute('aria-expanded') === 'true';
+    faqHeader.setAttribute('aria-expanded', String(!expanded));
+    faqContent.classList.toggle('open');
+    faqContent.setAttribute('aria-hidden', String(expanded));
+    faqToggleIcon.textContent = expanded ? '▼' : '▲';
+  });
+  faqHeader.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      faqHeader.click();
+    }
+  });
+
+  // Toggle individual FAQ questions
+  document.querySelectorAll('.faq-question').forEach(question => {
+    question.addEventListener('click', () => {
+      const expanded = question.getAttribute('aria-expanded') === 'true';
+      question.setAttribute('aria-expanded', String(!expanded));
+      const answer = document.getElementById(question.getAttribute('aria-controls'));
+      if (answer) {
+        if (expanded) {
+          answer.hidden = true;
+          answer.classList.remove('open');
+        } else {
+          answer.hidden = false;
+          answer.classList.add('open');
+        }
+      }
+      question.classList.toggle('open');
+    });
+    question.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        question.click();
+      }
+    });
+  });
+  });
+</script>
+
+</div>
 
 
 
-</div><!-- end of the graph-container-->
+<div class="right-column"> <!--start of right-column-->
 
 <!-- table view of the accumulation and decumulation -->
 <div id="tableView" style="width:100%; max-width:900px; overflow-x:auto; margin-bottom:30px;"></div>
+<section id="faq" aria-label="Frequently Asked Questions">
+  <div id="faqHeader" tabindex="0" role="button" aria-expanded="false" aria-controls="faqContent">
+    Frequently Asked Questions
+    <span aria-hidden="true" id="faqToggleIcon">▼</span>
+  </div>
+  <div id="faqContent" role="region" aria-hidden="true">
 
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer1" id="question1">
+        What is the FIN (Financial Independence Number)?
+      </div>
+      <div class="faq-answer" id="answer1" aria-labelledby="question1" hidden>
+        The FIN represents the lump sum amount you need at retirement to generate your desired income for life.
+      </div>
+    </div>
 
-</div> <!--end of main-container-->
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer2" id="question2">
+        Why does the FIN change for different start age?
+      </div>
+      <div class="faq-answer" id="answer2" aria-labelledby="question2" hidden>
+        The FIN changes with start age because the amount you need at retirement depends on how many years you have to save and how inflation impacts the value of your desired income. Starting earlier means your desired income needs to be inflated over a longer period before retirement, which changes the lump sum required.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer3" id="question3">
+        How is the “Future $” display different from “Today's $”?
+      </div>
+      <div class="faq-answer" id="answer3" aria-labelledby="question3" hidden>
+        “Future $” adjusts your income and savings goals to account for inflation, showing the amount of money you will need in inflated future dollars. “Today's $” shows the equivalent value in today’s dollars, removing the effects of inflation to provide a clearer comparison.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer4" id="question4">
+        What does “Fully Funded” mean?
+      </div>
+      <div class="faq-answer" id="answer4" aria-labelledby="question4" hidden>
+        “Fully Funded” shows how much you’d need invested today to meet your retirement goals without adding extra monthly contributions.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer5" id="question5">
+        What is the difference between Life Expectancy and Forever (FIRE style) modes?
+      </div>
+      <div class="faq-answer" id="answer5" aria-labelledby="question5" hidden>
+        Life Expectancy mode plans your finances to last until a set age, while Forever (FIRE) mode plans for perpetual income with no set end date.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" tabindex="0" role="button" aria-expanded="false" aria-controls="answer6" id="question6">
+        How do changes in inflation or investment return rates affect my results?
+      </div>
+      <div class="faq-answer" id="answer6" aria-labelledby="question6" hidden>
+        Inflation and return rates impact how much you need to save and your investment growth, which affects your FIN and funding requirements.
+      </div>
+    </div>
+
+  </div>
+</section>          
+</div> <!--end of right-container-->
+    
 
 </div> <!-- end of the main-wrapper, full page-->
-  <div class="buttons">
-    <!--
-    <button class="btn btn-red" onclick="exportPDF()">Export PDF</button>
- -->
-    <button class="btn btn-blue" onclick="resetDefaults()">Reset Defaults</button>
-    <button id="downloadHTMLBtn" class="btn btn-green" onclick="downloadHTML()" style="display:none;">Download HTML</button>
 
-    <!-- <button class="btn btn-green" onclick="downloadHTML()">Download HTML</button> -->
-  </div>
-  <div id="downloadLinkContainer"></div>
+</div> <!-- end of #content -->
 
+<!-- PASSWORD CHECK SCRIPT (must be the first script on the list)-->
+  <script>
+   document.addEventListener('DOMContentLoaded', () => {
+  const correctPassword = 'fna4success';
+  const overlay = document.getElementById('passwordOverlay');
+  const content = document.getElementById('content');
+  const input = document.getElementById('passwordInput');
+  const btn = document.getElementById('passwordBtn');
+  const errorMsg = document.getElementById('passwordError');
+
+  // Check sessionStorage on load
+  if (sessionStorage.getItem('accessGranted') === 'true') {
+    overlay.style.display = 'none';
+    content.style.display = 'block';
+    return;
+  }
+
+  btn.addEventListener('click', checkPassword);
+  input.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  function checkPassword() {
+    if (input.value === correctPassword) {
+      sessionStorage.setItem('accessGranted', 'true');
+      overlay.style.display = 'none';
+      content.style.display = 'block';
+      errorMsg.style.display = 'none';
+    } else {
+      errorMsg.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  }
+});
+
+  </script>
+  
+  
+<!-- script to set the default for scenarios-->
+<script>
+  const baseScenario = {
+    desiredIncome: 2000,
+    currentInvestment: 0,
+    monthlyContribution: 100,
+    stopAge: 100,
+    inflationRate: 2,
+    preReturn: 9,
+    postReturn: 7,
+    startAge: 25,
+    retireAge: 65,
+    endAge: 85
+  };
+
+  const scenarios = {
+    "default": { ...baseScenario },
+    "child-zero": { ...baseScenario, desiredIncome: 5000, startAge: 0 },
+    "start-19": { ...baseScenario, desiredIncome: 5000, startAge: 19 },
+    "start-25": { ...baseScenario, desiredIncome: 5000, startAge: 25 },
+    "start-30": { ...baseScenario, desiredIncome: 5000, startAge: 30 },
+    "start-40": { ...baseScenario, desiredIncome: 5000, startAge: 40 },
+    "start-50": { ...baseScenario, desiredIncome: 5000, startAge: 50 },
+
+    "start-60": { ...baseScenario, desiredIncome: 5000,startAge: 60 }
+  };
+
+  function setValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = value;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  document.querySelectorAll(".scenario-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      // UI highlight
+      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+localStorage.setItem('lastScenario', btn.dataset.scenario);
+
+      const s = scenarios[btn.dataset.scenario];
+      if (!s) return;
+
+      // Set plain inputs
+      setValue("desiredIncome", s.desiredIncome);
+      setValue("currentInvestment", s.currentInvestment);
+      setValue("monthlyContribution", s.monthlyContribution);
+      setValue("stopAge", s.stopAge);
+
+      // Set sliders + matching number inputs
+      setValue("inflationRate", s.inflationRate);
+      setValue("inflationInput", s.inflationRate);
+
+      setValue("preReturn", s.preReturn);
+      setValue("preInput", s.preReturn);
+
+      setValue("postReturn", s.postReturn);
+      setValue("postInput", s.postReturn);
+
+      setValue("startAge", s.startAge);
+      setValue("startInput", s.startAge);
+
+      setValue("retireAge", s.retireAge);
+      setValue("retireInput", s.retireAge);
+
+      setValue("endAge", s.endAge);
+      setValue("endInput", s.endAge);
+    });
+  });
+</script>
+
+<!--script to expand the chart in modal format for bigger view-->
+<script>
+let modalChart;
+
+function openGraphModal() {
+  const modal = document.getElementById("graphModal");
+  const modalContent = document.querySelector(".graph-modal-content");
+  const modalCanvas = document.getElementById("modalChart");
+
+  modal.style.display = "flex";
+
+  setTimeout(() => {
+    const mainChart = Chart.getChart("finChart");
+    if (!mainChart) return;
+
+    // Clone data deeply
+    const clonedData = JSON.parse(JSON.stringify(mainChart.data));
+
+    // Start with a basic clean copy of options
+const clonedOptions = {
+  responsive: false,
+  maintainAspectRatio: false,
+  scales: mainChart.options.scales,
+  plugins: {
+    legend: {
+      labels: {
+        usePointStyle: true,
+        pointStyle: 'line'
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: ctx => '$' + ctx.parsed.y.toLocaleString()
+      }
+    },
+    title: {
+      display: true,
+      text: 'Portfolio Growth & Drawdown'
+    },
+    annotation: {
+      drawTime: 'afterDraw',
+      annotations: mainChart.options.plugins.annotation?.annotations || {}
+    }
+  }
+};
+
+
+    modalCanvas.width = modalContent.clientWidth;
+    modalCanvas.height = 500;
+    modalCanvas.style.width = '100%';
+    modalCanvas.style.height = '500px';
+
+    if (modalChart) modalChart.destroy();
+
+    const ctx = modalCanvas.getContext("2d");
+    modalChart = new Chart(ctx, {
+      type: mainChart.config.type,
+      data: clonedData,
+      options: clonedOptions
+    });
+
+    console.log("✅ Chart rendered in modal.");
+  }, 300);
+}
+
+function closeGraphModal(event) {
+  document.getElementById("graphModal").style.display = "none";
+}
+</script>
+
+
+
+<!--script to load/save settings locally-->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      
+      
       const els = {};
       ['currentInvestment','desiredIncome','monthlyContribution',
        'inflationRate','inflationRateText','preReturn','preReturnText',
@@ -328,23 +1698,75 @@ body.dark td {
         els[id]=document.getElementById(id);
         });
         document.getElementById("drawdownToggle").addEventListener("change", function () {
-         const label = this.checked ? "Forever (FIRE style)" : "End at End Age";
-        document.getElementById("modeLabel").textContent = label;
-        calculateFIN();
-        });
-        document.getElementById("finDisplayToggle").addEventListener("change", function () {
-        const label = this.checked ? "Future $" : "Today's $";
-        document.getElementById("finDisplayLabel").textContent = label;
+        const isFire = this.checked;
+        document.getElementById("modeLabel").textContent = isFire ? "Forever (FIRE style)" : "Life Expectancy";
+
+        // Also change the slider label for Life Expectancy
+        const lifeLabel = document.querySelector('label[for="endAge"]');
+        if (lifeLabel) {
+          lifeLabel.textContent = isFire ? "Life Expectancy: Perpetual" : "Life Expectancy";
+        }
+
         calculateFIN();
       });
 
-      function loadSettings(){
-        const saved=localStorage.getItem('finToolSettings');
-        if(saved){
-          const s=JSON.parse(saved);
-          Object.keys(s).forEach(k=>{ if(els[k]) els[k].value=s[k];});
-        } else resetDefaults();
+        document.getElementById("finDisplayToggle").addEventListener("change", function () {
+        const label = this.checked ? "Future $" : "Today's $";
+        document.getElementById("finDisplayLabel").textContent = label;
+        
+        calculateFIN();
+      });
+
+function loadSettings(){
+  const saved = localStorage.getItem('finToolSettings');
+  if (saved) {
+    const s = JSON.parse(saved);
+    Object.keys(s).forEach(k => {
+      if (els[k]) els[k].value = s[k];
+    });
+
+    // 🎯 Match scenario by values
+    const mapped = {
+      desiredIncome: +s.desiredIncome,
+      currentInvestment: +s.currentInvestment,
+      monthlyContribution: +s.monthlyContribution,
+      stopAge: +s.stopAge,
+      inflationRate: +s.inflationRate,
+      preReturn: +s.preReturn,
+      postReturn: +s.postReturn,
+      startAge: +s.startAge,
+      retireAge: +s.retireAge,
+      endAge: +s.endAge
+    };
+
+    let matchedScenario = 'custom';
+    for (const [name, scenario] of Object.entries(scenarios)) {
+      const isMatch = Object.entries(scenario).every(([key, val]) =>
+        mapped.hasOwnProperty(key) && +mapped[key] === +val
+      );
+      if (isMatch) {
+        matchedScenario = name;
+        break;
       }
+    }
+
+    // ✅ Prefer last clicked scenario if stored
+    const last = localStorage.getItem('lastScenario');
+    const activeScenario = (last && scenarios[last]) ? last : matchedScenario;
+
+    // 🖱️ Apply active scenario UI
+    document.querySelectorAll(".scenario-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.scenario === activeScenario);
+    });
+
+  } else {
+    resetDefaults();
+  }
+
+  calculateFIN();
+}
+
+
 
 // DARK MODE PERSISTENCE
 const darkToggle = document.getElementById('darkModeToggle');
@@ -409,10 +1831,16 @@ const finChart = new Chart(ctx, {
     maintainAspectRatio: true,
     scales: {
       x: {
+      type: 'linear', // 🛠️ THIS is the magic that makes annotations match!
         title: {
           display: true,
           text: 'Age (Years)'
-        }
+        },
+        ticks: {
+  stepSize: 1, // show every year
+  callback: value => value.toString()
+}
+
       },
       y: {
         beginAtZero: true,
@@ -442,6 +1870,7 @@ const finChart = new Chart(ctx, {
     text: 'Portfolio Growth & Drawdown'
   },
   annotation: {
+  drawTime: 'afterDraw',
     annotations: {} // will be filled dynamically in calculateFIN()
   }
 }
@@ -464,6 +1893,10 @@ function calculateFIN() {
   const ci = +els.currentInvestment.value || 0;
   const di = +els.desiredIncome.value || 0;
   const mc = +els.monthlyContribution.value || 0;
+// Calculate Income Protection Number (IPN)
+const incomeProtectionNumber = di * 12 * 12;
+document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtectionNumber.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+
   const inf = +els.inflationRate.value / 100 || 0;
   const pre = +els.preReturn.value / 100 || 0;
   const post = +els.postReturn.value / 100 || 0;
@@ -471,15 +1904,47 @@ function calculateFIN() {
   const sa = +els.startAge.value,
         ra = +els.retireAge.value,
         ea = +els.endAge.value;
+        let stopAge = +document.getElementById("stopAge").value || ra;
+        stopAge = Math.min(stopAge, ea);
 
   const yrsTo = ra - sa,
         yrsIn = ea - ra,
         mRate = pre / 12,
         months = yrsTo * 12;
+        
+const mcFutureMonths = (ra - sa) * 12;
+const mcMonthlyRate = pre / 12;
+const mcFutureValue =
+  mcMonthlyRate > 0
+    ? mc * ((Math.pow(1 + mcMonthlyRate, mcFutureMonths) - 1) / mcMonthlyRate)
+    : mc * mcFutureMonths;
+const fvDisplay = document.getElementById("futureValueContributionDisplay");
+if (fvDisplay) {
+  fvDisplay.value = mcFutureValue.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  autoscaleInputs(); // 🚀 Re-scale instantly so value fits!
 
-  const infIncome = di * Math.pow(1 + inf, yrsTo);
+}
+
+
   const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
   const showFuture = document.getElementById("finDisplayToggle").checked;
+
+  // In FIRE mode, assume perpetual retirement to age 100
+  const effectiveEndAge = drawdownType === "perpetual" ? 100 : ea;
+  const drawdownYears = effectiveEndAge - ra + 1;
+
+  // Update future income calculation to match correct drawdown span
+  const futureIncome = di * Math.pow(1 + inf / 12, yrsTo * 12);
+  const incomeUsed = showFuture ? futureIncome : di;
+
+  const futureIncomeAnnual = di * Math.pow(1 + inf, yrsTo); // Simpler annual inflation
+  document.getElementById("futureIncomeDisplay").value = showFuture
+  ? futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  : di.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  <!--document.getElementById("futureAgeLabel").textContent = ra;-->
+
+  
+
 
   // FIN amount needed at retirement
   let fin;
@@ -487,14 +1952,21 @@ function calculateFIN() {
   const r = post / 12; // monthly rate
   const n = yrsIn * 12;
   fin = r > 0
-    ? infIncome * ((1 - Math.pow(1 + r, -n)) / r)
-    : infIncome * n;
+    ? incomeUsed * ((1 - Math.pow(1 + r, -n)) / r)
+    : incomeUsed * n;
+
 } else {
-    const realRate = post - inf;
-    fin = realRate > 0
-      ? (di * 12) / realRate
-      : di * 12 * 50;
+  const realRate = post - inf;
+  fin = realRate > 0
+    ? (incomeUsed * 12) / realRate
+    : incomeUsed * 12 * 50;
   }
+  const finUsed = fin;
+  const fullyFundedNow = fin / Math.pow(1 + pre, ra - sa);
+  const isFullyFunded = ci >= fullyFundedNow;
+  document.getElementById("fullyFundedNow").classList.toggle("highlight-success", isFullyFunded);
+
+
 
   // Ideal path: from $0
   const monthlyNeedIdeal = fin > 0
@@ -503,62 +1975,102 @@ function calculateFIN() {
 
   // Actual user forecast
   const fvCurr = ci * Math.pow(1 + pre, yrsTo);
-  const fvCont = mRate > 0
+    const fvCont = mRate > 0
     ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate)
     : mc * months;
 
+const fviDisplay = document.getElementById("futureValueInvestmentDisplay");
+if (fviDisplay) {
+  fviDisplay.value = fvCurr.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+
   const totalFV = fvCurr + fvCont;
-  const rem = Math.max(fin - totalFV, 0);
+  const rem = Math.max(finUsed - totalFV, 0);
   const monthlyNeed = rem > 0
     ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months)
     : 0;
 
+
   // Update outputs
   els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  const displayFIN = showFuture ? fin : fin / Math.pow(1 + inf, yrsTo);
+  const displayFIN = finUsed;
+
+
   els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
+document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
   // Chart data
   const yearLabels = [];
   const balancesTarget = [];
   const balancesCurrent = [];
 
-  let balTarget = 0;
-  for (let age = sa; age <= ra; age++) {
-    if (age > sa) {
-      balTarget += monthlyNeedIdeal * 12;
-      balTarget *= (1 + pre);
-    }
-    yearLabels.push(age);
-    balancesTarget.push(balTarget);
-  }
-  for (let age = ra + 1; age <= ea; age++) {
-  for (let m = 0; m < 12; m++) {
-    balTarget *= (1 + post / 12);
-    balTarget -= infIncome;
-    if (balTarget < 0) balTarget = 0;
-  }
+// === TARGET PLAN (REQUIRED) ===
+// Accumulate until retirement using ideal monthly need and starting from current investment
+let balTarget = ci;
+for (let age = sa; age < ra; age++) {
+  balTarget += monthlyNeedIdeal * 12;
+  balTarget *= (1 + pre);
   yearLabels.push(age);
   balancesTarget.push(balTarget);
 }
 
+// Save the balance at retirement age
+const balanceAtRetirement = balTarget;
+
+
+// 🎯 Reverse drawdown from retirement to life expectancy
+// Already calculated above
+const targetDrawdown = new Array(drawdownYears + 1);
+
+
+const postMonthly = post / 12;
+
+// Start drawdown from balance at retirement (continuity!)
+targetDrawdown[0] = balanceAtRetirement;
+
+for (let i = 0; i < drawdownYears; i++) {
+  let prev = targetDrawdown[i];
+  for (let m = 0; m < 12; m++) {
+    prev *= (1 + postMonthly);
+    prev -= incomeUsed;
+  }
+  targetDrawdown[i + 1] = Math.max(prev, 0);
+}
+
+
+
+// Append drawdown years from ra to ea inclusive, even if $0
+for (let age = ra; age <= ea; age++) {
+  const i = age - ra;
+  yearLabels.push(age);
+  const val = targetDrawdown[i] !== undefined ? targetDrawdown[i] : 0;
+  balancesTarget.push(val);
+}
+
+
+
+
 
   let balCurrent = ci;
-  for (let age = sa; age <= ra; age++) {
-    if (age > sa) {
-      balCurrent += mc * 12;
-      balCurrent *= (1 + pre);
-    }
-    balancesCurrent.push(balCurrent);
+for (let age = sa; age <= ra; age++) {
+  if (age < stopAge) {
+    balCurrent += mc * 12;
   }
-  for (let age = ra + 1; age <= ea; age++) {
+  balCurrent *= (1 + pre);
+  balancesCurrent.push(balCurrent);
+}
+
+
+ for (let i = 0; i <= drawdownYears; i++) {
   for (let m = 0; m < 12; m++) {
     balCurrent *= (1 + post / 12);
-    balCurrent -= infIncome;
+    balCurrent -= incomeUsed;
     if (balCurrent < 0) balCurrent = 0;
   }
   balancesCurrent.push(balCurrent);
 }
+
 
   // 🧠 Adjust both lines for display toggle
   const adjustedTarget = [];
@@ -566,7 +2078,7 @@ function calculateFIN() {
 
   for (let i = 0; i < yearLabels.length; i++) {
     const offset = yearLabels[i] - sa;
-    const factor = showFuture ? 1 : Math.pow(1 + inf, offset);
+    const factor = showFuture ? 1 : Math.pow(1 + inf / 12, offset * 12);
     adjustedTarget.push(balancesTarget[i] / factor);
     adjustedCurrent.push(balancesCurrent[i] / factor);
   }
@@ -577,64 +2089,82 @@ function calculateFIN() {
   finChart.data.datasets[1].data = adjustedCurrent;
   
     // Add dynamic chart annotations
-    const annotations = {
-    startAgeLine: {
-      type: 'line',
-      xMin: sa,
-xMax: sa,
+const annotations = {
+  startAgeLine: {
+    type: 'line',
+    xMin: sa,
+    xMax: sa,
+    borderColor: 'green',
+    borderDash: [6, 6],
+    borderWidth: 2,
+    label: {
+  content: 'Start Age',
+  enabled: true,
+  position: {
+    x: 'center',
+    y: 'end'   // 👈 aligns to X-axis bottom
+  },
+  yAdjust: 8, // ✅ pushes below chart line slightly
+  xAdjust: 0,  // optional: small nudge if misaligned
+  backgroundColor: '#444',
+  color: '#fff',
+  font: {
+    size: 10,
+    weight: 'bold'
+  },
+  padding: 4,
+  borderRadius: 4
+}
 
-      borderColor: 'green',
-      borderDash: [6, 6],
-      borderWidth: 2,
-      label: {
-        content: 'Start Age',
-        enabled: true,
-        position: 'center'
-      }
-    },
-    retireAgeLine: {
-      type: 'line',
-      xMin: ra,
-      xMax: ra,
 
-      borderColor: 'blue',
-      borderDash: [6, 6],
-      borderWidth: 2,
-      label: {
-        content: 'Retire Age',
-        enabled: true,
-        position: 'center'
-      }
-    },
-    endAgeLine: {
-      type: 'line',
-      xMin: ea,
-      xMax: ea,
+  },
+  retireAgeLine: {
+    type: 'line',
+    xMin: ra,
+    xMax: ra,
+    borderColor: 'blue',
+    borderDash: [6, 6],
+    borderWidth: 2,
+    label: {
+  content: 'Retire Age',
+  enabled: true,
+  position: {
+    x: 'center',
+    y: 'end'
+  },
+  yAdjust: 8,     // ⬇️ slightly below the chart
+  xAdjust: -14,   // ⬅️ nudges it left of the dot/tick
+  backgroundColor: '#444',
+  color: '#fff',
+  font: {
+    size: 10,
+    weight: 'bold'
+  },
+  padding: 4,
+  borderRadius: 4
+}
 
-      borderColor: 'red',
-      borderDash: [6, 6],
-      borderWidth: 2,
-      label: {
-        content: 'End Age',
-        enabled: true,
-        position: 'center'
-      }
-    },
-    modeLabel: {
-      type: 'label',
-      xValue: sa,
-      
-      yValue: Math.max(...adjustedTarget),
-      backgroundColor: 'rgba(0,0,0,0.7)',
-      content: showFuture ? 'Future $' : "Today's $",
-      color: 'white',
-      font: { weight: 'bold' },
-      padding: 6,
-      position: 'top',
-      xAdjust: 10,
-      yAdjust: -20
+  },
+  endAgeLine: {
+    type: 'line',
+    xMin: ea,
+    xMax: ea,
+    borderColor: 'red',
+    borderDash: [6, 6],
+    borderWidth: 2,
+    label: {
+      content: 'Life Expectancy',
+      enabled: true,
+      position: 'start',
+      yAdjust: -20,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      color: 'white'
     }
-  };
+  },
+
+
+};
+
 
   // Break-even point marker
 function findBreakEvenIndex(arr, threshold = 0.01) {
@@ -664,26 +2194,33 @@ if (breakEvenIndex !== -1) {
 
 
   finChart.options.plugins.annotation.annotations = annotations;
-console.log("Applying annotations:", annotations);
+console.log("ANNOTATIONS NOW SET:", finChart.options.plugins.annotation.annotations);
+
   finChart.update();
 
 // Generate Table View
 let tableHTML = '<table style="width:100%;border-collapse:collapse;">';
 tableHTML += '<thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
 
-const tableEndAge = drawdownType === 'perpetual' ? Math.max(ea, 100) : ea;
+const tableEndAge = drawdownType === 'perpetual' ? 100 : ea;
 const tableStartIdx = yearLabels.findIndex(y => y === sa);
-const tableEndIdx = yearLabels.findIndex(y => y === tableEndAge);
+let tableEndIdx = yearLabels.findIndex(y => y === tableEndAge);
+if (tableEndIdx === -1) tableEndIdx = yearLabels.length - 1;
+
 
 for (let i = tableStartIdx; i <= tableEndIdx; i++) {
   const y = yearLabels[i];
+  if ((y - sa) % 5 !== 0 && y !== sa && y !== ra && y !== ea) continue;
+
   const tp = adjustedTarget[i] || 0;
   const cp = adjustedCurrent[i] || 0;
-  tableHTML += `<tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#fff'};">
-    <td style="padding:8px;text-align:center;">${y}</td>
-    <td style="padding:8px;text-align:right;">$${tp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-    <td style="padding:8px;text-align:right;">$${cp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-  </tr>`;
+  const isRetirement = y === ra;
+tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
+  <td style="padding:8px;text-align:center;">${y}</td>
+  <td style="padding:8px;text-align:right;">$${tp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+  <td style="padding:8px;text-align:right;">$${cp.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+</tr>`;
+
 }
 tableHTML += '</tbody></table>';
 
@@ -754,17 +2291,133 @@ document.getElementById("tableView").innerHTML = tableHTML;
       loadSettings();
       // Set correct label on toggle
 const drawdownInitial = document.getElementById("drawdownToggle").checked;
-document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "End at End Age";
+document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "Life Expectancy";
 
       calculateFIN();
 
       // FINAL FIX — expose functions to window so buttons work:
       window.exportPDF = exportPDF;
+
       window.resetDefaults = resetDefaults;
       window.downloadHTML = downloadHTML;
 
     });
 
   </script>
+  <script>
+function autoscaleInputs() {
+  const inputs = document.querySelectorAll('.autoscale');
+  inputs.forEach(input => {
+    const maxWidth = input.clientWidth;
+
+    const testSpan = document.createElement('span');
+    const computed = window.getComputedStyle(input);
+
+    // 🧠 Clone exact font styling from input
+    testSpan.style.visibility = 'hidden';
+    testSpan.style.position = 'absolute';
+    testSpan.style.whiteSpace = 'nowrap';
+    testSpan.style.fontFamily = computed.fontFamily;
+    testSpan.style.fontWeight = computed.fontWeight;
+    testSpan.style.letterSpacing = computed.letterSpacing;
+    testSpan.style.fontStyle = computed.fontStyle;
+    testSpan.style.padding = computed.padding;
+    testSpan.style.border = computed.border;
+    testSpan.style.boxSizing = computed.boxSizing;
+
+    const maxFontSize = 18;
+    const minFontSize = 6;
+    let fontSize = maxFontSize;
+
+    testSpan.textContent = input.value;
+    testSpan.style.fontSize = fontSize + 'px';
+    document.body.appendChild(testSpan);
+
+    while ((testSpan.offsetWidth + 1) > maxWidth && fontSize > minFontSize) {
+      fontSize--;
+      testSpan.style.fontSize = fontSize + 'px';
+    }
+
+    input.style.fontSize = fontSize + 'px';
+    document.body.removeChild(testSpan);
+
+    // Optional: Show full value on hover
+    input.title = input.value;
+  });
+}
+
+// ✅ Run initially and keep rechecking every 500ms
+document.addEventListener('DOMContentLoaded', () => {
+  autoscaleInputs();
+  setInterval(autoscaleInputs, 500);
+});
+</script>
+
+<!-- tooltip tippy-->
+<script>
+  function applyTippyTheme() {
+    const tippyTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+
+    tippy('[data-tooltip]', {
+      content(reference) {
+        return reference.getAttribute('data-tooltip');
+      },
+      theme: tippyTheme,
+      placement: 'top',
+      maxWidth: 240,
+      allowHTML: true,
+      animation: 'shift-away',
+      delay: [100, 100],
+      offset: [0, 10],
+      inlinePositioning: true,
+      popperOptions: {
+        modifiers: [
+          {
+            name: 'preventOverflow',
+            options: {
+              boundary: 'window'
+            }
+          }
+        ]
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    applyTippyTheme();
+
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('[data-tippy-root]').forEach(el => el.remove());
+      applyTippyTheme();
+    });
+
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  });
+</script>
+
+
+
+
+<script>
+  // This script creates a small box to display the window width.
+  const widthDisplay = document.createElement('div');
+  widthDisplay.style.position = 'fixed';
+  widthDisplay.style.bottom = '10px';
+  widthDisplay.style.right = '10px';
+  widthDisplay.style.padding = '5px 10px';
+  widthDisplay.style.background = 'rgba(0, 0, 0, 0.7)';
+  widthDisplay.style.color = 'white';
+  widthDisplay.style.fontFamily = 'sans-serif';
+  widthDisplay.style.borderRadius = '5px';
+  widthDisplay.style.zIndex = '9999';
+  document.body.appendChild(widthDisplay);
+
+  function updateWidth() {
+    widthDisplay.textContent = `Width: ${window.innerWidth}px`;
+  }
+
+  window.addEventListener('resize', updateWidth);
+  updateWidth(); // Show initial width
+</script>
 </body>
 </html>
