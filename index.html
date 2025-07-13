@@ -2095,7 +2095,8 @@ if (fvDisplay) {
     : incomeUsed * 12 * 50;
   }
   const finUsed = fin;
-  const fullyFundedNow = fin / Math.pow(1 + pre, ra - sa);
+  const fullyFundedNow = Math.max((fin / Math.pow(1 + pre, ra - sa)) - ci, 0);
+
   const isFullyFunded = ci >= fullyFundedNow;
   document.getElementById("fullyFundedNow").classList.toggle("highlight-success", isFullyFunded);
 
