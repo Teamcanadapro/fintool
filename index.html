@@ -931,6 +931,19 @@ body.dark #tableView table .retirement-row {
   font-weight: bold;
 }
 
+/* Standardize slider thumb color across devices */
+input[type=range] {
+  accent-color: #1a73e8; /* For modern Chrome, Edge, Firefox */
+}
+
+input[type=range]::-webkit-slider-thumb {
+  background-color: #1a73e8;
+}
+
+input[type=range]::-moz-range-thumb {
+  background-color: #1a73e8;
+}
+
 
  </style>
 </head>
