@@ -2165,7 +2165,7 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
   // --- ACCUMULATION SIMULATION (Month by Month) ---
   let balCurrent = ci;
   let balTarget = ci;
-  const requiredMonthlySaving = mc + monthlyNeed;
+  const requiredMonthlySaving = monthlyNeedIdeal;
 
   for (let age = sa; age < ra; age++) {
     let yearEndCurrent = balCurrent;
