@@ -925,6 +925,12 @@ body.dark #tableView table .retirement-row {
   }
 }
 
+.on-track-green {
+  background-color: #c7f7c1 !important; /* soft green */
+  color: #176a12 !important;           /* dark green */
+  font-weight: bold;
+}
+
 
  </style>
 </head>
@@ -2258,21 +2264,29 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
   let tableHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
   
   finChart.data.labels.forEach(age => {
-      if ((age - sa) % 5 !== 0 && age !== sa && age !== ra && age !== ea) return;
+    if ((age - sa) % 5 !== 0 && age !== sa && age !== ra && age !== ea) return;
 
-      const dataPoint = dataMap.get(age);
-      if(!dataPoint) return;
-      
-      const tp = dataPoint.target / factor(age);
-      const cp = dataPoint.current / factor(age);
-      const isRetirement = age === ra;
+    const dataPoint = dataMap.get(age);
+    if (!dataPoint) return;
 
-      tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
-          <td style="padding:8px;text-align:center;">${age}</td>
-          <td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-          <td style="padding:8px;text-align:right;">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-      </tr>`;
-  });
+    const tp = dataPoint.target / factor(age);
+    const cp = dataPoint.current / factor(age);
+    const isRetirement = age === ra;
+
+    // --- HIGHLIGHT LOGIC ---
+    let onTrackClass = '';
+    if (isRetirement) {
+      if (tp > 0 && Math.abs(cp - tp) / tp < 0.01) { // within 1%
+        onTrackClass = 'on-track-green';
+      }
+    }
+
+    tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
+        <td style="padding:8px;text-align:center;">${age}</td>
+        <td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+        <td style="padding:8px;text-align:right;" class="${onTrackClass}">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+    </tr>`;
+});
   tableHTML += '</tbody></table>';
   document.getElementById("tableView").innerHTML = tableHTML;
 
