@@ -957,7 +957,7 @@ body.dark #tableView table .retirement-row {
 
 <!-- Left side: Title + Version underneath -->
   <div class="header-left"> <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.35t (Online) • Updated: July 13, 2025</div>
+    <div class="version-info">v2.0.36t (Online) • Updated: July 14, 2025</div>
 </div>
 
 <!-- Header Center Section -->
@@ -1185,7 +1185,8 @@ body.dark #tableView table .retirement-row {
   </div>
 
   <div class="slider-group">
-    <label for="infRate" data-tooltip="Average expected annual increase in cost of living.">Expected Inflation (%)</label>
+    <label for="inflationRate" data-tooltip="Average expected annual increase in cost of living.">Expected Inflation (%)</label>
+
     <div class="slider-container">
       <input type="range" id="inflationRate" min="0" max="7" step="1">
       <input type="text" id="inflationRateText">
@@ -1879,7 +1880,7 @@ function loadSettings(){
     resetDefaults();
   }
 
-  calculateFIN();
+  //calculateFIN();
 }
 
 
@@ -2017,6 +2018,8 @@ const ctx = document.getElementById('finChart').getContext('2d');
 
 
 function calculateFIN() {
+console.trace('calculateFIN called at', new Date().toISOString());
+
   validateAges();
 
   const ci = +els.currentInvestment.value || 0;
@@ -2027,7 +2030,6 @@ const incomeProtectionNumber = di * 12 * 12;
 document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtectionNumber.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 
   const inf = +els.inflationRate.value / 100 || 0;
-
   const pre = +els.preReturn.value / 100 || 0;
   const post = +els.postReturn.value / 100 || 0;
 
@@ -2040,7 +2042,6 @@ document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtec
   const yrsTo = ra - sa,
         yrsIn = ea - ra,
         mRate = pre / 12,
-
         months = yrsTo * 12;
         
 
@@ -2067,14 +2068,16 @@ if (fvDisplay) {
 
 
   // Update future income calculation to match correct drawdown span
-  const futureIncome = di * Math.pow(1 + inf / 12, yrsTo * 12);
+  const futureIncome = di * Math.pow(1 + inf, yrsTo);
 
   const incomeUsed = showFuture ? futureIncome : di;
+  
+  
   const futureIncomeAnnual = di * Math.pow(1 + inf, yrsTo); // Simpler annual inflation
   document.getElementById("futureIncomeDisplay").value = showFuture
   ? futureIncomeAnnual.toLocaleString(undefined, { maximumFractionDigits: 0 })
   : di.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  <!--document.getElementById("futureAgeLabel").textContent = ra;-->
+//  <!--document.getElementById("futureAgeLabel").textContent = ra;-->
 
   
 
@@ -2082,23 +2085,29 @@ if (fvDisplay) {
   // FIN amount needed at retirement
   let fin;
   if (drawdownType === "finite") {
-  const r = post / 12; // monthly rate
-  const n = yrsIn * 12;
+  // ANNUAL version for Primerica match
+  const annualPost = post;   // e.g. 0.07 (7%)
+  const annualInf = inf;     // e.g. 0.02 (2%)
+  const r = (1 + annualPost) / (1 + annualInf) - 1;
+  const n = yrsIn; // number of years in retirement
+  const annualIncome = (showFuture ? futureIncome : di) * 12; // <-- annual income at retirement
   fin = r > 0
-    ? incomeUsed * ((1 - Math.pow(1 + r, -n)) / r)
-    : incomeUsed * n;
+    ? annualIncome * ((1 - Math.pow(1 + r, -n)) / r)
+    : annualIncome * n;
+}
+ else {
+  console.log('mode is forever');
+    const realRate = post - inf;
+    fin = realRate > 0
+      ? (incomeUsed * 12) / realRate
+      : incomeUsed * 12 * 50;
+    }
+    const finUsed = fin;
+    const fullyFundedNow = Math.max((fin / Math.pow(1 + pre, ra - sa)) - ci, 0);
 
-} else {
-  const realRate = post - inf;
-  fin = realRate > 0
-    ? (incomeUsed * 12) / realRate
-    : incomeUsed * 12 * 50;
-  }
-  const finUsed = fin;
-  const fullyFundedNow = Math.max((fin / Math.pow(1 + pre, ra - sa)) - ci, 0);
 
-  const isFullyFunded = ci >= fullyFundedNow;
-  document.getElementById("fullyFundedNow").classList.toggle("highlight-success", isFullyFunded);
+    const isFullyFunded = ci >= fullyFundedNow;
+    document.getElementById("fullyFundedNow").classList.toggle("highlight-success", isFullyFunded);
 
 
 
@@ -2125,13 +2134,19 @@ if (fviDisplay) {
     ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months)
     : 0;
 
-
+console.log('DI (today):', di);
+console.log('yrsTo:', yrsTo);
+console.log('Annual Inflation Rate:', inf);
+console.log('futureIncome (annual):', futureIncome);
+console.log('post-ret rate:', post);
+console.log('years in retirement:', yrsIn);
+console.log('n (months):', yrsIn * 12);
+console.log('r (monthly post-ret):', post / 12);
+console.log('Calculated FIN:', fin);
   // Update outputs
   els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  const displayFIN = finUsed;
 
-
-  els.finAmount.textContent = '$' + displayFIN.toLocaleString(undefined, { maximumFractionDigits: 0 });
+els.finAmount.textContent = '$' + fin.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
 document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
