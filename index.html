@@ -94,7 +94,7 @@ body:not(.dark) .slider-group {
   border-radius: 24px;
 }
 
-..slider:before {
+.slider:before {
   position: absolute;
   content: "";
   height: 14px;
@@ -944,6 +944,14 @@ input[type=range]::-moz-range-thumb {
   background-color: #1a73e8;
 }
 
+#calcDragHandle {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+  padding: 10px;
+  width: 100%;
+}
 
  </style>
 </head>
@@ -969,14 +977,181 @@ input[type=range]::-moz-range-thumb {
   <!-- PAGE CONTENT (initially hidden) -->
   <div id="content" style="display:none;">
 
+<button onclick="document.getElementById('basicCalculator').classList.toggle('hidden')"
+  style="position: fixed; top: 20px; left: 20px; z-index: 999;
+         background: none; border: none; padding: 0; cursor: pointer;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"
+       stroke="#1976d2" stroke-width="4" fill="none"
+       style="width: 40px; height: 40px;">
+    <!-- Outer calculator body -->
+    <rect x="8" y="4" width="48" height="56" rx="6" ry="6"/>
+    <!-- Screen area -->
+    <rect x="12" y="8" width="40" height="12" rx="2" ry="2"/>
+    <!-- Button grid: 3 columns x 3 rows -->
+    <circle cx="20" cy="28" r="3"/>
+    <circle cx="32" cy="28" r="3"/>
+    <circle cx="44" cy="28" r="3"/>
+    <circle cx="20" cy="40" r="3"/>
+    <circle cx="32" cy="40" r="3"/>
+    <circle cx="44" cy="40" r="3"/>
+    <circle cx="20" cy="52" r="3"/>
+    <circle cx="32" cy="52" r="3"/>
+    <circle cx="44" cy="52" r="3"/>
+  </svg>
+</button>
+
+
+
+
+
+
+
 <!--<body class="debug-layout">-->
 <div class="header">
 
 <div class="header-flex">
 
-<!-- Left side: Title + Version underneath -->
-  <div class="header-left"> <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.36t (Online) • Updated: July 14, 2025</div>
+<div class="header-flex-row" style="display: flex; align-items: flex-start; gap: 20px;">
+<!-- Calculator Panel Start -->
+<div id="basicCalculator" class="calculator-panel hidden"
+style="position: fixed; top: 20px; left: 20px; z-index: 1000;
+       max-width: 320px; padding: 16px;
+       background: var(--calc-bg, #23272d);
+       color: var(--calc-text, #fff);
+       border-radius: 14px; box-shadow: 0 2px 8px #0003;">
+
+  <div id="calcDragHandle" style="font-weight:bold;font-size:1.2em;margin-bottom:6px; cursor: move;">Basic Calculator</div>
+  
+  <!--close button for the draggable calculator-->
+  <button onclick="document.getElementById('basicCalculator').classList.add('hidden')"
+style="position:absolute; top:10px; right:12px; background:none; color:white; font-size:20px; border:none; cursor:pointer;">×</button>
+
+  <input id="calcDisplay" type="text" style="width:100%;padding:10px;font-size:1.3em;margin-bottom:12px;text-align:right;border:none;border-radius:6px;background:var(--calc-panel,#1a1c1e);color:var(--calc-text,#fff);" readonly>
+  
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+    <button class="calc-btn" onclick="calcInput('7')">7</button>
+    <button class="calc-btn" onclick="calcInput('8')">8</button>
+    <button class="calc-btn" onclick="calcInput('9')">9</button>
+    <button class="calc-btn" onclick="calcInput('/')">÷</button>
+
+    <button class="calc-btn" onclick="calcInput('4')">4</button>
+    <button class="calc-btn" onclick="calcInput('5')">5</button>
+    <button class="calc-btn" onclick="calcInput('6')">6</button>
+    <button class="calc-btn" onclick="calcInput('*')">×</button>
+
+    <button class="calc-btn" onclick="calcInput('1')">1</button>
+    <button class="calc-btn" onclick="calcInput('2')">2</button>
+    <button class="calc-btn" onclick="calcInput('3')">3</button>
+    <button class="calc-btn" onclick="calcInput('-')">−</button>
+
+    <button class="calc-btn" onclick="calcInput('0')">0</button>
+    <button class="calc-btn" onclick="calcInput('.')">.</button>
+    <button class="calc-btn" onclick="calcClear()">C</button>
+    <button class="calc-btn" onclick="calcInput('+')">+</button>
+  </div>
+
+  <!-- Row for equals and backspace -->
+  <div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="calc-btn" id="calcEquals" style="flex:2;" onclick="calcEquals()">=</button>
+    <button class="calc-btn" style="flex:1;" onclick="calcBackspace()">⌫</button>
+  </div>
+</div>
+
+<!-- Calculator Styles (copy to your CSS or inside a <style> block) -->
+<style>
+.hidden {
+  display: none !important;
+}
+
+:root {
+  --calc-bg: #23272d;
+  --calc-panel: #1a1c1e;
+  --calc-text: #fff;
+  --calc-btn-bg: #2a2d34;
+  --calc-btn-hover: #1976d2;
+  --calc-btn-text: #fff;
+  --calc-equals-bg: #1976d2;
+}
+
+body:not(.dark) {
+  --calc-bg: #f4f5f7;
+  --calc-panel: #fff;
+  --calc-text: #222;
+  --calc-btn-bg: #f0f0f0;
+  --calc-btn-hover: #1976d2;
+  --calc-btn-text: #222;
+  --calc-equals-bg: #1976d2;
+}
+
+
+
+.calc-btn {
+  background: var(--calc-btn-bg, #2a2d34);
+  color: var(--calc-btn-text, #fff);
+  border: none;
+  border-radius: 6px;
+  padding: 12px 0;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background 0.14s;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.calc-btn:active,
+.calc-btn:hover {
+  background: var(--calc-btn-hover, #1976d2);
+  color: #fff;
+}
+
+#calcEquals {
+  background: var(--calc-equals-bg, #1976d2) !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+</style>
+
+
+
+<!-- Calculator Logic (place after the calculator HTML, before </body>) -->
+<script>
+let calcBuffer = "";
+
+function calcInput(char) {
+  // Prevent multiple decimals in the same number
+  if (char === '.' && calcBuffer.split(/[\+\-\*\/]/).pop().includes('.')) return;
+  calcBuffer += char;
+  document.getElementById('calcDisplay').value = calcBuffer;
+}
+function calcClear() {
+  calcBuffer = "";
+  document.getElementById('calcDisplay').value = "";
+}
+function calcBackspace() {
+  calcBuffer = calcBuffer.slice(0, -1);
+  document.getElementById('calcDisplay').value = calcBuffer;
+}
+function calcEquals() {
+  try {
+    if (/^[0-9+\-*/.() ]+$/.test(calcBuffer)) {
+      let result = eval(calcBuffer);
+      document.getElementById('calcDisplay').value = result;
+      calcBuffer = String(result);
+    } else {
+      document.getElementById('calcDisplay').value = "Err";
+      calcBuffer = "";
+    }
+  } catch {
+    document.getElementById('calcDisplay').value = "Err";
+    calcBuffer = "";
+  }
+}
+</script>
+
+  <div class="header-left">
+    <h1 class="header-title">FIN Calculator</h1>
+    <div class="version-info">v2.0.37t (Online) • Updated: July 14, 2025</div>
+  </div>
 </div>
 
 <!-- Header Center Section -->
@@ -984,7 +1159,7 @@ input[type=range]::-moz-range-thumb {
   
 <!-- Toggle Bar -->
   <div class="toggle-bar">
-   
+
    <!-- Dark Mode Toggle -->
     <div class="toggle-item">
       <span>Dark Mode 🌙</span>
@@ -1100,9 +1275,9 @@ input[type=range]::-moz-range-thumb {
   <strong id="incomeProtectionNumber">$0</strong>
 </div>
 
+
   
 </div>
-
 
 
 </div><!--end of header-flex with title, version and toggles-->
@@ -2497,5 +2672,124 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', updateWidth);
   updateWidth(); // Show initial width
 </script>
+<script>
+
+
+function calcInput(char) {
+  if (char === '.' && calcBuffer.split(/[\+\-\*\/]/).pop().includes('.')) return;
+  calcBuffer += char;
+  document.getElementById('calcDisplay').value = calcBuffer;
+}
+function calcClear() {
+  calcBuffer = "";
+  document.getElementById('calcDisplay').value = "";
+}
+function calcBackspace() {
+  calcBuffer = calcBuffer.slice(0, -1);
+  document.getElementById('calcDisplay').value = calcBuffer;
+}
+function calcEquals() {
+  try {
+    if (/^[0-9+\-*/.() ]+$/.test(calcBuffer)) {
+      let result = eval(calcBuffer);
+      document.getElementById('calcDisplay').value = result;
+      calcBuffer = String(result);
+    } else {
+      document.getElementById('calcDisplay').value = "Err";
+      calcBuffer = "";
+    }
+  } catch {
+    document.getElementById('calcDisplay').value = "Err";
+    calcBuffer = "";
+  }
+}
+
+document.addEventListener('keydown', function (e) {
+  const isCalcVisible = !document.getElementById('basicCalculator').classList.contains('hidden');
+  if (!isCalcVisible) return;
+
+  const key = e.key;
+
+  if (/\d/.test(key)) {
+    calcInput(key); // numbers 0–9
+  } else if (key === '+' || key === '-' || key === '*' || key === '/' || key === '.') {
+    calcInput(key);
+  } else if (key === 'Enter' || key === '=') {
+    e.preventDefault(); // prevent form submission if any
+    calcEquals();
+  } else if (key === 'Backspace') {
+    e.preventDefault();
+    calcBackspace();
+  } else if (key === 'Escape') {
+    calcClear();
+  }
+});
+
+</script>
+
+<script>
+(function () {
+  const el = document.getElementById("basicCalculator");
+  const handle = document.getElementById("calcDragHandle");
+  let offsetX = 0, offsetY = 0, isDragging = false;
+
+  // Restore position if saved
+  const savedLeft = localStorage.getItem("calcLeft");
+  const savedTop = localStorage.getItem("calcTop");
+
+  if (savedLeft !== null && savedTop !== null) {
+    el.style.left = savedLeft + "px";
+    el.style.top = savedTop + "px";
+    el.style.right = ""; // Clear right to avoid layout conflict
+  }
+
+  function startDrag(x, y) {
+    isDragging = true;
+    offsetX = x - el.offsetLeft;
+    offsetY = y - el.offsetTop;
+    el.style.position = "fixed";
+    document.body.style.userSelect = "none";
+  }
+
+  function dragTo(x, y) {
+    if (!isDragging) return;
+    const left = x - offsetX;
+    const top = y - offsetY;
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+    el.style.right = ""; // Clear right so left takes effect
+    localStorage.setItem("calcLeft", left);
+    localStorage.setItem("calcTop", top);
+  }
+
+  function stopDrag() {
+    isDragging = false;
+    document.body.style.userSelect = "";
+  }
+
+  // Mouse events
+  handle.addEventListener("mousedown", e => startDrag(e.clientX, e.clientY));
+  document.addEventListener("mousemove", e => dragTo(e.clientX, e.clientY));
+  document.addEventListener("mouseup", stopDrag);
+
+  // Touch events
+  handle.addEventListener("touchstart", e => {
+    const touch = e.touches[0];
+    startDrag(touch.clientX, touch.clientY);
+  }, { passive: false });
+
+  document.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    dragTo(touch.clientX, touch.clientY);
+  }, { passive: false });
+
+  document.addEventListener("touchend", stopDrag);
+})();
+</script>
+
+
+
+
 </body>
 </html>
