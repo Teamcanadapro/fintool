@@ -1150,7 +1150,7 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.37t (Online) • Updated: July 14, 2025</div>
+    <div class="version-info">v2.0.38t (Online) • Updated: July 17, 2025</div>
   </div>
 </div>
 
@@ -2352,7 +2352,7 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
 
   // --- ACCUMULATION SIMULATION (Month by Month) ---
   let balCurrent = ci;
-  let balTarget = ci;
+  let balTarget = 0;
   const requiredMonthlySaving = monthlyNeedIdeal;
 
   for (let age = sa; age < ra; age++) {
