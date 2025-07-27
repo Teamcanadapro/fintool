@@ -826,10 +826,10 @@ body.debug-layout #tableView::before {
   background-color: #e9f1fb; /* Soft sky blue for better contrast */
 }
 
-
 body.dark #tableView table tbody tr:nth-child(even) {
   background-color: #1f1f1f; /* a notch lighter than pure black */
 }
+
 #tableView table td {
   border-bottom: 1px solid #ccc;
 }
@@ -837,15 +837,32 @@ body.dark #tableView table tbody tr:nth-child(even) {
 body.dark #tableView table td {
   border-bottom: 1px solid #444;
 }
+
 #tableView table .retirement-row {
   background-color: #fff9db !important; /* Light golden highlight */
   font-weight: 600;
 }
-body.dark #tableView table .retirement-row {
-  background-color: #3a3200 !important; /* Deep amber */
+
+body.dark #tableView table .retirement-row td {
+  background-color: #5c4500 !important; /* Deep amber */
+  color: #ffe07b !important;            /* Warm yellow text */
   font-weight: 600;
-  color: #ffe082; /* Warm yellow text for contrast */
 }
+
+#tableView table .on-track-green {
+  background-color: #c8facc !important; /* Pale green for light mode */
+  color: #006400 !important;            /* Dark green text */
+  font-weight: 600;
+}
+
+body.dark #tableView table .on-track-green td {
+  background-color: #004d40 !important; /* Deep teal green */
+  color: #a5f5d0 !important;            /* Soft mint green text */
+  font-weight: 600;
+}
+
+
+
 
 /* --- Final Styles for Expanded Chart --- */
 
@@ -926,10 +943,15 @@ body.dark #tableView table .retirement-row {
 }
 
 .on-track-green {
-  background-color: #c7f7c1 !important; /* soft green */
-  color: #176a12 !important;           /* dark green */
+  background-color: #c7f7c1 !important;
+  color: #176a12 !important;
   font-weight: bold;
 }
+.on-track-green td {
+  background-color: #c7f7c1 !important;
+  color: #176a12 !important;
+}
+
 
 /* Standardize slider thumb color across devices */
 input[type=range] {
@@ -952,6 +974,17 @@ input[type=range]::-moz-range-thumb {
   padding: 10px;
   width: 100%;
 }
+
+/* Green highlight for on-track retirement row */
+.retirement-row.on-track {
+  background-color: #d1f2cc !important;  /* Light green */
+  color: #145d19 !important;            /* Dark green text */
+}
+body.dark .retirement-row.on-track {
+  background-color: #2a3f2a !important; /* Darker green for dark mode */
+  color: #8fffa1 !important;            /* Light green text */
+}
+
 
  </style>
 </head>
@@ -1150,7 +1183,7 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.41 • Updated: July 26, 2025</div>
+    <div class="version-info">v2.0.42 • Updated: July 26, 2025</div>
   </div>
 </div>
 
@@ -1409,7 +1442,7 @@ function calcEquals() {
   <div class="graph-expand-btn-2" onclick="toggleGraphSize()">↔️ Expand the Chart</div>
 </div>
 <p class="chart-disclaimer">
-    This illustrative calculator is designed to be an informational and educational tool only. This illustration is a hypothetical and does not represent an actual investment. This illustration uses a constant rate, compounded on a monthly basis, unlike actual investments which will fluctuate in value and could be significantly impacted by periods of negative returns. It does not include fees, taxes, expenses, or withdrawals, which if included, would lower results. There is no guarantee you will achieve these results. The historical inflation rate is 3%.
+    This illustrative calculator is designed to be an informational and educational tool only. This illustration is a hypothetical and does not represent an actual investment. This illustration uses a constant rate, compounded on a monthly basis, unlike actual investments which will fluctuate in value and could be significantly impacted by periods of negative returns. It does not include fees, taxes, expenses, or extra withdrawals before retirement, which if included, would lower results. Monthly withdrawal is at the beginning of the month, inflation applied annually. There is no guarantee you will achieve these results. The historical inflation rate is 3%.
   </p>
 
   </div> <!-- end of the graph-container-->
@@ -2243,7 +2276,7 @@ const mcFutureMonths = (ra - sa) * 12;
 const mcMonthlyRate = pre / 12;
 const mcFutureValue =
   mcMonthlyRate > 0
-    ? mc * ((Math.pow(1 + mcMonthlyRate, mcFutureMonths) - 1) / mcMonthlyRate)
+    ? mc * ((Math.pow(1 + mcMonthlyRate, mcFutureMonths) - 1) / mcMonthlyRate) * (1 + mcMonthlyRate)
     : mc * mcFutureMonths;
 const fvDisplay = document.getElementById("futureValueContributionDisplay");
 if (fvDisplay) {
@@ -2373,6 +2406,8 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
     balTarget = yearEndTarget;
   }
 
+  
+
   // --- DRAWDOWN SIMULATION (Month by Month) ---
   const simulateDrawdown = (startingBalance) => {
     let balance = startingBalance;
@@ -2451,30 +2486,55 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
   // Update Table View
   let tableHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
   
-  finChart.data.labels.forEach(age => {
-    if ((age - sa) % 5 !== 0 && age !== sa && age !== ra && age !== ea) return;
-
-    const dataPoint = dataMap.get(age);
-    if (!dataPoint) return;
-
-    const tp = dataPoint.target / factor(age);
-    const cp = dataPoint.current / factor(age);
-    const isRetirement = age === ra;
-
-    // --- HIGHLIGHT LOGIC ---
-    let onTrackClass = '';
-    if (isRetirement) {
-      if (tp > 0 && Math.abs(cp - tp) / tp < 0.01) { // within 1%
-        onTrackClass = 'on-track-green';
-      }
-    }
-
-    tableHTML += `<tr class="${isRetirement ? 'retirement-row' : ''}">
-        <td style="padding:8px;text-align:center;">${age}</td>
-        <td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-        <td style="padding:8px;text-align:right;" class="${onTrackClass}">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-    </tr>`;
+ const zeroAge = finChart.data.labels.find(age => {
+  const dp = dataMap.get(age);
+  return dp && dp.current <= 0;
 });
+const finalFiveStartAge = zeroAge ? Math.max(sa, zeroAge - 5) : null;
+const finalFiveEndAge = zeroAge || -1;
+
+finChart.data.labels.forEach(age => {
+  let showRow = false;
+
+  if (age < finalFiveStartAge) {
+    // before the final 5 years: show in 5-year increments
+    showRow = ((age - sa) % 5 === 0 || age === sa || age === ra || age === ea);
+  } else if (age >= finalFiveStartAge && age <= finalFiveEndAge) {
+    // final 5 years before balance depletion: show all
+    showRow = true;
+  } else {
+    // after depletion: resume 5-year increments
+    showRow = ((age - sa) % 5 === 0 || age === ra || age === ea);
+  }
+
+  if (!showRow) return;
+
+  const dataPoint = dataMap.get(age);
+  if (!dataPoint) return;
+
+  const tp = dataPoint.target / factor(age);
+  const cp = dataPoint.current / factor(age);
+  const isRetirement = age === ra;
+
+  let rowClass = '';
+let onTrackClass = '';
+if (isRetirement) {
+  rowClass = 'retirement-row';
+  if (tp > 0 && cp > tp) {
+    rowClass += ' on-track-green';
+    onTrackClass = 'on-track-green';
+  }
+}
+
+tableHTML += `<tr class="${rowClass}">
+  <td style="padding:8px;text-align:center;">${age}</td>
+  <td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+  <td style="padding:8px;text-align:right;" class="${onTrackClass}">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+</tr>`;
+
+});
+
+
   tableHTML += '</tbody></table>';
   document.getElementById("tableView").innerHTML = tableHTML;
 
