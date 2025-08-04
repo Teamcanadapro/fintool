@@ -1191,7 +1191,7 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.43 • Updated: August 3, 2025</div>
+    <div class="version-info">v2.0.44 • Updated: August 4, 2025</div>
   </div>
 </div>
 
@@ -1375,7 +1375,16 @@ function calcEquals() {
     <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions.">End contr. age</label>
     <input type="number" id="stopAge" value="65" min="0">
   </div>
-
+<div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+  <div style="flex: 0.5;">
+    <label for="inheritanceAmount" data-tooltip="Lump sum amount you expect to receive (e.g., inheritance) at a specific age.">Inheritance $</label>
+    <input type="number" id="inheritanceAmount" min="0" value="0" />
+  </div>
+  <div style="flex: 0.5;">
+    <label for="inheritanceAge" data-tooltip="Age at which you expect to receive the inheritance (must be between start age and retirement age).">at Age</label>
+    <input type="number" id="inheritanceAge" min="0" value="0" step="1" />
+  </div>
+</div>
   <!-- Row 3 -->
   <div class="slider-group">
     <label for="startAge" data-tooltip="Your current age or the age at which savings start.">Start Age</label>
@@ -1903,8 +1912,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const baseScenario = {
     desiredIncome: 2000,
     currentInvestment: 0,
-    monthlyContribution: 100,
-    stopAge: 100,
+    monthlyContribution: 300,
+    stopAge: 65,
+    inheritanceAmount: 0,
+    inheritanceAge: 0,
     inflationRate: 2,
     preReturn: 9,
     postReturn: 7,
@@ -1947,6 +1958,8 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
       setValue("currentInvestment", s.currentInvestment);
       setValue("monthlyContribution", s.monthlyContribution);
       setValue("stopAge", s.stopAge);
+      setValue("inheritanceAmount", s.inheritanceAmount);
+      setValue("inheritanceAge", s.inheritanceAge);
 
       // Set sliders + matching number inputs
       setValue("inflationRate", s.inflationRate);
@@ -2039,14 +2052,15 @@ function toggleGraphSize() {
     document.addEventListener('DOMContentLoaded', function() {
       
       
-      const els = {};
-      ['currentInvestment','desiredIncome','monthlyContribution',
-       'inflationRate','inflationRateText','preReturn','preReturnText',
-       'postReturn','postReturnText','startAge','startAgeText',
-       'retireAge','retireAgeText','endAge','endAgeText',
-       'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
-        els[id]=document.getElementById(id);
-        });
+     const els = {};
+['currentInvestment','desiredIncome','monthlyContribution',
+ 'stopAge','inheritanceAmount','inheritanceAge',
+ 'inflationRate','inflationRateText','preReturn','preReturnText',
+ 'postReturn','postReturnText','startAge','startAgeText',
+ 'retireAge','retireAgeText','endAge','endAgeText',
+ 'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
+  els[id]=document.getElementById(id);
+  });
         document.getElementById("drawdownToggle").addEventListener("change", function () {
         const isFire = this.checked;
         document.getElementById("modeLabel").textContent = isFire ? "Forever (FIRE style)" : "Life Expectancy";
@@ -2076,12 +2090,18 @@ function loadSettings(){
       if (els[k]) els[k].value = s[k];
     });
 
+    // Set min/max for inheritanceAge based on loaded startAge and retireAge
+    els.inheritanceAge.min = els.startAge.value;
+    els.inheritanceAge.max = els.retireAge.value;
+
     // 🎯 Match scenario by values
     const mapped = {
       desiredIncome: +s.desiredIncome,
       currentInvestment: +s.currentInvestment,
       monthlyContribution: +s.monthlyContribution,
       stopAge: +s.stopAge,
+      inheritanceAmount: +s.inheritanceAmount, // Add inheritance fields
+      inheritanceAge: +s.inheritanceAge,
       inflationRate: +s.inflationRate,
       preReturn: +s.preReturn,
       postReturn: +s.postReturn,
@@ -2094,7 +2114,6 @@ function loadSettings(){
     for (const [name, scenario] of Object.entries(scenarios)) {
       const isMatch = Object.entries(scenario).every(([key, val]) =>
         mapped.hasOwnProperty(key) && +mapped[key] === +val
-
       );
       if (isMatch) {
         matchedScenario = name;
@@ -2110,10 +2129,10 @@ function loadSettings(){
     document.querySelectorAll(".scenario-btn").forEach(b => {
       b.classList.toggle("active", b.dataset.scenario === activeScenario);
     });
-
   } else {
     resetDefaults();
   }
+
 
   //calculateFIN();
 }
@@ -2144,15 +2163,14 @@ darkToggle.addEventListener('change', () => {
 
 
 
-      function saveSettings(){
-        const data={};
-        Object.keys(els).forEach(k=>{
-          if(['monthlyNeeded','finAmount','ageWarning'].includes(k)) return;
-
-          data[k]=els[k].value;
-        });
-        localStorage.setItem('finToolSettings',JSON.stringify(data));
-      }
+     function saveSettings(){
+  const data={};
+  Object.keys(els).forEach(k=>{
+    if(['monthlyNeeded','finAmount','ageWarning'].includes(k)) return;
+    data[k]=els[k].value;
+  });
+  localStorage.setItem('finToolSettings',JSON.stringify(data));
+}
 
 
 // chart definition
@@ -2244,12 +2262,33 @@ const ctx = document.getElementById('finChart').getContext('2d');
 });
 
       
-      function validateAges(){
-        let sa=+els.startAge.value, ra=+els.retireAge.value, ea=+els.endAge.value, warn=false;
-        if(ra<=sa){ ra=sa+1; els.retireAge.value=ra; els.retireAgeText.value=ra; warn=true; }
-        if(ea<=ra){ ea=ra+1; els.endAge.value=ea; els.endAgeText.value=ea; warn=true; }
-        els.ageWarning.style.display = warn?'block':'none';
-      }
+function validateAges(){
+  let sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value, ia = +els.inheritanceAge.value, warn = false;
+  if (ra <= sa) { 
+    ra = sa + 1; 
+    els.retireAge.value = ra; 
+    els.retireAgeText.value = ra; 
+    warn = true; 
+  }
+  if (ea <= ra) { 
+    ea = ra + 1; 
+    els.endAge.value = ea; 
+    els.endAgeText.value = ea; 
+    warn = true; 
+  }
+  if (ia !== 0 && (ia < sa || ia > ra)) { 
+    ia = sa; 
+    els.inheritanceAge.value = ia; 
+    warn = true; 
+    els.ageWarning.textContent = `⚠️ Inheritance age must be between ${sa} and ${ra} or 0 for no inheritance. Adjusted to ${ia}.`;
+  } else {
+    els.ageWarning.textContent = '⚠️ Invalid ages auto-adjusted.';
+  }
+  els.ageWarning.style.display = warn ? 'block' : 'none';
+  // Update min/max attributes for inheritanceAge
+  els.inheritanceAge.min = sa;
+  els.inheritanceAge.max = ra;
+}
 
 
 function calculateFIN() {
@@ -2258,8 +2297,10 @@ console.trace('calculateFIN called at', new Date().toISOString());
   validateAges();
 
   const ci = +els.currentInvestment.value || 0;
-  const di = +els.desiredIncome.value || 0;
-  const mc = +els.monthlyContribution.value || 0;
+const di = +els.desiredIncome.value || 0;
+const mc = +els.monthlyContribution.value || 0;
+const inheritanceAmount = +els.inheritanceAmount.value || 0;
+let inheritanceAge = +els.inheritanceAge.value || 0;
 // Calculate Income Protection Number (IPN)
 const incomeProtectionNumber = di * 12 * 12;
 document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtectionNumber.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
@@ -2392,27 +2433,32 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
   const mPreRate = pre / 12;
 
   // --- ACCUMULATION SIMULATION (Month by Month) ---
-  let balCurrent = ci;
-  let balTarget = 0;
-  const requiredMonthlySaving = monthlyNeedIdeal;
+let balCurrent = ci;
+let balTarget = 0;
+const requiredMonthlySaving = monthlyNeedIdeal;
 
-  for (let age = sa; age < ra; age++) {
-    let yearEndCurrent = balCurrent;
-    let yearEndTarget = balTarget;
+for (let age = sa; age < ra; age++) {
+  let yearEndCurrent = balCurrent;
+  let yearEndTarget = balTarget;
 
-    for (let month = 1; month <= 12; month++) {
-      // Assuming beginning-of-month contributions
-      yearEndCurrent = (yearEndCurrent + (age < stopAge ? mc : 0)) * (1 + mPreRate);
-      yearEndTarget = (yearEndTarget + requiredMonthlySaving) * (1 + mPreRate);
-    }
-    
-    yearLabels.push(age);
-    balancesCurrent.push(yearEndCurrent);
-    balancesTarget.push(yearEndTarget);
-    
-    balCurrent = yearEndCurrent;
-    balTarget = yearEndTarget;
+  // Add inheritance at the start of the specified year
+  if (inheritanceAge > 0 && age === inheritanceAge) {
+    yearEndCurrent += inheritanceAmount;
   }
+
+  for (let month = 1; month <= 12; month++) {
+    // Assuming beginning-of-month contributions
+    yearEndCurrent = (yearEndCurrent + (age < stopAge ? mc : 0)) * (1 + mPreRate);
+    yearEndTarget = (yearEndTarget + requiredMonthlySaving) * (1 + mPreRate);
+  }
+  
+  yearLabels.push(age);
+  balancesCurrent.push(yearEndCurrent);
+  balancesTarget.push(yearEndTarget);
+  
+  balCurrent = yearEndCurrent;
+  balTarget = yearEndTarget;
+}
 
   
 
@@ -2571,8 +2617,15 @@ tableHTML += `<tr class="${rowClass}">
           calculateFIN();
         });
       });
-
-      document.querySelectorAll('input[type="number"]').forEach(inp=>inp.addEventListener('input', calculateFIN));
+let debounceTimeout;
+document.querySelectorAll('input[type="number"]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+      calculateFIN();
+    }, 300); // 300ms debounce
+  });
+});
 
       function exportPDF(){
         html2pdf().set({margin:0.5,filename:'FIN_tool.pdf',
@@ -2581,19 +2634,22 @@ tableHTML += `<tr class="${rowClass}">
       }
 
       function resetDefaults(){
-        localStorage.removeItem('finToolSettings');
-        els.currentInvestment.value=0;
-        els.desiredIncome.value=2000;
-        els.monthlyContribution.value=100;
-        els.inflationRate.value=2; els.inflationRateText.value=2;
-        els.preReturn.value=9; els.preReturnText.value=9;
-        els.postReturn.value=7; els.postReturnText.value=7;
-        els.startAge.value=25; els.startAgeText.value=25;
-        els.retireAge.value=65; els.retireAgeText.value=65;
-        els.endAge.value=85; els.endAgeText.value=85;
-        els.ageWarning.style.display='none';
-        calculateFIN();
-      }
+  localStorage.removeItem('finToolSettings');
+  els.currentInvestment.value=0;
+  els.desiredIncome.value=2000;
+  els.monthlyContribution.value=100;
+  els.stopAge.value=100;
+  els.inheritanceAmount.value=0;
+  els.inheritanceAge.value=0;
+  els.inflationRate.value=2; els.inflationRateText.value=2;
+  els.preReturn.value=9; els.preReturnText.value=9;
+  els.postReturn.value=7; els.postReturnText.value=7;
+  els.startAge.value=25; els.startAgeText.value=25;
+  els.retireAge.value=65; els.retireAgeText.value=65;
+  els.endAge.value=85; els.endAgeText.value=85;
+  els.ageWarning.style.display='none';
+  calculateFIN();
+}
 
       function downloadHTML(){
         const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
