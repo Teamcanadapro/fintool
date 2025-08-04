@@ -144,13 +144,6 @@ input:checked + .slider:before {
   box-sizing: border-box;
 }
 
-#finChart {
-  width: 100% !important;
-  height: auto !important;  /* Let it scale naturally */
-  display: block;
-}
-
-
 
 .main-wrapper {
   display: flex;
@@ -910,11 +903,7 @@ body.dark #tableView table td.on-track-green {
   height: fit-content;
 }
 
-#finChart {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
+
 @media (max-width: 1530px) {
   .main-layout.chart-is-expanded {
     flex-direction: column;
@@ -1192,7 +1181,7 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.44 • Updated: August 4, 2025</div>
+    <div class="version-info">v2.0.45 • Updated: August 4, 2025</div>
   </div>
 </div>
 
@@ -1682,6 +1671,12 @@ body.dark #finChartContainer {
   border: 1px solid #444;
 }
 
+#finChart {
+  display: block;
+  width: 100%;
+  height: auto;
+  background-color: transparent;
+}
 .chart-disclaimer {
   font-size: 0.70rem; 
   color: #555;
@@ -2062,6 +2057,87 @@ function toggleGraphSize() {
  'monthlyNeeded','finAmount','ageWarning'].forEach(id=>{
   els[id]=document.getElementById(id);
   });
+
+const ctx = document.getElementById('finChart').getContext('2d');
+
+finChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'Target Plan (Required)',
+        data: [],
+        borderColor: '#1a73e8',
+        backgroundColor: 'rgba(26,115,232,0.1)',
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        tension: 0.25
+      },
+      {
+        label: 'Your Current Plan',
+        data: [],
+        borderColor: '#fb8c00',
+        backgroundColor: 'rgba(251,140,0,0.1)',
+        fill: true,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        tension: 0.25
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    scales: {
+      x: {
+        type: 'linear', // 🛠️ THIS is the magic that makes annotations match!
+        title: {
+          display: true,
+          text: 'Age (Years)'
+        },
+        ticks: {
+          stepSize: 1, // show every year
+          callback: value => value.toString()
+        }
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Portfolio Value ($)'
+        },
+        ticks: {
+          callback: v => '$' + v.toLocaleString()
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        labels: {
+          usePointStyle: true,
+          pointStyle: 'line'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => '$' + ctx.parsed.y.toLocaleString()
+        }
+      },
+      title: {
+        display: true,
+        text: 'Portfolio Growth & Drawdown'
+      },
+      annotation: {
+        drawTime: 'afterDraw',
+        annotations: {} // will be filled dynamically in calculateFIN()
+      }
+    }
+  }
+});
+
+
         document.getElementById("drawdownToggle").addEventListener("change", function () {
         const isFire = this.checked;
         document.getElementById("modeLabel").textContent = isFire ? "Forever (FIRE style)" : "Life Expectancy";
@@ -2139,30 +2215,78 @@ function loadSettings(){
 }
 
 
+// Function to update all chart colors based on the current theme
+function updateChartColors() {
+    // Make sure the chart exists before trying to update it
+    if (!window.finChart) {
+        return;
+    }
 
+    const isDark = document.body.classList.contains('dark');
+
+    // Define color palettes for light and dark modes
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const textColor = isDark ? '#ddd' : '#666';
+    const titleColor = isDark ? '#eee' : '#222';
+    const annotationLabelBg = isDark ? '#444' : 'rgba(0,0,0,0.7)';
+    const annotationLabelColor = '#fff';
+
+    const options = finChart.options;
+
+    // 1. Update Dataset Colors
+    finChart.data.datasets[0].borderColor = isDark ? '#42a5f5' : '#1a73e8';
+    finChart.data.datasets[0].backgroundColor = isDark ? 'rgba(66, 165, 245, 0.2)' : 'rgba(26, 115, 232, 0.1)';
+    finChart.data.datasets[1].borderColor = isDark ? '#ffca28' : '#fb8c00';
+    finChart.data.datasets[1].backgroundColor = isDark ? 'rgba(255, 202, 40, 0.2)' : 'rgba(251, 140, 0, 0.1)';
+
+    // 2. Update Scale (Axes, Ticks, Grid) Colors
+    if (options.scales) {
+        options.scales.x.grid.color = gridColor;
+        options.scales.y.grid.color = gridColor;
+        options.scales.x.ticks.color = textColor;
+        options.scales.y.ticks.color = textColor;
+        options.scales.x.title.color = textColor;
+        options.scales.y.title.color = textColor;
+    }
+
+    // 3. Update Plugin (Legend, Title, Annotations) Colors
+    if (options.plugins) {
+        if (options.plugins.legend) {
+            options.plugins.legend.labels.color = textColor;
+        }
+        if (options.plugins.title) {
+            options.plugins.title.color = titleColor;
+        }
+        if (options.plugins.annotation && options.plugins.annotation.annotations) {
+             Object.values(options.plugins.annotation.annotations).forEach(ann => {
+                if(ann.label) {
+                    ann.label.backgroundColor = annotationLabelBg;
+                    ann.label.color = annotationLabelColor;
+                }
+             });
+        }
+    }
+    
+    // 4. Trigger a chart update to apply the new colors
+    finChart.update();
+}
 
 // DARK MODE PERSISTENCE
 const darkToggle = document.getElementById('darkModeToggle');
 
+darkToggle.addEventListener('change', () => {
+  document.body.classList.toggle('dark', darkToggle.checked);
+  localStorage.setItem('darkMode', darkToggle.checked ? 'enabled' : 'disabled');
+  
+  // Call the centralized function to update all chart colors
+  updateChartColors(); 
+});
+
+// Set the initial state of the toggle and theme when the page loads
 if (localStorage.getItem('darkMode') === 'enabled') {
   document.body.classList.add('dark');
   darkToggle.checked = true;
 }
-
-
-darkToggle.addEventListener('change', () => {
-  if (darkToggle.checked) {
-    document.body.classList.add('dark');
-
-    localStorage.setItem('darkMode', 'enabled');
-  } else {
-    document.body.classList.remove('dark');
-    localStorage.setItem('darkMode', 'disabled');
-
-  }
-});
-
-
 
      function saveSettings(){
   const data={};
@@ -2174,93 +2298,7 @@ darkToggle.addEventListener('change', () => {
 }
 
 
-// chart definition
 
- 
-const ctx = document.getElementById('finChart').getContext('2d');
-
- finChart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [
-      {
-        label: 'Target Plan (Required)',
-        data: [],
-        borderColor: '#1a73e8',
-        backgroundColor: 'rgba(26,115,232,0.1)',
-        fill: true,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        tension: 0.25
-      },
-      {
-        label: 'Your Current Plan',
-        data: [],
-        borderColor: '#fb8c00',
-        backgroundColor: 'rgba(251,140,0,0.1)',
-        fill: true,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        tension: 0.25
-      }
-    ]
-  },
-
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,
-    scales: {
-      x: {
-      type: 'linear', // 🛠️ THIS is the magic that makes annotations match!
-        title: {
-          display: true,
-          text: 'Age (Years)'
-        },
-        ticks: {
-  stepSize: 1, // show every year
-  callback: value => value.toString()
-}
-
-      },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Portfolio Value ($)'
-        },
-        ticks: {
-          callback: v => '$' + v.toLocaleString()
-        }
-      }
-    },
-  plugins: {
-  legend: {
-
-    labels: {
-      usePointStyle: true,
-      pointStyle: 'line'
-    }
-  },
-  tooltip: {
-
-    callbacks: {
-      label: ctx => '$' + ctx.parsed.y.toLocaleString()
-    }
-  },
-  title: {
-    display: true,
-    text: 'Portfolio Growth & Drawdown'
-  },
-  annotation: {
-  drawTime: 'afterDraw',
-
-    annotations: {} // will be filled dynamically in calculateFIN()
-  }
-}
-
-  }
-});
 
       
 function validateAges(){
@@ -2294,6 +2332,12 @@ function validateAges(){
 
 function calculateFIN() {
 console.trace('calculateFIN called at', new Date().toISOString());
+ const isDark = document.body.classList.contains('dark');
+    const annotationLabelBg = isDark ? 'rgba(68, 68, 68, 0.9)' : 'rgba(0, 0, 0, 0.7)';
+    const annotationLabelColor = '#fff';
+    const retireLineColor = isDark ? '#8ab4f8' : 'blue'; // A brighter blue for dark mode
+    const startLineColor = isDark ? '#57bb8a' : 'green'; // A brighter green for dark mode
+    const lifeLineColor = isDark ? '#ff7b7b' : 'red'; // A brighter red for dark mode
 
   validateAges();
 
@@ -2510,24 +2554,26 @@ const drawdownBalances = []; // Don't push yet
   finChart.data.datasets[0].data = finChart.data.labels.map(age => dataMap.get(age).target / factor(age));
   finChart.data.datasets[1].data = finChart.data.labels.map(age => dataMap.get(age).current / factor(age));
 
-  finChart.options.plugins.annotation.annotations = {
-    startAgeLine: { type: 'line', xMin: sa, xMax: sa, borderColor: 'green', borderDash: [6, 6], borderWidth: 2, label: { content: 'Start Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, backgroundColor: '#444', color: '#fff', font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
-    retireAgeLine: { type: 'line', xMin: ra, xMax: ra, borderColor: 'blue', borderDash: [6, 6], borderWidth: 2, label: { content: 'Retire Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, xAdjust: -14, backgroundColor: '#444', color: '#fff', font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
-    endAgeLine: { type: 'line', xMin: ea, xMax: ea, borderColor: 'red', borderDash: [6, 6], borderWidth: 2, label: { content: 'Life Expectancy', enabled: true, position: 'start', yAdjust: -20, backgroundColor: 'rgba(0,0,0,0.6)', color: 'white' }}
-  };
+ // --- REPLACE the old annotation block with this new one ---
+finChart.options.plugins.annotation.annotations = {
+    startAgeLine: { type: 'line', xMin: sa, xMax: sa, borderColor: startLineColor, borderDash: [6, 6], borderWidth: 2, label: { content: 'Start Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, backgroundColor: annotationLabelBg, color: annotationLabelColor, font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
+    retireAgeLine: { type: 'line', xMin: ra, xMax: ra, borderColor: retireLineColor, borderDash: [6, 6], borderWidth: 2, label: { content: 'Retire Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, xAdjust: -14, backgroundColor: annotationLabelBg, color: annotationLabelColor, font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
+    endAgeLine: { type: 'line', xMin: ea, xMax: ea, borderColor: lifeLineColor, borderDash: [6, 6], borderWidth: 2, label: { content: 'Life Expectancy', enabled: true, position: 'start', yAdjust: -20, backgroundColor: annotationLabelBg, color: annotationLabelColor }}
+};
   
-  const breakEvenIndex = findBreakEvenIndex(finChart.data.datasets[1].data);
-  if (breakEvenIndex !== -1 && finChart.data.labels[breakEvenIndex] < ea) {
+const breakEvenIndex = findBreakEvenIndex(finChart.data.datasets[1].data);
+if (breakEvenIndex !== -1 && finChart.data.labels[breakEvenIndex] < ea) {
     finChart.options.plugins.annotation.annotations.breakEvenPoint = {
-      type: 'point',
-      xValue: finChart.data.labels[breakEvenIndex],
-      yValue: finChart.data.datasets[1].data[breakEvenIndex],
-      backgroundColor: 'black', radius: 5,
-      label: { content: 'Funds Depleted', enabled: true, position: 'top' }
+        type: 'point',
+        xValue: finChart.data.labels[breakEvenIndex],
+        yValue: finChart.data.datasets[1].data[breakEvenIndex],
+        backgroundColor: isDark ? '#ff5252' : 'black',
+        radius: 5,
+        label: { content: 'Funds Depleted', enabled: true, position: 'top', backgroundColor: annotationLabelBg, color: annotationLabelColor }
     };
-  } else if (finChart.options.plugins.annotation.annotations.breakEvenPoint) {
-      delete finChart.options.plugins.annotation.annotations.breakEvenPoint;
-  }
+} else if (finChart.options.plugins.annotation.annotations.breakEvenPoint) {
+    delete finChart.options.plugins.annotation.annotations.breakEvenPoint;
+}
   
   function findBreakEvenIndex(arr, threshold = 1) {
       for (let i = 0; i < arr.length; i++) {
@@ -2671,6 +2717,7 @@ const drawdownInitial = document.getElementById("drawdownToggle").checked;
 document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "Life Expectancy";
 
       calculateFIN();
+      updateChartColors(); // update the chart colors based on theme
 
       // FINAL FIX — expose functions to window so buttons work:
       window.exportPDF = exportPDF;
