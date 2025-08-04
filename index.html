@@ -1191,7 +1191,7 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.42 • Updated: July 26, 2025</div>
+    <div class="version-info">v2.0.43 • Updated: August 3, 2025</div>
   </div>
 </div>
 
@@ -2419,7 +2419,7 @@ document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toL
   // --- DRAWDOWN SIMULATION (Month by Month) ---
   const simulateDrawdown = (startingBalance) => {
     let balance = startingBalance;
-    const drawdownBalances = [balance]; // Start with the balance at retirement age
+const drawdownBalances = []; // Don't push yet
     let monthlyWithdrawal = di * Math.pow(1 + inf / 12, (ra - sa) * 12);
 
     for (let year = ra; year < ea; year++) {
