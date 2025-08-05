@@ -1229,7 +1229,7 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info">v2.0.48 • Updated: August 4, 2025</div>
+    <div class="version-info"> <span data-tooltip="<strong>Recent Updates (v2.0.49):</strong><ul><li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li><li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li><li>Added independent start age for CPP benefits (60-70).</li><li>Fixed 'Today's $' & 'Forever' mode calculations.</li><li>Added conditional highlighting for successful plans.</li></ul>">v2.0.49</span> • Updated: August 5, 2025</div>
   </div>
 </div>
 
@@ -1363,11 +1363,17 @@ function calcEquals() {
       <input type="text" id="futureValueInvestmentDisplay" class="readonly-box autoscale" readonly />
     </div>
   </div>
-
-  <div class="input-group">
-    <label for="cppBenefit" data-tooltip="Enter your estimated monthly CPP benefit in today's dollars. This amount will be subtracted from your desired income.">Monthly CPP $</label>
+<div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
+  <div style="flex: 0.5;">
+    <label for="cppBenefit" data-tooltip="Enter your estimated monthly CPP (Canada Pension Plan) benefit in today’s dollars.">Monthly CPP</label>
     <input type="number" id="cppBenefit" value="0" />
+  </div>
+  <div style="flex: 0.5;">
+    <label for="cppStartAge" data-tooltip="The age you plan to start receiving CPP benefits. Must be between 60 and 70.">at Age</label>
+    <input type="number" id="cppStartAge" value="65" min="60" max="70" step="1" />
+  </div>
 </div>
+  
   <!-- Row 2 -->
   <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
     <div style="flex: 0.5;">
@@ -1391,9 +1397,12 @@ function calcEquals() {
   </div>
 </div>
 
-  <div class="input-group">
-    <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions.">End contr. age</label>
-    <input type="number" id="stopAge" value="65" min="0">
+  <div class="slider-group">
+    <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions. This age is dynamically updated to be between your Start Age and Retirement Age.">End contr. age</label>
+    <div class="slider-container">
+      <input type="range" id="stopAge" min="0" max="100" step="1">
+      <input type="text" id="stopAgeText">
+    </div>
   </div>
 
   <!-- Row 3 -->
@@ -1926,21 +1935,22 @@ document.addEventListener('DOMContentLoaded', function() {
   
 <!-- script to set the default for scenarios-->
 <script>
-  const baseScenario = {
-    desiredIncome: 2000,
-    currentInvestment: 0,
-    monthlyContribution: 300,
-    cppBenefit: 0,
-    stopAge: 65,
-    inheritanceAmount: 0,
-    inheritanceAge: 0,
-    inflationRate: 2,
-    preReturn: 9,
-    postReturn: 7,
-    startAge: 25,
-    retireAge: 65,
-    endAge: 85
-  };
+ const baseScenario = {
+    desiredIncome: 0,
+    currentInvestment: 0,
+    monthlyContribution: 0,
+    cppBenefit: 0,
+    cppStartAge: 65,
+    stopAge: 65,
+    inheritanceAmount: 0,
+    inheritanceAge: 0,
+    inflationRate: 2,
+    preReturn: 9,
+    postReturn: 7,
+    startAge: 20,
+    retireAge: 65,
+    endAge: 85
+  };
 
   const scenarios = {
     "default": { ...baseScenario },
@@ -1976,6 +1986,7 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
       setValue("currentInvestment", s.currentInvestment);
       setValue("monthlyContribution", s.monthlyContribution);
       setValue("cppBenefit", s.cppBenefit); 
+      setValue("cppStartAge", s.cppStartAge); 
       setValue("stopAge", s.stopAge);
       setValue("inheritanceAmount", s.inheritanceAmount);
       setValue("inheritanceAge", s.inheritanceAge);
@@ -2006,6 +2017,7 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
 
 <script>
   let finChart;
+  let isCurrentPlanSuccessful = false;
 </script>
 
 <script>
@@ -2072,8 +2084,8 @@ function toggleGraphSize() {
       
       
      const els = {};
-['currentInvestment','desiredIncome','monthlyContribution','cppBenefit',
- 'stopAge','inheritanceAmount','inheritanceAge',
+['currentInvestment','desiredIncome','monthlyContribution','cppBenefit','cppStartAge',
+ 'stopAge','stopAgeText','inheritanceAmount','inheritanceAge', 
  'inflationRate','inflationRateText','preReturn','preReturnText',
  'postReturn','postReturnText','startAge','startAgeText',
  'retireAge','retireAgeText','endAge','endAgeText',
@@ -2240,58 +2252,74 @@ function loadSettings(){
 
 // Function to update all chart colors based on the current theme
 function updateChartColors() {
-    // Make sure the chart exists before trying to update it
-    if (!window.finChart) {
-        return;
+    // Make sure the chart exists before trying to update it
+    if (!window.finChart) {
+        return;
+    }
+
+    const isDark = document.body.classList.contains('dark');
+
+    // Define color palettes for light and dark modes
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+    const textColor = isDark ? '#ddd' : '#666';
+    const titleColor = isDark ? '#eee' : '#222';
+    const annotationLabelBg = isDark ? '#444' : 'rgba(0,0,0,0.7)';
+    const annotationLabelColor = '#fff';
+
+    const options = finChart.options;
+
+    // 1. Update Target Plan (Dataset 0) Colors
+    finChart.data.datasets[0].borderColor = isDark ? '#42a5f5' : '#1a73e8';
+    finChart.data.datasets[0].backgroundColor = isDark ? 'rgba(66, 165, 245, 0.2)' : 'rgba(26, 115, 232, 0.1)';
+
+    // --- MODIFIED: Update Current Plan (Dataset 1) Colors ---
+    if (isCurrentPlanSuccessful) {
+        // Use GREEN color scheme if the plan is successful
+        finChart.data.datasets[1].borderColor = isDark ? '#81c784' : '#2e7d32';
+        finChart.data.datasets[1].backgroundColor = isDark ? 'rgba(129, 199, 132, 0.2)' : 'rgba(46, 125, 50, 0.1)';
+    } else {
+        // Use the default ORANGE color scheme
+        finChart.data.datasets[1].borderColor = isDark ? '#ffca28' : '#fb8c00';
+        finChart.data.datasets[1].backgroundColor = isDark ? 'rgba(255, 202, 40, 0.2)' : 'rgba(251, 140, 0, 0.1)';
     }
 
-    const isDark = document.body.classList.contains('dark');
+    // 2. Update Scale (Axes, Ticks, Grid) Colors
+    if (options.scales) {
+        // Set the axis min/max and stepSize for better readability
+        const sa = +document.getElementById('startAge').value;
+        const ea = +document.getElementById('endAge').value;
+        options.scales.x.min = sa;
+        options.scales.x.max = ea;
+        options.scales.x.ticks.stepSize = 5;
+        
+        options.scales.x.grid.color = gridColor;
+        options.scales.y.grid.color = gridColor;
+        options.scales.x.ticks.color = textColor;
+        options.scales.y.ticks.color = textColor;
+        options.scales.x.title.color = textColor;
+        options.scales.y.title.color = textColor;
+    }
 
-    // Define color palettes for light and dark modes
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-    const textColor = isDark ? '#ddd' : '#666';
-    const titleColor = isDark ? '#eee' : '#222';
-    const annotationLabelBg = isDark ? '#444' : 'rgba(0,0,0,0.7)';
-    const annotationLabelColor = '#fff';
-
-    const options = finChart.options;
-
-    // 1. Update Dataset Colors
-    finChart.data.datasets[0].borderColor = isDark ? '#42a5f5' : '#1a73e8';
-    finChart.data.datasets[0].backgroundColor = isDark ? 'rgba(66, 165, 245, 0.2)' : 'rgba(26, 115, 232, 0.1)';
-    finChart.data.datasets[1].borderColor = isDark ? '#ffca28' : '#fb8c00';
-    finChart.data.datasets[1].backgroundColor = isDark ? 'rgba(255, 202, 40, 0.2)' : 'rgba(251, 140, 0, 0.1)';
-
-    // 2. Update Scale (Axes, Ticks, Grid) Colors
-    if (options.scales) {
-        options.scales.x.grid.color = gridColor;
-        options.scales.y.grid.color = gridColor;
-        options.scales.x.ticks.color = textColor;
-        options.scales.y.ticks.color = textColor;
-        options.scales.x.title.color = textColor;
-        options.scales.y.title.color = textColor;
-    }
-
-    // 3. Update Plugin (Legend, Title, Annotations) Colors
-    if (options.plugins) {
-        if (options.plugins.legend) {
-            options.plugins.legend.labels.color = textColor;
-        }
-        if (options.plugins.title) {
-            options.plugins.title.color = titleColor;
-        }
-        if (options.plugins.annotation && options.plugins.annotation.annotations) {
-             Object.values(options.plugins.annotation.annotations).forEach(ann => {
-                if(ann.label) {
-                    ann.label.backgroundColor = annotationLabelBg;
-                    ann.label.color = annotationLabelColor;
-                }
-             });
-        }
-    }
-    
-    // 4. Trigger a chart update to apply the new colors
-    finChart.update();
+    // 3. Update Plugin (Legend, Title, Annotations) Colors
+    if (options.plugins) {
+        if (options.plugins.legend) {
+            options.plugins.legend.labels.color = textColor;
+        }
+        if (options.plugins.title) {
+            options.plugins.title.color = titleColor;
+        }
+        if (options.plugins.annotation && options.plugins.annotation.annotations) {
+             Object.values(options.plugins.annotation.annotations).forEach(ann => {
+                if(ann.label) {
+                    ann.label.backgroundColor = annotationLabelBg;
+                    ann.label.color = annotationLabelColor;
+          }
+             });
+        }
+    }
+    
+    // 4. Trigger a chart update to apply the new colors
+    finChart.update();
 }
 
 // DARK MODE PERSISTENCE
@@ -2325,7 +2353,9 @@ if (localStorage.getItem('darkMode') === 'enabled') {
 
       
 function validateAges(){
-  let sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value, ia = +els.inheritanceAge.value, warn = false;
+  let sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value, ia = +els.inheritanceAge.value, csa = +els.cppStartAge.value, warn = false;
+  let warnText = '⚠️ Invalid ages auto-adjusted.';
+
   if (ra <= sa) { 
     ra = sa + 1; 
     els.retireAge.value = ra; 
@@ -2342,206 +2372,209 @@ function validateAges(){
     ia = sa; 
     els.inheritanceAge.value = ia; 
     warn = true; 
-    els.ageWarning.textContent = `⚠️ Inheritance age must be between ${sa} and ${ra} or 0 for no inheritance. Adjusted to ${ia}.`;
-  } else {
-    els.ageWarning.textContent = '⚠️ Invalid ages auto-adjusted.';
+    warnText = `⚠️ Inheritance age must be between ${sa} and ${ra}. Adjusted to ${ia}.`;
   }
+  // New CPP Age Validation
+  if (csa < 60 || csa > 70) {
+    csa = Math.max(60, Math.min(csa, 70)); // Clamp between 60 and 70
+    els.cppStartAge.value = csa;
+    warn = true;
+    warnText = `⚠️ CPP start age must be between 60 and 70. Adjusted to ${csa}.`;
+  }
+
+  els.ageWarning.textContent = warnText;
   els.ageWarning.style.display = warn ? 'block' : 'none';
-  // Update min/max attributes for inheritanceAge
+  
   els.inheritanceAge.min = sa;
   els.inheritanceAge.max = ra;
 }
 
+// HELPER 1: Simulates the accumulation of savings until retirement.
+function simulateAccumulation(ci, mc, stopAge, sa, ra, mRate, inheritanceAmount, inheritanceAge) {
+    let balance = ci;
+    for (let age = sa; age < ra; age++) {
+        // Add windfall at the beginning of the year it's received
+        if (inheritanceAge > 0 && age === inheritanceAge) {
+            balance += inheritanceAmount;
+        }
+        for (let month = 1; month <= 12; month++) {
+            // Contribution at the beginning of the month
+            let contribution = (age < stopAge) ? mc : 0;
+            balance = (balance + contribution) * (1 + mRate);
+        }
+    }
+    return balance;
+}
 
-// REPLACE your entire calculateFIN function with this one
+// HELPER 2: Simulates the drawdown of a portfolio during retirement. This is our "ground truth".
+function simulateDrawdown(startingBalance, di, cppBenefit, cppStartAge, sa, ra, ea, inf, post) {
+    let balance = startingBalance;
+    const drawdownData = [{ age: ra, balance: balance }];
+    for (let year = ra; year < ea; year++) {
+        let annualWithdrawal = di * 12 * Math.pow(1 + inf, year - sa);
+        if (cppBenefit > 0 && year >= cppStartAge) {
+            annualWithdrawal -= (cppBenefit * 12 * Math.pow(1 + inf, year - sa));
+        }
+        annualWithdrawal = Math.max(0, annualWithdrawal);
+        const monthlyWithdrawal = annualWithdrawal / 12;
+
+        for (let month = 1; month <= 12; month++) {
+            // Withdrawal at the beginning of the month
+            balance = (balance - monthlyWithdrawal) * (1 + post / 12);
+        }
+        drawdownData.push({ age: year + 1, balance: Math.max(0, balance) });
+    }
+    return drawdownData;
+}
+
+// HELPER 3: Calculates the exact FIN by running the drawdown simulation in reverse.
+function calculateRealFIN(di, cppBenefit, cppStartAge, sa, ra, ea, inf, post) {
+    let requiredBalance = 0.0;
+    for (let year = ea - 1; year >= ra; year--) {
+        let annualWithdrawal = di * 12 * Math.pow(1 + inf, year - sa);
+        if (cppBenefit > 0 && year >= cppStartAge) {
+            annualWithdrawal -= (cppBenefit * 12 * Math.pow(1 + inf, year - sa));
+        }
+        annualWithdrawal = Math.max(0, annualWithdrawal);
+        const monthlyWithdrawal = annualWithdrawal / 12;
+
+        let startOfYearBalance = requiredBalance;
+        for (let month = 12; month >= 1; month--) {
+            // Reverse logic for BEGINNING-of-month withdrawal
+            startOfYearBalance = (startOfYearBalance / (1 + post / 12)) + monthlyWithdrawal;
+        }
+        requiredBalance = startOfYearBalance;
+    }
+    return requiredBalance;
+}
+
 function calculateFIN() {
-    console.trace('calculateFIN called at', new Date().toISOString());
-    const isDark = document.body.classList.contains('dark');
-    const annotationLabelBg = isDark ? 'rgba(68, 68, 68, 0.9)' : 'rgba(0, 0, 0, 0.7)';
-    const annotationLabelColor = '#fff';
-    const retireLineColor = isDark ? '#8ab4f8' : 'blue';
-    const startLineColor = isDark ? '#57bb8a' : 'green';
-    const lifeLineColor = isDark ? '#ff7b7b' : 'red';
-
+    // This function is now self-contained and uses the correct helper functions.
     validateAges();
 
+    // --- 1. GATHER ALL INPUTS ---
     const ci = +els.currentInvestment.value || 0;
     const di = +els.desiredIncome.value || 0;
     const mc = +els.monthlyContribution.value || 0;
     const inheritanceAmount = +els.inheritanceAmount.value || 0;
-    let inheritanceAge = +els.inheritanceAge.value || 0;
-
+    const inheritanceAge = +els.inheritanceAge.value || 0;
     const cppBenefit = +els.cppBenefit.value || 0;
-    // For internal calculations: the income needed from personal investments
-    const netDesiredIncome = Math.max(0, di - cppBenefit);
-
-    // IPN is based on total desired income, so it remains unchanged
-    const incomeProtectionNumber = di * 12 * 12;
-    document.getElementById("incomeProtectionNumber").textContent = `$${incomeProtectionNumber.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
-
+    const cppStartAge = +els.cppStartAge.value || 65;
     const inf = +els.inflationRate.value / 100 || 0;
     const pre = +els.preReturn.value / 100 || 0;
     const post = +els.postReturn.value / 100 || 0;
-
     const sa = +els.startAge.value,
-          ra = +els.retireAge.value,
-          ea = +els.endAge.value;
-          let stopAge = +document.getElementById("stopAge").value || ra;
-          stopAge = Math.min(stopAge, ea);
+          ra = +els.retireAge.value;
+    let ea = +els.endAge.value;
+    const stopAge = +els.stopAge.value || ra;
+    const yrsTo = ra - sa;
+    const mRate = pre / 12;
+    const months = yrsTo * 12;
+    const showFuture = document.getElementById("finDisplayToggle").checked;
+    const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
 
-    const yrsTo = ra - sa,
-          yrsIn = ea - ra,
-          mRate = pre / 12,
-          months = yrsTo * 12;
+    if (drawdownType === 'perpetual') {
+        ea = 120; // Use a long fixed end age for perpetual mode
+    }
 
-    const mcFutureMonths = (ra - sa) * 12;
-    const mcMonthlyRate = pre / 12;
-    const mcFutureValue =
-        mcMonthlyRate > 0
-        ? mc * ((Math.pow(1 + mcMonthlyRate, mcFutureMonths) - 1) / mcMonthlyRate) * (1 + mcMonthlyRate)
-        : mc * mcFutureMonths;
-    const fvDisplay = document.getElementById("futureValueContributionDisplay");
-    if (fvDisplay) {
-        fvDisplay.value = mcFutureValue.toLocaleString(undefined, { maximumFractionDigits: 0 });
-        autoscaleInputs();
+    // --- 2. PERFORM CORE CALCULATIONS (using helpers) ---
+    const fin = calculateRealFIN(di, cppBenefit, cppStartAge, sa, ra, ea, inf, post);
+    const fvOfCurrentPlan = simulateAccumulation(ci, mc, stopAge, sa, ra, mRate, inheritanceAmount, inheritanceAge);
+    const fullyFundedNow = fin > 0 ? fin / Math.pow(1 + mRate, months) : 0;
+    const totalMonthlySavingRequired = fin > 0 ? (mRate > 0 ? fin * mRate / (Math.pow(1 + mRate, months) - 1) : fin / months) : 0;
+
+    // --- 3. UPDATE UI WIDGETS ---
+    if (showFuture) {
+        els.finAmount.textContent = '$' + fin.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    } else {
+        const finTodaysDollars = fin / Math.pow(1 + inf, yrsTo);
+        els.finAmount.textContent = '$' + finTodaysDollars.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    }
+    document.getElementById("fullyFundedNow").textContent = '$' + Math.max(0, fullyFundedNow - ci).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const rem = Math.max(fin - fvOfCurrentPlan, 0);
+    const monthlyNeed = rem > 0 ? (mRate > 0 ? rem * mRate / (Math.pow(1 + mRate, months) - 1) : rem / months) : 0;
+    els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const futureMonthlyIncome = di * Math.pow(1 + inf, yrsTo);
+    document.getElementById('futureIncomeDisplay').value = futureMonthlyIncome.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const fvCurr = ci * Math.pow(1 + mRate, months);
+    const fvCont = mRate > 0 ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate) * (1 + mRate) : mc * months;
+    document.getElementById("futureValueInvestmentDisplay").value = fvCurr.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    document.getElementById("futureValueContributionDisplay").value = fvCont.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    document.getElementById("incomeProtectionNumber").textContent = `$${(di * 12 * 12).toLocaleString(undefined, {maximumFractionDigits:0})}`;
+    autoscaleInputs();
+
+    // --- 4. PREPARE CHART & TABLE DATA ---
+    const targetMap = new Map();
+    const currentMap = new Map();
+
+    // Target Plan Accumulation (Starts at 0, uses total required savings)
+    let balTarget = 0;
+    for (let age = sa; age < ra; age++) {
+        targetMap.set(age, balTarget);
+        for (let month = 1; month <= 12; month++) {
+            balTarget = (balTarget + totalMonthlySavingRequired) * (1 + mRate);
+        }
     }
     
-    const drawdownType = document.getElementById("drawdownToggle").checked ? "perpetual" : "finite";
-    const showFuture = document.getElementById("finDisplayToggle").checked;
-
-    // --- START: UI DISPLAY FIX ---
-    // This part now ALWAYS calculates the future value of the TOTAL desired income for the UI.
-    const totalFutureIncomeForDisplay = di * Math.pow(1 + inf, yrsTo); 
-    document.getElementById("futureIncomeDisplay").value = showFuture
-        ? totalFutureIncomeForDisplay.toLocaleString(undefined, { maximumFractionDigits: 0 })
-        : di.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    // --- END: UI DISPLAY FIX ---
-
-    // The rest of the logic correctly uses the CPP-reduced "netDesiredIncome" for the actual FIN calculation.
-    const futureIncome = netDesiredIncome * Math.pow(1 + inf, yrsTo);
-    const incomeUsed = showFuture ? futureIncome : netDesiredIncome;
-
-    // FIN amount needed at retirement
-    let fin;
-    if (drawdownType === "finite") {
-        const annualPost = post;
-        const annualInf = inf;
-        const r = (1 + annualPost) / (1 + annualInf) - 1;
-        const n = yrsIn;
-        const annualIncome = (showFuture ? futureIncome : netDesiredIncome) * 12; 
-        fin = r > 0
-            ? annualIncome * ((1 - Math.pow(1 + r, -n)) / r)
-            : annualIncome * n;
-    } else {
-        const realRate = post - inf;
-        fin = realRate > 0
-            ? (incomeUsed * 12) / realRate
-            : incomeUsed * 12 * 50;
-    }
-
-    // (The rest of the function remains exactly the same as before)
-    // ...
-    const finUsed = fin;
-    const fullyFundedNow = Math.max((fin / Math.pow(1 + pre, ra - sa)) - ci, 0);
-    const isFullyFunded = ci >= fullyFundedNow;
-    document.getElementById("fullyFundedNow").classList.toggle("highlight-success", isFullyFunded);
-    const monthlyNeedIdeal = fin > 0 ? (mRate > 0 ? fin / ((Math.pow(1 + mRate, months) - 1) / mRate) : fin / months) : 0;
-    const fvCurr = ci * Math.pow(1 + pre, yrsTo);
-    const fvCont = mRate > 0 ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate) : mc * months;
-    const fviDisplay = document.getElementById("futureValueInvestmentDisplay");
-    if (fviDisplay) { fviDisplay.value = fvCurr.toLocaleString(undefined, { maximumFractionDigits: 0 }); }
-    const totalFV = fvCurr + fvCont;
-    const rem = Math.max(finUsed - totalFV, 0);
-    const monthlyNeed = rem > 0 ? (mRate > 0 ? rem / ((Math.pow(1 + mRate, months) - 1) / mRate) : rem / months) : 0;
-    els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    els.finAmount.textContent = '$' + fin.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    document.getElementById("fullyFundedNow").textContent = '$' + fullyFundedNow.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    const yearLabels = [];
-    const balancesTarget = [];
-    const balancesCurrent = [];
-    const mPreRate = pre / 12;
+    // Current Plan Accumulation
     let balCurrent = ci;
-    let balTarget = 0;
-    const requiredMonthlySaving = monthlyNeedIdeal;
     for (let age = sa; age < ra; age++) {
-        let yearEndCurrent = balCurrent;
-        let yearEndTarget = balTarget;
-        if (inheritanceAge > 0 && age === inheritanceAge) { yearEndCurrent += inheritanceAmount; }
+        currentMap.set(age, balCurrent);
+        if (inheritanceAge > 0 && age === inheritanceAge) { balCurrent += inheritanceAmount; }
         for (let month = 1; month <= 12; month++) {
-            yearEndCurrent = (yearEndCurrent + (age < stopAge ? mc : 0)) * (1 + mPreRate);
-            yearEndTarget = (yearEndTarget + requiredMonthlySaving) * (1 + mPreRate);
+            balCurrent = (balCurrent + (age < stopAge ? mc : 0)) * (1 + mRate);
         }
-        yearLabels.push(age);
-        balancesCurrent.push(yearEndCurrent);
-        balancesTarget.push(yearEndTarget);
-        balCurrent = yearEndCurrent;
-        balTarget = yearEndTarget;
     }
-    const simulateDrawdown = (startingBalance) => {
-        let balance = startingBalance;
-        const drawdownBalances = [];
-        let monthlyWithdrawal = netDesiredIncome * Math.pow(1 + inf / 12, (ra - sa) * 12);
-        for (let year = ra; year < ea; year++) {
-            for (let month = 1; month <= 12; month++) { balance = balance * (1 + post / 12) - monthlyWithdrawal; }
-            drawdownBalances.push(Math.max(0, balance));
-            monthlyWithdrawal *= (1 + inf);
-        }
-        return drawdownBalances;
-    };
-    const currentDrawdown = simulateDrawdown(balCurrent);
-    const targetDrawdown = simulateDrawdown(balTarget);
-    for (let i = 0; i < currentDrawdown.length; i++) {
-        const currentAge = ra + i;
-        yearLabels.push(currentAge);
-        balancesCurrent.push(currentDrawdown[i]);
-        balancesTarget.push(targetDrawdown[i]);
-    }
-    const uniqueLabels = [...new Set(yearLabels)].sort((a,b) => a-b);
-    const endOfChart = drawdownType === 'perpetual' ? 100 : ea;
-    finChart.data.labels = uniqueLabels.filter(y => y <= endOfChart);
-    const dataMap = new Map();
-    uniqueLabels.forEach(label => {
-        const idx = yearLabels.indexOf(label);
-        if (idx !== -1) { dataMap.set(label, { target: balancesTarget[idx], current: balancesCurrent[idx] }); }
-    });
+
+    // Drawdown Phase Data
+    const targetDrawdownData = simulateDrawdown(fin, di, cppBenefit, cppStartAge, sa, ra, ea, inf, post);
+    const currentDrawdownData = simulateDrawdown(fvOfCurrentPlan, di, cppBenefit, cppStartAge, sa, ra, ea, inf, post);
+    targetDrawdownData.forEach(d => targetMap.set(d.age, d.balance));
+    currentDrawdownData.forEach(d => currentMap.set(d.age, d.balance));
+    
+    // --- 5. RENDER CHART (with ANNOTATIONS) ---
     const factor = (age) => showFuture ? 1 : Math.pow(1 + inf, age - sa);
-    finChart.data.datasets[0].data = finChart.data.labels.map(age => dataMap.get(age).target / factor(age));
-    finChart.data.datasets[1].data = finChart.data.labels.map(age => dataMap.get(age).current / factor(age));
+    const endOfChart = drawdownType === 'perpetual' ? 100 : ea;
+    const allAges = Array.from({length: ea - sa + 1}, (_, i) => sa + i);
+    const chartLabels = allAges.filter(age => age <= endOfChart);
+    
+    finChart.data.labels = chartLabels;
+    finChart.data.datasets[0].data = chartLabels.map(age => (targetMap.get(age) || 0) / factor(age));
+    finChart.data.datasets[1].data = chartLabels.map(age => (currentMap.get(age) || 0) / factor(age));
+
+    const isDark = document.body.classList.contains('dark');
+    const annotationLabelBg = isDark ? 'rgba(68, 68, 68, 0.9)' : 'rgba(0, 0, 0, 0.7)';
+    const annotationLabelColor = '#fff';
     finChart.options.plugins.annotation.annotations = {
-        startAgeLine: { type: 'line', xMin: sa, xMax: sa, borderColor: startLineColor, borderDash: [6, 6], borderWidth: 2, label: { content: 'Start Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, backgroundColor: annotationLabelBg, color: annotationLabelColor, font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
-        retireAgeLine: { type: 'line', xMin: ra, xMax: ra, borderColor: retireLineColor, borderDash: [6, 6], borderWidth: 2, label: { content: 'Retire Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, xAdjust: -14, backgroundColor: annotationLabelBg, color: annotationLabelColor, font: {size: 10, weight: 'bold'}, padding: 4, borderRadius: 4 }},
-        endAgeLine: { type: 'line', xMin: ea, xMax: ea, borderColor: lifeLineColor, borderDash: [6, 6], borderWidth: 2, label: { content: 'Life Expectancy', enabled: true, position: 'start', yAdjust: -20, backgroundColor: annotationLabelBg, color: annotationLabelColor }}
+        startAgeLine: { type: 'line', xMin: sa, xMax: sa, borderColor: 'green', borderDash: [6, 6], borderWidth: 2, label: { content: 'Start Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, backgroundColor: annotationLabelBg, color: annotationLabelColor }},
+        retireAgeLine: { type: 'line', xMin: ra, xMax: ra, borderColor: 'blue', borderDash: [6, 6], borderWidth: 2, label: { content: 'Retire Age', enabled: true, position: {x:'center', y:'end'}, yAdjust: 8, xAdjust: -14, backgroundColor: annotationLabelBg, color: annotationLabelColor }},
+        endAgeLine: { type: 'line', xMin: ea, xMax: ea, borderColor: 'red', borderDash: [6, 6], borderWidth: 2, label: { content: 'Life Expectancy', enabled: true, position: 'start', yAdjust: -20, backgroundColor: annotationLabelBg, color: annotationLabelColor }}
     };
-    const breakEvenIndex = findBreakEvenIndex(finChart.data.datasets[1].data);
-    if (breakEvenIndex !== -1 && finChart.data.labels[breakEvenIndex] < ea) {
-        finChart.options.plugins.annotation.annotations.breakEvenPoint = { type: 'point', xValue: finChart.data.labels[breakEvenIndex], yValue: finChart.data.datasets[1].data[breakEvenIndex], backgroundColor: isDark ? '#ff5252' : 'black', radius: 5, label: { content: 'Funds Depleted', enabled: true, position: 'top', backgroundColor: annotationLabelBg, color: annotationLabelColor }};
-    } else if (finChart.options.plugins.annotation.annotations.breakEvenPoint) {
-        delete finChart.options.plugins.annotation.annotations.breakEvenPoint;
-    }
-    function findBreakEvenIndex(arr, threshold = 1) {
-        for (let i = 0; i < arr.length; i++) { if (arr[i] <= threshold) return i; }
-        return -1;
-    }
-    finChart.update();
+    
+    // --- 6. RENDER TABLE & UPDATE COLORS ---
     let tableHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#1a73e8;color:#fff;"><th style="padding:8px;">Age</th><th style="padding:8px;">Target Plan ($)</th><th style="padding:8px;">Current Plan ($)</th></tr></thead><tbody>';
-    const zeroAge = finChart.data.labels.find(age => { const dp = dataMap.get(age); return dp && dp.current <= 0; });
-    const finalFiveStartAge = zeroAge ? Math.max(sa, zeroAge - 5) : null;
-    const finalFiveEndAge = zeroAge || -1;
-    finChart.data.labels.forEach(age => {
-        let showRow = false;
-        if (age < finalFiveStartAge) { showRow = ((age - sa) % 5 === 0 || age === sa || age === ra || age === ea); } else if (age >= finalFiveStartAge && age <= finalFiveEndAge) { showRow = true; } else { showRow = ((age - sa) % 5 === 0 || age === ra || age === ea); }
+    const zeroAge = allAges.find(age => currentMap.get(age) <= 1 && age >= ra);
+    const finalFiveStartAge = zeroAge ? Math.max(ra, zeroAge - 5) : null;
+    
+    chartLabels.forEach(age => {
+        let showRow = (age - sa) % 5 === 0 || age === sa || age === ra || age === ea || (finalFiveStartAge && age >= finalFiveStartAge && age <= zeroAge);
         if (!showRow) return;
-        const dataPoint = dataMap.get(age);
-        if (!dataPoint) return;
-        const tp = dataPoint.target / factor(age);
-        const cp = dataPoint.current / factor(age);
-        const isRetirement = age === ra;
-        let rowClass = ''; let onTrackClass = '';
-        if (isRetirement) { rowClass = 'retirement-row'; if (tp > 0 && cp > tp) { rowClass += ' on-track-green'; onTrackClass = 'on-track-green'; } }
-        tableHTML += `<tr class="${rowClass}"><td style="padding:8px;text-align:center;">${age}</td><td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td><td style="padding:8px;text-align:right;" class="${onTrackClass}">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td></tr>`;
+
+        const tp = targetMap.get(age) / factor(age);
+        const cp = currentMap.get(age) / factor(age);
+        
+        let rowClass = (age === ra) ? 'retirement-row' : '';
+        if (age === ra && fvOfCurrentPlan >= fin) {
+            rowClass += ' on-track-green';
+        }
+        
+        tableHTML += `<tr class="${rowClass}"><td style="padding:8px;text-align:center;">${age}</td><td style="padding:8px;text-align:right;">$${(tp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td><td style="padding:8px;text-align:right;">$${(cp || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td></tr>`;
     });
     tableHTML += '</tbody></table>';
     document.getElementById("tableView").innerHTML = tableHTML;
+    
+    isCurrentPlanSuccessful = fvOfCurrentPlan >= fin && currentMap.get(ea) > 0;
+    updateChartColors();
     saveSettings();
 }
 
@@ -2552,6 +2585,7 @@ function calculateFIN() {
        ['postReturn','postReturnText'],
        ['startAge','startAgeText'],
        ['retireAge','retireAgeText'],
+       ['stopAge', 'stopAgeText'], 
        ['endAge','endAgeText']].forEach(pair=>{
         const [sl,tx]=pair, slider=els[sl], text=els[tx];
         slider.addEventListener('input',()=>{
@@ -2590,7 +2624,8 @@ document.querySelectorAll('input[type="number"]').forEach(inp => {
   els.desiredIncome.value=2000;
   els.monthlyContribution.value=100;
    els.cppBenefit.value=0;
-  els.stopAge.value=100;
+   els.cppStartAge.value=65;
+  els.stopAge.value=65; els.stopAgeText.value=65;
   els.inheritanceAmount.value=0;
   els.inheritanceAge.value=0;
   els.inflationRate.value=2; els.inflationRateText.value=2;
@@ -2622,7 +2657,6 @@ const drawdownInitial = document.getElementById("drawdownToggle").checked;
 document.getElementById("modeLabel").textContent = drawdownInitial ? "Forever (FIRE style)" : "Life Expectancy";
 
       calculateFIN();
-      updateChartColors(); // update the chart colors based on theme
 
       // FINAL FIX — expose functions to window so buttons work:
       window.exportPDF = exportPDF;
