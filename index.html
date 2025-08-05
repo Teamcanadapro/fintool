@@ -1229,7 +1229,17 @@ function calcEquals() {
 
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info"> <span data-tooltip="<strong>Recent Updates (v2.0.49):</strong><ul><li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li><li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li><li>Added independent start age for CPP benefits (60-70).</li><li>Fixed 'Today's $' & 'Forever' mode calculations.</li><li>Added conditional highlighting for successful plans.</li></ul>">v2.0.49</span> • Updated: August 5, 2025</div>
+    <div class="version-info"> <span data-tooltip=
+    "<strong>Recent Updates (v2.0.49):
+    </strong><ul>
+    <li>Enhanced scenario buttons for parameters that show practical conversational points.</li>
+    <li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li>
+    <li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li>
+    <li>Added independent start age for CPP benefits (60-70).</li>
+    <li>Fixed 'Today's $' & 'Forever' mode calculations.</li>
+    <li>Added conditional highlighting for successful plans.</li>
+    <li>Redesigned end cotnribution age to a slider format with limited range from start to retirement age</li>
+    </ul>">v2.0.49</span> • Updated: August 5, 2025</div>
   </div>
 </div>
 
@@ -1342,11 +1352,11 @@ function calcEquals() {
   <!-- Row 1 -->
   <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
     <div style="flex: 0.5;">
-      <label for="desiredIncome" data-tooltip="Monthly income you want during retirement, in today’s dollars." class="tooltip-label">Income $</label>
+      <label for="desiredIncome" data-tooltip="Monthly income you want during retirement, in today’s dollars." class="tooltip-label">Income Goal</label>
       <input type="number" id="desiredIncome" />
     </div>
     <div style="flex: 0.5;">
-      <label for="futureIncomeDisplay" data-tooltip="Inflation-adjusted monthly income at retirement age to match today’s value.">Future $</label>
+      <label for="futureIncomeDisplay" data-tooltip="Inflation-adjusted monthly income at retirement age to match today’s value.">Future Value</label>
       <input type="text" id="futureIncomeDisplay" readonly />
     </div>
   </div>
@@ -1355,11 +1365,11 @@ function calcEquals() {
 
   <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
     <div style="flex: 0.5;">
-      <label for="currentInvestment" data-tooltip="How much money have you saved so far, in the bank, mutual funds, stocks, GICs, CASH?">Current $</label>
+      <label for="currentInvestment" data-tooltip="How much money have you saved so far, in the bank, mutual funds, stocks, GICs, CASH?">Savings Now</label>
       <input type="number" id="currentInvestment" />
     </div>
     <div style="flex: 0.5;">
-      <label for="futureValueInvestmentDisplay" data-tooltip="Future value of your existing investments by retirement.">Future $</label>
+      <label for="futureValueInvestmentDisplay" data-tooltip="Future value of your existing investments by retirement.">Future Value</label>
       <input type="text" id="futureValueInvestmentDisplay" class="readonly-box autoscale" readonly />
     </div>
   </div>
@@ -1377,11 +1387,11 @@ function calcEquals() {
   <!-- Row 2 -->
   <div class="input-group" style="display: flex; align-items: flex-end; gap: 12px;">
     <div style="flex: 0.5;">
-      <label for="monthlyContribution" data-tooltip="How much money are you putting away right now monthly?">PAC/mo</label>
+      <label for="monthlyContribution" data-tooltip="How much money are you putting away right now monthly?">Add Monthly</label>
       <input type="number" id="monthlyContribution" />
     </div>
     <div style="flex: 0.5;">
-      <label for="futureValueContributionDisplay" data-tooltip="Total value of your contributions by retirement, assuming compounding growth.">Future $</label>
+      <label for="futureValueContributionDisplay" data-tooltip="Total value of your contributions by retirement, including compounding growth.">Grows to $</label>
       <input type="text" id="futureValueContributionDisplay" class="readonly-box autoscale" readonly />
     </div>
   </div>
@@ -1398,7 +1408,7 @@ function calcEquals() {
 </div>
 
   <div class="slider-group">
-    <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions. This age is dynamically updated to be between your Start Age and Retirement Age.">End contr. age</label>
+    <label for="stopAge" data-tooltip="The age at which you plan to STOP monthly investing contributions. This age is dynamically updated to be between your Start Age and Retirement Age.">Stop Saving Age</label>
     <div class="slider-container">
       <input type="range" id="stopAge" min="0" max="100" step="1">
       <input type="text" id="stopAgeText">
@@ -1407,7 +1417,7 @@ function calcEquals() {
 
   <!-- Row 3 -->
   <div class="slider-group">
-    <label for="startAge" data-tooltip="Your current age or the age at which savings start.">Start Age</label>
+    <label for="startAge" data-tooltip="Your current age or the age at which savings start.">Start Saving Age</label>
     <div class="slider-container">
       <input type="range" id="startAge" min="0" max="100" step="1">
       <input type="text" id="startAgeText">
@@ -1415,7 +1425,7 @@ function calcEquals() {
   </div>
 
   <div class="slider-group">
-    <label for="preReturn" data-tooltip="Expected average annual rate of return on your investments before retirement, during accumulation phase.">Pre-ret. return %</label>
+    <label for="preReturn" data-tooltip="Expected average annual rate of return on your investments before retirement, during accumulation phase.">Growth Rate %</label>
     <div class="slider-container">
       <input type="range" id="preReturn" min="0" max="9" step="1">
       <input type="text" id="preReturnText">
@@ -1432,7 +1442,7 @@ function calcEquals() {
   </div>
 
   <div class="slider-group">
-    <label for="postReturn" data-tooltip="Expected average annual return on your investments during retirement or from the age you set for financial independence.">Post-ret. return %</label>
+    <label for="postReturn" data-tooltip="Expected average annual return on your investments during retirement or from the age you set for financial independence.">Retire Rate %</label>
     <div class="slider-container">
       <input type="range" id="postReturn" min="0" max="9" step="1">
       <input type="text" id="postReturnText">
@@ -1441,7 +1451,7 @@ function calcEquals() {
 
   <!-- Row 5 -->
   <div class="slider-group">
-    <label for="endAge" id="lifeLabel" data-tooltip="What's your life expectancy? Default is 100. In FIRE mode, your money is set to last forever.">Life Expectancy</label>
+    <label for="endAge" id="lifeLabel" data-tooltip="What's your life expectancy? Default is 100. In FIRE mode, your money is set to last forever.">Life Expectancy Age</label>
     <div class="slider-container">
       <input type="range" id="endAge" min="55" max="120" step="1">
       <input type="text" id="endAgeText">
@@ -1449,7 +1459,7 @@ function calcEquals() {
   </div>
 
   <div class="slider-group">
-    <label for="inflationRate" data-tooltip="Average expected annual increase in cost of living.">Inflation (%)</label>
+    <label for="inflationRate" data-tooltip="Average expected annual increase in cost of living.">Inflation Rate %</label>
 
     <div class="slider-container">
       <input type="range" id="inflationRate" min="0" max="7" step="1">
@@ -1762,6 +1772,8 @@ body.dark .graph-expand-btn-2:hover {
    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+
+
 </style>
 
 <script>
@@ -1935,83 +1947,79 @@ document.addEventListener('DOMContentLoaded', function() {
   
 <!-- script to set the default for scenarios-->
 <script>
- const baseScenario = {
-    desiredIncome: 0,
-    currentInvestment: 0,
-    monthlyContribution: 0,
-    cppBenefit: 0,
+ // Define the "all-zero" state specifically for the Default button
+ const zeroScenario = {
+    desiredIncome: 0,
+    currentInvestment: 0,
+    monthlyContribution: 0,
+    cppBenefit: 0,
     cppStartAge: 65,
-    stopAge: 65,
-    inheritanceAmount: 0,
-    inheritanceAge: 0,
-    inflationRate: 2,
-    preReturn: 9,
-    postReturn: 7,
-    startAge: 20,
-    retireAge: 65,
-    endAge: 85
-  };
+    stopAge: 65,
+    inheritanceAmount: 0,
+    inheritanceAge: 0,
+    inflationRate: 2,
+    preReturn: 9,
+    postReturn: 7,
+    startAge: 20,
+    retireAge: 65,
+    endAge: 85
+ };
 
-  const scenarios = {
-    "default": { ...baseScenario },
-    "child-zero": { ...baseScenario, desiredIncome: 5000, startAge: 0 },
-    "start-19": { ...baseScenario, desiredIncome: 5000, startAge: 19 },
-    "start-25": { ...baseScenario, desiredIncome: 5000, startAge: 25 },
-    "start-30": { ...baseScenario, desiredIncome: 5000, startAge: 30 },
-    "start-40": { ...baseScenario, desiredIncome: 5000, startAge: 40 },
-    "start-50": { ...baseScenario, desiredIncome: 5000, startAge: 50 },
-    "start-60": { ...baseScenario, desiredIncome: 5000,startAge: 60 }
-  };
+ // Define a base for the *active* scenarios (note: monthlyContribution is removed from here)
+ const baseActiveScenario = {
+    ...zeroScenario, 
+    desiredIncome: 5000, 
+ };
 
-  function setValue(id, value) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.value = value;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  }
+ // Rebuild the scenarios object with specific, calculated monthly contributions for each age
+ const scenarios = {
+    "default": zeroScenario,
+    "child-zero": { ...baseActiveScenario, startAge: 0,  monthlyContribution: 0},
+    "start-19":   { ...baseActiveScenario, startAge: 19, monthlyContribution: 0 },
+    "start-25":   { ...baseActiveScenario, startAge: 25, monthlyContribution: 0 },
+    "start-30":   { ...baseActiveScenario, startAge: 30, monthlyContribution: 0 },
+    "start-40":   { ...baseActiveScenario, startAge: 40, monthlyContribution: 0 },
+    "start-50":   { ...baseActiveScenario, startAge: 50, monthlyContribution: 0 },
+    "start-60":   { ...baseActiveScenario, startAge: 60, monthlyContribution: 0 }
+ };
 
-  document.querySelectorAll(".scenario-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      // UI highlight
-      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+  function setValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = value;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  document.querySelectorAll(".scenario-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      // UI highlight
+      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
 localStorage.setItem('lastScenario', btn.dataset.scenario);
 
-      const s = scenarios[btn.dataset.scenario];
-      if (!s) return;
+      const s = scenarios[btn.dataset.scenario];
+      if (!s) return;
 
-      // Set plain inputs
-      setValue("desiredIncome", s.desiredIncome);
-      setValue("currentInvestment", s.currentInvestment);
-      setValue("monthlyContribution", s.monthlyContribution);
-      setValue("cppBenefit", s.cppBenefit); 
-      setValue("cppStartAge", s.cppStartAge); 
-      setValue("stopAge", s.stopAge);
-      setValue("inheritanceAmount", s.inheritanceAmount);
-      setValue("inheritanceAge", s.inheritanceAge);
+      // Set plain inputs
+      setValue("desiredIncome", s.desiredIncome);
+      setValue("currentInvestment", s.currentInvestment);
+      setValue("monthlyContribution", s.monthlyContribution);
+      setValue("cppBenefit", s.cppBenefit); 
+      setValue("cppStartAge", s.cppStartAge); 
+      setValue("stopAge", s.stopAge);
+      setValue("inheritanceAmount", s.inheritanceAmount);
+      setValue("inheritanceAge", s.inheritanceAge);
 
-      // Set sliders + matching number inputs
-      setValue("inflationRate", s.inflationRate);
-      setValue("inflationInput", s.inflationRate);
-
-
-      setValue("preReturn", s.preReturn);
-      setValue("preInput", s.preReturn);
-
-      setValue("postReturn", s.postReturn);
-      setValue("postInput", s.postReturn);
-
-      setValue("startAge", s.startAge);
-      setValue("startInput", s.startAge);
-
-      setValue("retireAge", s.retireAge);
-      setValue("retireInput", s.retireAge);
-
-      setValue("endAge", s.endAge);
-      setValue("endInput", s.endAge);
-    });
-  });
+      // Set sliders + matching number inputs
+      setValue("inflationRate", s.inflationRate);
+      setValue("preReturn", s.preReturn);
+      setValue("postReturn", s.postReturn);
+      setValue("startAge", s.startAge);
+      setValue("retireAge", s.retireAge);
+      setValue("endAge", s.endAge);
+    });
+  });
 </script>
 
 
