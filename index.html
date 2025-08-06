@@ -1230,8 +1230,12 @@ function calcEquals() {
   <div class="header-left">
     <h1 class="header-title">FIN Calculator</h1>
     <div class="version-info"> <span data-tooltip=
-    "<strong>Recent Updates (v2.0.49):
-    </strong><ul>
+    "<strong>Recent Updates
+    </strong>
+    <ul>(v2.0.50)
+    <li>Restricted Stop Saving Age to the range between start saving age and retirement age</li>
+    </ul>
+    <ul>(v2.0.49)
     <li>Enhanced scenario buttons for parameters that show practical conversational points.</li>
     <li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li>
     <li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li>
@@ -1239,7 +1243,8 @@ function calcEquals() {
     <li>Fixed 'Today's $' & 'Forever' mode calculations.</li>
     <li>Added conditional highlighting for successful plans.</li>
     <li>Redesigned end cotnribution age to a slider format with limited range from start to retirement age</li>
-    </ul>">v2.0.49</span> • Updated: August 5, 2025</div>
+    </ul>
+    ">v2.0.50</span> • Updated: August 5, 2025</div>
   </div>
 </div>
 
@@ -2395,6 +2400,20 @@ function validateAges(){
   
   els.inheritanceAge.min = sa;
   els.inheritanceAge.max = ra;
+
+// Set the min and max for the Stop Saving Age slider
+  els.stopAge.min = sa;
+  els.stopAge.max = ra;
+  
+  // If the current stop age is now invalid, fix it
+  if (+els.stopAge.value < sa) {
+      els.stopAge.value = sa;
+      els.stopAgeText.value = sa;
+  }
+  if (+els.stopAge.value > ra) {
+      els.stopAge.value = ra;
+      els.stopAgeText.value = ra;
+  }
 }
 
 // HELPER 1: Simulates the accumulation of savings until retirement.
