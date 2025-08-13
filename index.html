@@ -4,7 +4,7 @@
 	
 	
 	<!--
-Copyright © 2025 Team Canada Financial Tool. All Rights Reserved.
+Copyright © 2025 Dmitri Ivanenko, Team Canada Financial Tool. All Rights Reserved.
 Created by Dmitri Ivanenko, June 10, 2025 (initial)
 This tool is provided for personal use only.
 No part of the source code, design, or content may be copied, reproduced, modified, or redistributed without prior written permission.
@@ -58,15 +58,18 @@ body:not(.dark) .slider-group {
     input[type=number],input[type=text]{width:100%;padding:6px;margin-bottom:4px;border:1px solid #aaa;border-radius:4px;}
     .slider-container{display:flex;align-items:center;gap:8px;}
     .output{font-size:1.2rem;font-weight:600;margin:16px 0;text-align:center;}
-   #finChart{
-    width:100%;
-    max-width:900px;
-    height:400px;
-    background:#fff;
-    border-radius:6px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
-    /* margin-bottom removed */
+#finChart{
+  display:block;
+  width:100%;
+  max-width:none;      /* no cap */
+  height:auto;         /* base height; expanded CSS will set real height */
+  background:#fff;
+  border-radius:6px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
 }
+
+
+
     .buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px;}
     .btn{padding:10px 20px;font-size:1rem;color:#fff;border:none;border-radius:4px;cursor:pointer;}
     .btn-red{background:#d32f2f;} .btn-red:hover{background:#b71c1c;}
@@ -875,42 +878,39 @@ body.dark #tableView table td.on-track-green {
 
 
 
-/* --- Final Styles for Expanded Chart --- */
+/* --- Final Styles for Expanded Chart (fixed) --- */
 
 .main-layout.chart-is-expanded .middle-column {
-  /* Make the column take up most of the available space */
-  flex: 1; 
-  height: 75vh; /* Set height to 80% of the browser window's height */
+  flex: 1;
+  height: 70vh;            /* gives a nice tall area */
 }
 
 .main-layout.chart-is-expanded .graph-container {
-  /* Make the container fill the new height of the column */
-  height: auto;
-  display: flex;
-  flex-direction: column;
-
+  display: block;
+  height: 100%;
+  flex-direction: unset;   /* not needed when display:block */
 }
-
 
 .main-layout.chart-is-expanded .right-column {
-  /* Hide the table column */
   display: none;
 }
+
+/* Base graph container rules */
 .graph-container {
-  display: inline-block;
-  width: fit-content;
-  height: fit-content;
+  display: block;
+  width: 100%;
+  height: auto;
   padding: 0;
   margin: 0 auto;
-  padding-bottom: 6px; /* Tweak this value until heights match */
-  
+  padding-bottom: 6px;
 }
 
 #finChartContainer {
-  display: inline-block;
-  width: fit-content;
-  height: fit-content;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
+
 
 
 @media (max-width: 1530px) {
@@ -926,11 +926,23 @@ body.dark #tableView table td.on-track-green {
   }
 
   .main-layout.chart-is-expanded .graph-container {
-    width: fit-content;
-    height: 500px; /* or whatever fixed height you want */
+    width: 100%;
+    height: 60vh;     /* responsive height on narrower screens */
     margin-top: 20px;
   }
 }
+@media (max-width: 1530px) {
+  /* your existing small screen styles */
+}
+
+/* Let middle column use all remaining width and reduce the left column width */
+.left-column { flex: 0 0 420px; }       /* make inputs a fixed narrower column */
+.main-layout.chart-is-expanded .middle-column { max-width: none; flex: 1 1 auto; }
+.main-layout.chart-is-expanded .graph-container,
+#finChartContainer { width: 100%; height: 70vh; }
+#finChart { width: 100% !important; height: 100% !important; }
+
+
 @media (max-width: 600px) {
   .summary-bar {
     display: grid !important;
@@ -1032,6 +1044,67 @@ body.dark .retirement-row.on-track {
     border-color: #444;
   }
 }
+/* EXPANDED (keep inputs visible) — final overrides */
+.left-column { flex: 0 0 420px; }                 /* narrower inputs column */
+
+.main-layout.chart-is-expanded .middle-column {
+  max-width: none;
+  flex: 1 1 auto;
+}
+
+.main-layout.chart-is-expanded .graph-container,
+.main-layout.chart-is-expanded #finChartContainer {
+  display: block !important;
+  width: 100% !important;
+  height: 70vh !important;
+}
+
+.main-layout.chart-is-expanded canvas#finChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+/* === Canonical graph container rules === */
+.graph-container {
+  display: block;          /* full row, not inline-block */
+  flex: 1 1 auto;          /* still allowed as a flex child */
+  min-width: 300px;
+  width: 100%;
+  height: auto;
+  padding: 0;
+  margin: 0 auto;
+  padding-bottom: 6px;
+  box-sizing: border-box;
+}
+
+/* Chart wrapper + canvas fill the container */
+#finChartContainer { width: 100%; height: 100%; }
+#finChart { width: 100% !important; height: 100% !important; }
+
+/* Expanded: keep inputs visible, give chart vertical space */
+.main-layout.chart-is-expanded .graph-container {
+  height: 70vh;            /* was 100% — that depended on sibling height */
+}
+
+/* Narrower screens: a bit shorter */
+@media (max-width: 1530px) {
+  .main-layout.chart-is-expanded .graph-container {
+    height: 60vh;
+    margin-top: 20px;
+  }
+}
+/* Keep inputs + chart side‑by‑side when expanded */
+.main-layout.chart-is-expanded {
+  flex-direction: row;     /* force row */
+  flex-wrap: nowrap;       /* do NOT wrap to a new line */
+  justify-content: flex-start; /* stop centering that encourages wrap */
+  align-items: stretch;
+}
+
+/* Fixed width for inputs; chart takes the rest */
+.left-column { flex: 0 0 420px; }     /* your chosen inputs width */
+.main-layout.chart-is-expanded .middle-column { flex: 1 1 auto; max-width: none; }
+
+
  </style>
 </head>
 <body>
@@ -1232,6 +1305,9 @@ function calcEquals() {
     <div class="version-info"> <span data-tooltip=
     "<strong>Recent Updates
     </strong>
+    <ul>(v2.0.51)
+    <li>Expanded chart is wider now for better visibility</li>
+    </ul>
     <ul>(v2.0.50)
     <li>Restricted Stop Saving Age to the range between start saving age and retirement age</li>
     </ul>
@@ -1244,7 +1320,7 @@ function calcEquals() {
     <li>Added conditional highlighting for successful plans.</li>
     <li>Redesigned end cotnribution age to a slider format with limited range from start to retirement age</li>
     </ul>
-    ">v2.0.50</span> • Updated: August 5, 2025</div>
+    ">v2.0.51</span> • Updated: August 12, 2025</div>
   </div>
 </div>
 
@@ -1486,7 +1562,8 @@ function calcEquals() {
   <div class="graph-container"> <!--graph container starting-->
 
     <div id="finChartContainer">
-  <canvas id="finChart" style="width: 100%; max-height: 100%;"></canvas>
+  <canvas id="finChart"></canvas>
+
 </div>
 
     
@@ -1695,13 +1772,14 @@ body.dark .summary-bar {
 }
 
 #finChartContainer {
-  width: auto;
+  width: 100%;
   max-width: none;
-  height: auto;
+  height: 100%;
   border-radius: 8px;
   display: block;
   overflow: hidden;
 }
+
 
 /* Light Mode Styling */
 body:not(.dark) #finChartContainer {
@@ -2034,57 +2112,40 @@ localStorage.setItem('lastScenario', btn.dataset.scenario);
 </script>
 
 <script>
-  // Final, direct function for in-place graph expansion
-  let isChartExpanded = false;
+// Final, direct function for in-place graph expansion
+let isChartExpanded = false;
 
 function toggleGraphSize() {
-  const mainLayout = document.querySelector('.main-layout');
-  const expandButton = document.querySelector('.graph-expand-btn-2');
+  const mainLayout     = document.querySelector('.main-layout');
+  const expandButton   = document.querySelector('.graph-expand-btn-2');
   const chartContainer = document.getElementById('finChartContainer');
-  const canvas = document.getElementById('finChart');
+  const canvas         = document.getElementById('finChart');
   const inputsContainer = document.querySelector('.inputs-container');
 
-  if (!finChart || !mainLayout || !chartContainer || !inputsContainer) {
-    return;
-  }
+  if (!finChart || !mainLayout || !chartContainer || !inputsContainer) return;
 
   mainLayout.classList.toggle('chart-is-expanded');
   isChartExpanded = mainLayout.classList.contains('chart-is-expanded');
 
+  // Let CSS control size; do NOT lock a pixel height
+  chartContainer.style.removeProperty('height');
+  canvas.style.removeProperty('height');
+  canvas.style.removeProperty('width');
+
   if (isChartExpanded) {
-    // ✅ EXPAND view to match inputs column height
-    const inputsHeight = inputsContainer.offsetHeight;
-    chartContainer.style.height = `${inputsHeight}px`;
-
+    // Expanded: fill width, flexible height (no stretching)
+    finChart.options.responsive = true;
     finChart.options.maintainAspectRatio = false;
-    finChart.options.responsive = false;
     expandButton.innerHTML = '↔️ Shrink View';
-
-    finChart.resize();
-
   } else {
-    // 🔄 FULL RESET: Destroy & recreate chart to restore original responsive behavior
-    const chartData = JSON.parse(JSON.stringify(finChart.data));
-    const chartOptions = JSON.parse(JSON.stringify(finChart.options));
-
-    finChart.destroy();
-
-    // Restore container + canvas dimensions
-    chartContainer.style.removeProperty('height');
-    canvas.style.removeProperty('height');
-    canvas.style.removeProperty('width');
-
-    chartOptions.responsive = true;
-    chartOptions.maintainAspectRatio = true;
-
-    finChart = new Chart(canvas.getContext('2d'), {
-      type: 'line',
-      data: chartData,
-      options: chartOptions
-    });
-
+    // Normal: restore usual responsive/aspect behavior
+    finChart.options.responsive = true;
+    finChart.options.maintainAspectRatio = true;
     expandButton.innerHTML = '↔️ Expand the Chart';
   }
+
+  finChart.update('none');
+  finChart.resize();
 }
 
 
@@ -2188,13 +2249,13 @@ finChart = new Chart(ctx, {
 
         document.getElementById("drawdownToggle").addEventListener("change", function () {
         const isFire = this.checked;
-        document.getElementById("modeLabel").textContent = isFire ? "Forever (FIRE style)" : "Life Expectancy";
+        document.getElementById("modeLabel").textContent = isFire ? "Forever)" : "Life Expectancy";
 
         // Also change the slider label for Life Expectancy
         const lifeLabel = document.querySelector('label[for="endAge"]');
         if (lifeLabel) {
 
-          lifeLabel.textContent = isFire ? "Life Expectancy: Perpetual" : "Life Expectancy";
+          lifeLabel.textContent = isFire ? "Mode: Perpetual" : "Life Expectancy";
         }
 
         calculateFIN();
