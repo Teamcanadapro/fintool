@@ -1073,82 +1073,163 @@ body.dark .retirement-row.on-track {
 }
 
 /* Fixed width for inputs; chart takes the rest */
-.left-column { flex: 0 0 420px; }     /* your chosen inputs width */
+.left-column { flex: 0 0 430px; }     /* your chosen inputs width */
 .main-layout.chart-is-expanded .middle-column { flex: 1 1 auto; max-width: none; }
 
-@media (min-width: 1900px) {
+
+
+@media (max-width: 1075px) and (min-width: 821px) {
   .main-layout {
-    max-width: 1800px; /* widen main layout */
-    padding: 0 40px;    /* optional padding on sides */
-  }
-
-  .middle-column {
-    max-width: 1000px;  /* expand chart area */
-  }
-
-  .graph-container {
-    height: 70vh;
-  }
-
-  #finChartContainer,
-  canvas#finChart {
-    height: 100% !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 0 8px;
   }
 
   .left-column {
-    flex: 0 0 380px; /* optionally slightly narrower inputs column */
+    flex: 0 0 55%;
+    max-width: 55%;
+    min-width: 300px;
+    order: 1;
   }
 
   .right-column {
-    flex: 0 0 320px; /* reduce width slightly */
-  }
-}
-
-@media (min-width: 1900px) {
-  .main-layout {
-    max-width: 1760px;
-    padding: 0 30px;
+    flex: 0 0 42%;
+    max-width: 42%;
+    min-width: auto;
+    order: 2;
   }
 
   .middle-column {
-    max-width: 1040px;
+    flex: 0 0 100%;
+    max-width: 100%;
+    order: 3;
+    margin-top: 0;
   }
+
+  .graph-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    margin-bottom: 10px;
+  }
+
+  #finChartContainer,
+  #finChart {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 10;
+  }
+}
+
+
+
+@media (min-width: 1375px) and (max-width: 1499px) {
+  .main-layout {
+    max-width: 100%;
+    padding: 0 12px;
+    justify-content: space-between;
+  }
+
+  .left-column {
+    flex: 0 0 430px;
+  }
+
+  .middle-column {
+    flex: 1 1 0;
+    max-width: 900px;
+  }
+
+
 
   .graph-container {
     height: auto;
     aspect-ratio: 16 / 9;
+    margin-bottom: 8px;
+  }
+
+  #finChartContainer,
+  #finChart {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+  }
+
+  .disclosures {
+    margin-top: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    max-width: 900px;
+  }
+}
+
+
+
+@media (min-width: 1500px) and (max-width: 1899px) {
+  .main-layout {
+    max-width: 96vw;
+    padding: 0 16px;
+    justify-content: space-between;
+  }
+
+  .left-column {
+    flex: 0 0 430px;
+  }
+
+  .middle-column {
+    flex: 1 1 0;
+    max-width: 1000px;
+  }
+
+
+  .graph-container {
+    height: 64vh;
+  }
+
+  #finChartContainer,
+  #finChart {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+
+
+
+@media (min-width: 1900px) {
+  .main-layout {
+    display: flex;
+    flex-wrap: nowrap;              /* ❗ prevent stacking */
+    justify-content: space-between;
+    max-width: 1860px;
+    padding: 0 20px;
+    margin: 0 auto;
+  }
+
+  .left-column {
+    flex: 0 0 520px;
+  }
+
+  .middle-column {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .right-column {
+    flex: 0 0 360px;
+  }
+
+  .graph-container {
+    width: 100%;
+    height: 68vh;
+    aspect-ratio: auto;
+    margin: 0;
+    padding: 0;
   }
 
   #finChartContainer {
     width: 100%;
-    aspect-ratio: 16 / 9;
-  }
-
-  canvas#finChart {
-    width: 100% !important;
-    height: auto !important;
-  }
-}
-@media (min-width: 1900px) {
-  .graph-container {
-    height: 500px; /* or tweak between 460–540px for best fit */
-  }
-
-  #finChartContainer {
-    height: 100%;
-  }
-
-  canvas#finChart {
-    width: 100% !important;
-    height: 100% !important;
-  }
-}
-
-@media (min-width: 1900px) {
-  .graph-container {
-  }
-
-  #finChartContainer {
     height: 100%;
     max-height: 585px;
   }
@@ -1158,6 +1239,9 @@ body.dark .retirement-row.on-track {
     height: 100% !important;
   }
 }
+
+
+
 
  /*END of upper style*/
  
@@ -1492,55 +1576,17 @@ body.dark .graph-expand-btn-2:hover {
    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-@media (min-width: 1600px) {
-  .main-layout {
-    max-width: 1800px;
-    padding: 0 30px;
-  }
 
-  .middle-column {
-    max-width: 1100px;
-  }
 
-  .graph-container {
-    height: 72vh;
-  }
-
-  #finChartContainer,
-  #finChart {
-    height: 100% !important;
-    width: 100% !important;
-  }
-}
-@media (min-width: 1600px) {
-  .main-layout {
-    max-width: 1760px;     /* widen layout slightly */
-    justify-content: space-between;
-    padding: 0 20px;
-  }
-
-  .middle-column {
-    max-width: 1000px;     /* chart column expands */
-  }
-
-  .graph-container {
-    height: 68vh;          /* chart gets taller */
-  }
-
-  .left-column {
-    flex: 0 0 520px;       /* keep input block size same as before */
-  }
-
-  .right-column {
-    flex: 0 0 380px;       /* table column size as before */
-  }
-
-  #finChartContainer,
-  #finChart {
-    width: 100% !important;
-    height: 100% !important;
-  }
+/* Fix graph container background bleed in dark mode */
+body.dark .graph-container {
+  background: transparent !important;
 }
 
+body.dark #finChart {
+  background-color: #1e1e1e !important;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
 
 
