@@ -12,7 +12,7 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 	
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Team Canada FIN Calculator</title>
+  <title>FIN tools</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.2.1"></script>
 <script>
@@ -21,10 +21,11 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css" />
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
 <link rel="icon" type="image/x-icon" href="./favicon_io/favicon.ico?v=20250804">
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
+
 
   
 
@@ -51,8 +52,8 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   <!-- PAGE CONTENT (initially hidden) -->
   <div id="content" style="display:none;">
 
-<button onclick="document.getElementById('basicCalculator').classList.toggle('hidden')"
-  style="position: fixed; top: 20px; left: 20px; z-index: 999;
+<button id="calculatorBtn" onclick="document.getElementById('basicCalculator').classList.toggle('hidden')"
+  style="position: fixed; top: 48px; left: 20px; z-index: 999;
          background: none; border: none; padding: 0; cursor: pointer;">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"
        stroke="#1976d2" stroke-width="4" fill="none"
@@ -74,12 +75,56 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   </svg>
 </button>
 
+<div class="tab-wrapper">
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="fin">FIN Calculator</button>
+      <button class="tab-btn" data-tab="rdsp">RDSP</button>
+      <button class="tab-btn" data-tab="resp">RESP</button>
+      <button class="tab-btn" data-tab="tfsa">TFSA / RRSP</button>
+      <button class="tab-btn" data-tab="btid">BTID vs WL</button>
+      <button class="tab-btn" data-tab="tax">Tax Calculator</button>
+      <button class="tab-btn" data-tab="budget">Budgeting</button>
+      <button class="tab-btn" data-tab="fna">FNA</button>
+       <div class="version-info"> <span data-tooltip=
+      "<strong>Recent Updates
+      </strong>
+      <ul>(v2.0.54) Aug 15, 2025
+      <li>added help overlay, keyboard shortcuts for core functions on the page</li>
+      </ul>
+      <li>adjusted the top bar for visibily improvement</li>
+      </ul>
+      <li>added a side menu, moved toggles to the side menu</li>
+      </ul>
+      <li>added tabs for future fintools, updated the menu to toggle tabs to see on the screen</li>
+      </ul>      
+      <ul>(v2.0.53) Aug 15, 2025
+      <li>separated css from html, refactored css for tablets, laptops and desktops up to 1900+ resolutions</li>
+      </ul>
+      <ul>(v2.0.52) Aug 14, 2025
+      <li>Optimized view for the 1920px screen size</li>
+      </ul>
+      <ul>(v2.0.51) Aug 12, 2025
+      <li>Expanded chart is wider now for better visibility</li>
+      </ul>
+      <ul>(v2.0.50) Aug 5, 2025
+      <li>Restricted Stop Saving Age to the range between start saving age and retirement age</li>
+      </ul>
+      <ul>(v2.0.49) Jul 30, 2025
+      <li>Enhanced scenario buttons for parameters that show practical conversational points.</li>
+      <li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li>
+      <li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li>
+      <li>Added independent start age for CPP benefits (60-70).</li>
+      <li>Fixed 'Today's $' & 'Forever' mode calculations.</li>
+      <li>Added conditional highlighting for successful plans.</li>
+      <li>Redesigned end cotnribution age to a slider format with limited range from start to retirement age</li>
+      </ul>
+      ">v2.0.54</span> • Updated: August 15, 2025</div>
+    </div>
+<div id="shortcutHint" class="shortcut-hint-bar">
+  💡 <strong>Shortcut:</strong> Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>/</kbd> for Help and Shortcuts
+</div>
 
-
-
-
-
-
+    <div class="tab-content" id="tab-fin">
 <!--<body class="debug-layout">-->
 <div class="header">
 
@@ -97,10 +142,10 @@ style="position: fixed; top: 20px; left: 20px; z-index: 1000;
   <div id="calcDragHandle" style="font-weight:bold;font-size:1.2em;margin-bottom:6px; cursor: move;">Basic Calculator</div>
   
   <!--close button for the draggable calculator-->
-  <button onclick="document.getElementById('basicCalculator').classList.add('hidden')"
-style="position:absolute; top:10px; right:12px; background:none; color:white; font-size:20px; border:none; cursor:pointer;">×</button>
+  <button class="calc-close" onclick="document.getElementById('basicCalculator').classList.add('hidden')"
+style="position:absolute; top:10px; right:12px; background:none;  font-size:20px; border:none; cursor:pointer;">×</button>
 
-  <input id="calcDisplay" type="text" style="width:100%;padding:10px;font-size:1.3em;margin-bottom:12px;text-align:right;border:none;border-radius:6px;background:var(--calc-panel,#1a1c1e);color:var(--calc-text,#fff);" readonly>
+  <input id="calcDisplay" type="text" style="width:100%;padding:10px;font-size:1.3em;margin-bottom:12px;text-align:right;border:none;border-radius:6px;background:var(--calc-panel,#1a1c1e);color:var(--calc-text,#fff);" placeholder="0"  readonly>
   
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
     <button class="calc-btn" onclick="calcInput('7')">7</button>
@@ -132,7 +177,7 @@ style="position:absolute; top:10px; right:12px; background:none; color:white; fo
 </div>
 
 
-<!-- Calculator Logic (place after the calculator HTML, before </body>) -->
+<!-- Calculator Logic  -->
 <script>
 let calcBuffer = "";
 
@@ -166,91 +211,20 @@ function calcEquals() {
   }
 }
 </script>
-
-  <div class="header-left">
-    <h1 class="header-title">FIN Calculator</h1>
-    <div class="version-info"> <span data-tooltip=
-    "<strong>Recent Updates
-    </strong>
-    <ul>(v2.0.53) Aug 15, 2025
-    <li>separated css from html, refactored css for tablets, laptops and desktops up to 1900+ resolutions</li>
-    </ul>
-    <ul>(v2.0.52) Aug 14, 2025
-    <li>Optimized view for the 1920px screen size</li>
-    </ul>
-    <ul>(v2.0.51) Aug 12, 2025
-    <li>Expanded chart is wider now for better visibility</li>
-    </ul>
-    <ul>(v2.0.50) Aug 5, 2025
-    <li>Restricted Stop Saving Age to the range between start saving age and retirement age</li>
-    </ul>
-    <ul>(v2.0.49) Jul 30, 2025
-    <li>Enhanced scenario buttons for parameters that show practical conversational points.</li>
-    <li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li>
-    <li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li>
-    <li>Added independent start age for CPP benefits (60-70).</li>
-    <li>Fixed 'Today's $' & 'Forever' mode calculations.</li>
-    <li>Added conditional highlighting for successful plans.</li>
-    <li>Redesigned end cotnribution age to a slider format with limited range from start to retirement age</li>
-    </ul>
-    ">v2.0.53</span> • Updated: August 15, 2025</div>
-  </div>
-</div>
-
-<!-- Header Center Section -->
-<div class="header-center">
-  
-<!-- Toggle Bar -->
-  <div class="toggle-bar">
-
-   <!-- Dark Mode Toggle -->
-    <div class="toggle-item">
-      <span>Dark Mode 🌙</span>
-      <label class="switch">
-        <input type="checkbox" id="darkModeToggle">
-        <span class="slider"></span>
-      </label>
+<div class="top-layout-container">
+  <!-- 🔹 LEFT COLUMN: Title + Version + Toggles -->
+  <div class="top-left">
+    <div class="header-left">
+      <!--<h1 class="header-title">FIN Calculator</h1>-->
+     
     </div>
 
-    <!-- Display Toggle -->
-    <div class="toggle-item">
-  <span
-    id="finDisplayLabelContainer"
-    data-tooltip="Show results in <strong>today’s dollars</strong> or <strong>inflated future dollars</strong>. Due to inflation, the amount you will need in the future to buy the same things you buy today will be much higher."
-  
-  >
-    <span id="finDisplayLabelPrefix">Display:</span>
-    <strong id="finDisplayLabel">Future $</strong>
-  </span>
-
-  <label class="switch">
-    <input type="checkbox" id="finDisplayToggle" checked>
-    <span class="slider"></span>
-  </label>
-</div>
-
-
-    <!-- Mode Toggle -->
-<div class="toggle-item">
-  <span
-    id="modeLabelWrapper"
-    data-tooltip="Choose Life Expectancy mode (investments are expected to last up to this age) or Forever drawdown style (the money lasts forever in the hands of your beneficiaries)."
-  
-  >
-    <span id="modeLabelPrefix">Mode:</span>
-    <strong id="modeLabel">Life Expectancy</strong>
-  </span>
-
-  <label class="switch">
-    <input type="checkbox" id="drawdownToggle">
-    <span class="slider"></span>
-  </label>
-</div>
-
-</div> <!-- Closes: <div class="toggles-row"> -->
-</div> <!-- Closes: <div class="toggles-container"> -->
-</div> <!-- Closes: <div class="header-flex"> -->
-
+<!-- Header Center Section -->
+    <div class="header-center">
+    
+    </div> <!-- closes .header-center -->
+  </div> <!-- closes .top-left -->
+</div><!--closes
 
 <!-- Scenario Buttons Row -->
 <div class="top-interactive-area">
@@ -423,11 +397,6 @@ function calcEquals() {
 
 </div> <!-- end of the input container -->
 
-<!--
- <div class="results-container"> 
-
-  </div> <!--end of results-container-->
-
 </div> <!--end of left-column-->
 
 <div class="middle-column">
@@ -572,12 +541,12 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 
   </div>
-</section>          
+  
 </div> <!--end of right-container-->
-    
-
 </div> <!-- end of the main-wrapper, full page-->
+</div> <!-- ✅ END OF tab-content #tab-fin -->
 
+</div> <!-- end of tab-wrapper-->
 </div> <!-- end of #content -->
 
 <!-- PASSWORD CHECK SCRIPT (must be the first script on the list)-->
@@ -1581,7 +1550,227 @@ document.addEventListener('keydown', function (e) {
 </script>
 
 
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      
+      // Switch active tab
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
+      // Show selected tab, hide others
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+    });
+  });
+  
+
+</script>
+
+<!-- Right-Side Menu Button -->
+<button id="menuToggleBtn"
+  style="position: fixed; top: 48px; right: 20px; z-index: 999;
+         background: none; border: none; padding: 0; cursor: pointer;">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80" width="40" height="40" fill="#1976d2">
+    <rect width="100" height="15"></rect>
+    <rect y="30" width="100" height="15"></rect>
+    <rect y="60" width="100" height="15"></rect>
+  </svg>
+</button>
+
+<!-- Slide-Out Menu Overlay -->
+<div id="sideMenuOverlay" class="side-menu hidden">
+
+  <!-- Header -->
+  <div class="side-menu-header">
+    <span><strong>Menu</strong></span>
+    <button id="closeMenuBtn">✖</button>
+  </div>
+
+  <!-- Section 1: Global Toggles -->
+  <div class="side-menu-section">
+    <h4>Settings</h4>
+
+    <!-- 🌙 Dark Mode -->
+    <div class="toggle-row tooltip-container" data-tooltip="Enable dark theme for the entire tool.">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider"></span>
+      </label>
+      <label for="darkModeToggle"> Dark Mode</label>
+    </div>
+
+    <!-- 📈 Future $ -->
+    <div class="toggle-row tooltip-container" data-tooltip="Toggle between inflation-adjusted and today’s dollar view. Generally you will want to use the Future $ adjusted by inflation as in reality we experience inflation and what things cost today will not be the case in the future. The longer we have before we will be using that money, the more inflation will play a critical role">
+      <label class="switch">
+        <input type="checkbox" id="finDisplayToggle" />
+        <span class="slider"></span>
+      </label>
+      <label id="finDisplayLabel" for="finDisplayToggle"> Future $</label>
+    </div>
+
+    <!-- ♾️ Forever -->
+    <div class="toggle-row tooltip-container" data-tooltip="Switch between perpetual withdrawal mode and life expectancy-based planning. Forever mode means money will never run out provided the growth remains constant. Life expectancy mode means we only need money until the year we die, after that we expect to have zero in our investments.">
+      <label class="switch">
+        <input type="checkbox" id="drawdownToggle" />
+        <span class="slider"></span>
+      </label>
+      <label id="modeLabel" for="drawdownToggle"> Forever Mode</label>
+    </div>
+  </div>
+
+  <!-- Section 2: Tabs -->
+  <div class="side-menu-section">
+    <h4>Show Tabs</h4>
+
+    <!-- Master Toggle -->
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggleAllTabs" />
+        <span class="slider"></span>
+      </label>
+      <label for="toggleAllTabs">Show All Tabs</label>
+    </div>
+
+    <!-- Individual Tab Toggles -->
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-rdsp" data-toggle-tab="rdsp" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-rdsp">Show RDSP</label>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-resp" data-toggle-tab="resp" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-resp">Show RESP</label>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-tfsa" data-toggle-tab="tfsa" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-tfsa">Show TFSA / RRSP</label>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-btid" data-toggle-tab="btid" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-btid">Show BTID vs WL</label>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-tax" data-toggle-tab="tax" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-tax">Show Income Tax Calculator</label>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-budget" data-toggle-tab="budget" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-budget">Show Budgeting</label>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="toggle-fna" data-toggle-tab="fna" checked />
+        <span class="slider"></span>
+      </label>
+      <label for="toggle-fna">Show FNA</label>
+    </div>
+
+  </div>
+</div>
+
+
+<div id="helpOverlay" class="help-overlay">
+  <div class="help-box">
+    <h2>Help & Shortcuts</h2>
+    <ul>
+      <li><strong>Ctrl + Alt + M</strong> — Toggle Side Menu</li>
+      <li><strong>Ctrl + Alt + C</strong> — Open Calculator</li>
+      <li><strong>Ctrl + Alt + D</strong> — Toggle Dark Mode</li>
+      <li><strong>Ctrl + Alt + R</strong> — Reset Inputs</li>
+      <li><strong>Ctrl + Alt + /</strong> — Show/Hide This Help</li>
+    </ul>
+    <hr>
+    <p>Need help? Contact: <a href="mailto:dmitri.ivanenko@gmail.com">dmitri.ivanenko@gmail.com</a></p>
+    <button onclick="toggleHelpOverlay()">Close</button>
+  </div>
+</div>
+<script>
+//helper yellow bar below the tabs
+  document.addEventListener('DOMContentLoaded', () => {
+    const hint = document.getElementById('shortcutHint');
+    if (!hint) return;
+
+    let hideTimer;
+    let idleTimer;
+    let wasAutoShown = false;
+
+    const hideHint = () => {
+      hint.classList.add('fade-out');
+      setTimeout(() => hint.classList.add('hidden'), 600);
+    };
+
+    const showHint = (auto = false) => {
+      hint.classList.remove('fade-out', 'hidden');
+      if (!auto) {
+        // only set 10s hide timer on first/manual show
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(hideHint, 10000);
+      } else {
+        wasAutoShown = true;
+      }
+    };
+
+    const resetIdleTimer = () => {
+      clearTimeout(idleTimer);
+
+      // If user moves & hint was auto-shown, hide it again
+      if (wasAutoShown) {
+        wasAutoShown = false;
+        hideHint();
+      }
+
+      idleTimer = setTimeout(() => {
+        showHint(true); // auto = true: don't set hide timer
+      }, 300000); // idle for 300s
+    };
+
+    // Initial show + hide after 10s
+    showHint();
+    hideTimer = setTimeout(hideHint, 10000);
+
+    // Activity resets idle
+    ['mousemove', 'keydown', 'touchstart', 'click'].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+
+    resetIdleTimer(); // Start idle tracking
+  });
+</script>
+
+
+
+
+
+<script src="js/loader.js"></script>
 
 </body>
+
 </html>
