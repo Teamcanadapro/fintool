@@ -1,21 +1,14 @@
 // shortcuts.js — cross-platform keyboard shortcuts
-// Uniform across Windows/Linux/Mac using Alt+Shift combinations.
-// Option+Shift on Mac = Alt+Shift on Windows/Linux.
+// Mac: Cmd+Shift+Key, Win/Linux: Ctrl+Shift+Key
 
-// Helpers
 function isTypingTarget(el) {
   if (!el) return false;
   const tag = el.tagName?.toLowerCase();
-  const isEditable = el.isContentEditable;
-  return (
-    isEditable ||
-    tag === 'input' ||
-    tag === 'textarea' ||
-    tag === 'select'
-  );
+  return el.isContentEditable || ['input', 'textarea', 'select'].includes(tag);
 }
 
-// Map of actions
+const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
+
 const actions = {
   m: () => window.toggleSideMenu?.(),
   c: () => window.openCalculator?.(),
@@ -25,36 +18,33 @@ const actions = {
   g: () => window.toggleHighReturn?.()
 };
 
-// Normalize a key (treat '?' as '/')
 function normalizeKey(e) {
   const k = e.key || '';
-  if (k === '?') return '/';
-  return k.toLowerCase();
+  return k === '?' ? '/' : k.toLowerCase();
 }
 
 document.addEventListener('keydown', (e) => {
   const key = normalizeKey(e);
+  const targetIsTyping = isTypingTarget(document.activeElement);
+  const isHelp = key === '/';
+  const action = actions[key];
 
-  // 1) Primary: Alt+Shift+<key> (works on Mac/Win/Linux)
-  if (e.altKey && e.shiftKey) {
-    // Don’t fire most shortcuts while typing in fields, except Help
-    const targetIsTyping = isTypingTarget(document.activeElement);
-    const isHelp = key === '/';
+  if (!action) return;
 
+  // ✅ Mac: Cmd + Shift + Key
+  if (isMac && e.metaKey && e.shiftKey && !e.ctrlKey && !e.altKey) {
     if (targetIsTyping && !isHelp) return;
-
-    const action = actions[key];
-    if (action) {
-      e.preventDefault();
-      action();
-      return;
-    }
+    e.preventDefault();
+    action();
+    return;
   }
 
-  // 2) Secondary alias: Ctrl+Alt+/ for Help (since this already works on Mac for you)
-  if (e.ctrlKey && e.altKey && key === '/') {
+  // ✅ Windows/Linux: Ctrl + Shift + Key
+  if (!isMac && e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) {
+    if (targetIsTyping && !isHelp) return;
     e.preventDefault();
-    actions['/']?.();
+    action();
+    return;
   }
 });
 
