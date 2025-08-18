@@ -2,7 +2,6 @@
 (function () {
   const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
 
-  // Labels per platform
   const ALT = isMac ? 'Option' : 'Alt';
   const ALT_SYM = isMac ? '⌥' : 'Alt';
   const SHIFT = isMac ? 'Shift' : 'Shift';
@@ -10,14 +9,13 @@
   const CTRL = isMac ? 'Control' : 'Ctrl';
   const CTRL_SYM = isMac ? '⌃' : 'Ctrl';
 
-  // Unified combos
   const combos = [
-    { key: 'M', desc: 'Toggle Side Menu', primary: `${ALT_SYM} + ${SHIFT_SYM} + M` },
-    { key: 'C', desc: 'Open Calculator', primary: `${ALT_SYM} + ${SHIFT_SYM} + C` },
-    { key: 'L', desc: 'Toggle Dark Mode', primary: `${ALT_SYM} + ${SHIFT_SYM} + L` },
-    { key: 'R', desc: 'Reset Inputs', primary: `${ALT_SYM} + ${SHIFT_SYM} + R` },
-    { key: '/', desc: 'Help / Shortcuts', primary: `${ALT_SYM} + ${SHIFT_SYM} + /`, secondary: `${CTRL_SYM} + ${ALT_SYM} + /` },
-    
+    { key: '.', desc: 'Toggle Side Menu', primary: `${ALT_SYM} + ${SHIFT_SYM} + .`, secondary: isMac ? '⌘ + ⇧ + .' : '' },
+    { key: ',', desc: 'Toggle Dark Mode', primary: `${ALT_SYM} + ${SHIFT_SYM} + ,`, secondary: isMac ? '⌘ + ⇧ + ,' : '' },
+    { key: 'K', desc: 'Open Calculator', primary: `${ALT_SYM} + ${SHIFT_SYM} + K`, secondary: isMac ? '⌘ + ⇧ + K' : '' },
+    { key: 'U', desc: 'Reset Inputs', primary: `${ALT_SYM} + ${SHIFT_SYM} + U`, secondary: isMac ? '⌘ + ⇧ + U' : '' },
+    { key: 'Y', desc: 'Toggle High Return Mode', primary: `${ALT_SYM} + ${SHIFT_SYM} + Y`, secondary: isMac ? '⌘ + ⇧ + Y' : '' },
+    { key: '/', desc: 'Help / Shortcuts', primary: `${ALT_SYM} + ${SHIFT_SYM} + /`, secondary: `${CTRL_SYM} + ${ALT_SYM} + /` }
   ];
 
   function ensureOverlay() {
@@ -86,7 +84,7 @@
       opacity: 0.8;
     `;
     subtitle.textContent = isMac
-      ? `Use ${ALT} (${ALT_SYM}) + ${SHIFT} (${SHIFT_SYM}) + key`
+      ? `Use ${ALT} (${ALT_SYM}) + ${SHIFT} (${SHIFT_SYM}) + key or ⌘ + ⇧ + key`
       : `Use ${ALT} + ${SHIFT} + key`;
 
     const table = document.createElement('div');
@@ -143,7 +141,6 @@
       ? `Tip: On Mac, <strong>${ALT}</strong> is the <strong>${ALT_SYM}</strong> key.`
       : `Tip: Works on Windows & Linux using <strong>Alt + Shift</strong>.`;
 
-    // Dark mode tweaks
     const darkStyles = document.createElement('style');
     darkStyles.textContent = `
       body.dark .help-overlay-panel { background:#1e1e1e; color:#eee; }

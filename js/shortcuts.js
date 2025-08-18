@@ -1,11 +1,4 @@
-// shortcuts.js — Final Cross-Platform Keyboard Shortcuts
-
-function isTypingTarget(el) {
-  if (!el) return false;
-  const tag = el.tagName?.toLowerCase();
-  return el.isContentEditable || ['input', 'textarea', 'select'].includes(tag);
-}
-
+// Determine platform
 const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
 
 const actions = {
@@ -13,9 +6,15 @@ const actions = {
   ',': () => document.getElementById('darkModeToggle')?.click(),
   k: () => window.openCalculator?.(),
   u: () => window.resetInputs?.(),
-  y: () => window.toggleGodMode?.(),
+  y: () => window.toggleHighReturn?.(),
   '/': () => window.toggleHelpOverlay?.()
 };
+
+function isTypingTarget(el) {
+  if (!el) return false;
+  const tag = el.tagName?.toLowerCase();
+  return el.isContentEditable || ['input', 'textarea', 'select'].includes(tag);
+}
 
 function normalizeKey(e) {
   const k = e.key || '';
@@ -25,29 +24,28 @@ function normalizeKey(e) {
 document.addEventListener('keydown', (e) => {
   const key = normalizeKey(e);
   const targetIsTyping = isTypingTarget(document.activeElement);
-  const isHelpKey = key === '/';
+  const isHelp = key === '/';
   const action = actions[key];
-
   if (!action) return;
 
-  // 1️⃣ Help Overlay — universal Ctrl + Alt + /
-  if (e.ctrlKey && e.altKey && isHelpKey) {
+  // 1️⃣ Help overlay for all OS: Ctrl + Alt + /
+  if (e.ctrlKey && e.altKey && key === '/') {
     e.preventDefault();
     action();
     return;
   }
 
-  // 2️⃣ Mac: Cmd + Shift + Key
+  // 2️⃣ Mac: Cmd + Shift + [Key]
   if (isMac && e.metaKey && e.shiftKey && !e.ctrlKey && !e.altKey) {
-    if (targetIsTyping && !isHelpKey) return;
+    if (targetIsTyping && !isHelp) return;
     e.preventDefault();
     action();
     return;
   }
 
-  // 3️⃣ Windows/Linux: Ctrl + Shift + Key
-  if (!isMac && e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) {
-    if (targetIsTyping && !isHelpKey) return;
+  // 3️⃣ Windows/Linux: Alt + Shift + [Key]
+  if (!isMac && e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    if (targetIsTyping && !isHelp) return;
     e.preventDefault();
     action();
     return;
