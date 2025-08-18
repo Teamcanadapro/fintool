@@ -1,21 +1,42 @@
 // help-overlay.js — builds a cross-platform keyboard shortcuts overlay
 (function () {
   const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
+  const isLinux = !isMac && /Linux/.test(navigator.platform);
 
   const ALT = isMac ? 'Option' : 'Alt';
   const ALT_SYM = isMac ? '⌥' : 'Alt';
   const SHIFT = isMac ? 'Shift' : 'Shift';
   const SHIFT_SYM = isMac ? '⇧' : 'Shift';
-  const CTRL = isMac ? 'Control' : 'Ctrl';
   const CTRL_SYM = isMac ? '⌃' : 'Ctrl';
+  const CMD_SYM = '⌘';
 
+  // Final key mappings
   const combos = [
-    { key: '.', desc: 'Toggle Side Menu', primary: `${ALT_SYM} + ${SHIFT_SYM} + .`, secondary: isMac ? '⌘ + ⇧ + .' : '' },
-    { key: ',', desc: 'Toggle Dark Mode', primary: `${ALT_SYM} + ${SHIFT_SYM} + ,`, secondary: isMac ? '⌘ + ⇧ + ,' : '' },
-    { key: 'K', desc: 'Open Calculator', primary: `${ALT_SYM} + ${SHIFT_SYM} + K`, secondary: isMac ? '⌘ + ⇧ + K' : '' },
-    { key: 'U', desc: 'Reset Inputs', primary: `${ALT_SYM} + ${SHIFT_SYM} + U`, secondary: isMac ? '⌘ + ⇧ + U' : '' },
-    { key: 'Y', desc: 'Toggle High Return Mode', primary: `${ALT_SYM} + ${SHIFT_SYM} + Y`, secondary: isMac ? '⌘ + ⇧ + Y' : '' },
-    { key: '/', desc: 'Help / Shortcuts', primary: `${ALT_SYM} + ${SHIFT_SYM} + /`, secondary: `${CTRL_SYM} + ${ALT_SYM} + /` }
+    {
+      key: 'Side Menu',
+      primary: isMac ? `${CMD_SYM} + ${SHIFT_SYM} + .` : isLinux ? `Ctrl + Alt + M` : `${ALT_SYM} + ${SHIFT_SYM} + M`
+    },
+    {
+      key: 'Dark Mode',
+      primary: isMac ? `${CMD_SYM} + ${SHIFT_SYM} + ,` : `${ALT_SYM} + ${SHIFT_SYM} + L`
+    },
+    {
+      key: 'Open Calculator',
+      primary: `${isMac ? CMD_SYM : ALT_SYM} + ${SHIFT_SYM} + K`
+    },
+    {
+      key: 'Reset Inputs',
+      primary: `${isMac ? CMD_SYM : ALT_SYM} + ${SHIFT_SYM} + U`
+    },
+    {
+      key: 'High Return Mode',
+      primary: isMac ? `${CMD_SYM} + ${SHIFT_SYM} + '` : `${ALT_SYM} + ${SHIFT_SYM} + G`
+    },
+    {
+      key: 'Help / Shortcuts',
+      primary: `${ALT_SYM} + ${SHIFT_SYM} + /`,
+      secondary: `${CTRL_SYM} + ${ALT_SYM} + /`
+    }
   ];
 
   function ensureOverlay() {
@@ -60,130 +81,5 @@
       position: absolute;
       top: 8px; right: 12px;
       width: 36px; height: 36px;
-      border: none;
-      background: transparent;
-      color: inherit;
-      font-size: 28px;
-      line-height: 1;
-      cursor: pointer;
-    `;
-
-    const title = document.createElement('h2');
-    title.id = 'helpOverlayTitle';
-    title.textContent = 'Keyboard Shortcuts';
-    title.style.cssText = `
-      margin: 0 0 6px 0;
-      font-size: 1.25rem;
-      color: var(--brand, #1976d2);
-    `;
-
-    const subtitle = document.createElement('div');
-    subtitle.style.cssText = `
-      margin: 0 0 14px 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    `;
-    subtitle.textContent = isMac
-      ? `Use ${ALT} (${ALT_SYM}) + ${SHIFT} (${SHIFT_SYM}) + key or ⌘ + ⇧ + key`
-      : `Use ${ALT} + ${SHIFT} + key`;
-
-    const table = document.createElement('div');
-    table.className = 'help-grid';
-    table.style.cssText = `
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px 18px;
-      align-items: center;
-    `;
-
-    combos.forEach(({ desc, primary, secondary }) => {
-      const label = document.createElement('div');
-      label.textContent = desc;
-      label.style.cssText = `font-weight: 600;`;
-
-      const keys = document.createElement('div');
-      keys.style.cssText = `justify-self: end; display: flex; flex-wrap: wrap; gap: 6px;`;
-
-      const chip = (txt) => {
-        const k = document.createElement('span');
-        k.textContent = txt;
-        k.style.cssText = `
-          padding: 4px 8px;
-          border-radius: 8px;
-          background: #f1f3f4;
-          border: 1px solid #dadce0;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-          font-size: 0.85rem;
-        `;
-        return k;
-      };
-
-      keys.appendChild(chip(primary));
-      if (secondary) {
-        const sep = document.createElement('span');
-        sep.textContent = ' or ';
-        sep.style.cssText = `margin: 0 4px; opacity: 0.6;`;
-        keys.appendChild(sep);
-        keys.appendChild(chip(secondary));
-      }
-
-      table.appendChild(label);
-      table.appendChild(keys);
-    });
-
-    const tip = document.createElement('div');
-    tip.style.cssText = `
-      margin-top: 14px;
-      font-size: 0.85rem;
-      opacity: 0.8;
-    `;
-    tip.innerHTML = isMac
-      ? `Tip: On Mac, <strong>${ALT}</strong> is the <strong>${ALT_SYM}</strong> key.`
-      : `Tip: Works on Windows & Linux using <strong>Alt + Shift</strong>.`;
-
-    const darkStyles = document.createElement('style');
-    darkStyles.textContent = `
-      body.dark .help-overlay-panel { background:#1e1e1e; color:#eee; }
-      body.dark .help-grid span { background:#2b2b2b; border-color:#444; }
-    `;
-
-    panel.appendChild(closeBtn);
-    panel.appendChild(title);
-    panel.appendChild(subtitle);
-    panel.appendChild(table);
-    panel.appendChild(tip);
-    overlay.appendChild(panel);
-    overlay.appendChild(darkStyles);
-    document.body.appendChild(overlay);
-
-    // Wire up interactions
-    function hide() { overlay.style.display = 'none'; }
-    function show() { overlay.style.display = 'flex'; }
-
-    closeBtn.addEventListener('click', hide);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) hide();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (overlay.style.display !== 'none' && e.key === 'Escape') hide();
-    });
-
-    // Expose global toggle for shortcuts.js
-    window.toggleHelpOverlay = function () {
-      if (overlay.style.display === 'none' || overlay.style.display === '') {
-        show();
-      } else {
-        hide();
-      }
-    };
-
-    return overlay;
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ensureOverlay);
-  } else {
-    ensureOverlay();
-  }
-})();
+      border:
 
