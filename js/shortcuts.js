@@ -1,35 +1,60 @@
+// shortcuts.js — cross-platform keyboard shortcuts
+// Uniform across Windows/Linux/Mac using Alt+Shift combinations.
+// Option+Shift on Mac = Alt+Shift on Windows/Linux.
+
+// Helpers
+function isTypingTarget(el) {
+  if (!el) return false;
+  const tag = el.tagName?.toLowerCase();
+  const isEditable = el.isContentEditable;
+  return (
+    isEditable ||
+    tag === 'input' ||
+    tag === 'textarea' ||
+    tag === 'select'
+  );
+}
+
+// Map of actions
+const actions = {
+  m: () => window.toggleSideMenu?.(),
+  c: () => window.openCalculator?.(),
+  l: () => document.getElementById('darkModeToggle')?.click(),
+  r: () => window.resetInputs?.(),
+  '/': () => window.toggleHelpOverlay?.(),
+  g: () => window.toggleHighReturn?.()
+};
+
+// Normalize a key (treat '?' as '/')
+function normalizeKey(e) {
+  const k = e.key || '';
+  if (k === '?') return '/';
+  return k.toLowerCase();
+}
+
 document.addEventListener('keydown', (e) => {
-  const key = e.key.toLowerCase();
+  const key = normalizeKey(e);
 
-  // Support both Windows (Ctrl+Alt) and Mac (Meta+Alt)
-  const ctrlOrCmd = e.ctrlKey || e.metaKey;
+  // 1) Primary: Alt+Shift+<key> (works on Mac/Win/Linux)
+  if (e.altKey && e.shiftKey) {
+    // Don’t fire most shortcuts while typing in fields, except Help
+    const targetIsTyping = isTypingTarget(document.activeElement);
+    const isHelp = key === '/';
 
-  if (ctrlOrCmd && e.altKey) {
-    switch (key) {
-      case 'm':
-        e.preventDefault();
-        window.toggleSideMenu?.();
-        break;
-      case 'c':
-        e.preventDefault();
-        window.openCalculator?.();
-        break;
-      case 'l':
-        e.preventDefault();
-        document.getElementById('darkModeToggle')?.click();
-        break;
-      case 'r':
-        e.preventDefault();
-        window.resetInputs?.();
-        break;
-      case '/':
-        e.preventDefault();
-        window.toggleHelpOverlay?.();
-        break;
-      case 'g':
-        e.preventDefault();
-        window.toggleHighReturn?.();
-        break;
+    if (targetIsTyping && !isHelp) return;
+
+    const action = actions[key];
+    if (action) {
+      e.preventDefault();
+      action();
+      return;
     }
   }
+
+  // 2) Secondary alias: Ctrl+Alt+/ for Help (since this already works on Mac for you)
+  if (e.ctrlKey && e.altKey && key === '/') {
+    e.preventDefault();
+    actions['/']?.();
+  }
 });
+

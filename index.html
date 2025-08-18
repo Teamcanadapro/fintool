@@ -23,6 +23,8 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css" />
 <link rel="stylesheet" href="css/style.css">
 <link rel="icon" type="image/x-icon" href="./favicon_io/favicon.ico?v=20250804">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/tippy.js@6"></script>
 
@@ -30,6 +32,7 @@ No part of the source code, design, or content may be copied, reproduced, modifi
   
 
 </head>
+<!--<body class="debug-layout">-->
 <body>
 <!-- PASSWORD OVERLAY -->
   <div id="passwordOverlay" style="
@@ -76,18 +79,29 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 </button>
 
 <div class="tab-wrapper">
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="fin">FIN Calculator</button>
-      <button class="tab-btn" data-tab="rdsp">RDSP</button>
-      <button class="tab-btn" data-tab="resp">RESP</button>
-      <button class="tab-btn" data-tab="tfsa">TFSA / RRSP</button>
-      <button class="tab-btn" data-tab="btid">BTID vs WL</button>
-      <button class="tab-btn" data-tab="tax">Tax Calculator</button>
-      <button class="tab-btn" data-tab="budget">Budgeting</button>
-      <button class="tab-btn" data-tab="fna">FNA</button>
-       <div class="version-info"> <span data-tooltip=
-      "<strong>Recent Updates
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="fin">FIN Calculator</button>
+    <button class="tab-btn" data-tab="rdsp">RDSP</button>
+    <button class="tab-btn" data-tab="resp">RESP</button>
+    <button class="tab-btn" data-tab="tfsa">TFSA / RRSP</button>
+    <button class="tab-btn" data-tab="btid">BTID vs WL</button>
+    <button class="tab-btn" data-tab="tax">Tax Calculator</button>
+    <button class="tab-btn" data-tab="budget">Budgeting</button>
+    <button class="tab-btn" data-tab="fna">FNA</button>
+    <span class="tab-highlight"></span> <!-- sliding bar -->
+    <div class="version-info">
+      <span data-tooltip='
+      <strong>Recent Updates
       </strong>
+      <ul>(v2.0.55) Aug 17, 2025
+      <li>Added Actual Monthly Income estimate based on Current Plan</li>
+      </ul>
+      <li>updated the tabs styling, enabled ESC key use</li>
+      </ul>
+      <li>added "In Retirement" scenario for a critical scenario calculations once a person retires, no longer accumulates wealth, but lives off of the investments</li>
+      </ul>
+      <li>updated keyboard shortcuts to work on PCs with Windows, Linux and Apple MACs</li>
+      </ul>
       <ul>(v2.0.54) Aug 15, 2025
       <li>added help overlay, keyboard shortcuts for core functions on the page</li>
       </ul>
@@ -109,20 +123,27 @@ No part of the source code, design, or content may be copied, reproduced, modifi
       <ul>(v2.0.50) Aug 5, 2025
       <li>Restricted Stop Saving Age to the range between start saving age and retirement age</li>
       </ul>
-      <ul>(v2.0.49) Jul 30, 2025
-      <li>Enhanced scenario buttons for parameters that show practical conversational points.</li>
-      <li>Overhauled calculation engine for perfect accuracy (Target Plan now ends at $0).</li>
-      <li>Redesigned 'Target Plan' to show an intuitive savings path from $0.</li>
-      <li>Added independent start age for CPP benefits (60-70).</li>
-      <li>Fixed 'Today's $' & 'Forever' mode calculations.</li>
-      <li>Added conditional highlighting for successful plans.</li>
-      <li>Redesigned end cotnribution age to a slider format with limited range from start to retirement age</li>
-      </ul>
-      ">v2.0.54</span> • Updated: August 15, 2025</div>
+      '>v2.0.56</span> • Updated: August 17, 2025
     </div>
-<div id="shortcutHint" class="shortcut-hint-bar">
-  💡 <strong>Shortcut:</strong> Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>/</kbd> for Help and Shortcuts
+
+    <!-- Help button (clickable) -->
+    <button id="helpBtn"
+            type="button"
+            aria-label="Open help"
+            title="Keyboard Shortcuts"
+            onclick="window.toggleHelpOverlay?.()"
+            style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #dadce0;border-radius:8px;background:#f7f8fa;cursor:pointer;">
+      <span style="font-weight:700;">?</span>
+      <span class="help-btn-text" style="font-size:0.9rem;">Help</span>
+    </button>
+  </div>
+
+  <!-- Dynamic shortcut hint (clickable to open help) -->
+  <div id="shortcutHint" class="shortcut-hint-bar" role="button" tabindex="0" aria-label="Open help">
+    <!-- Filled by script -->
+  </div>
 </div>
+
 
     <div class="tab-content" id="tab-fin">
 <!--<body class="debug-layout">-->
@@ -179,6 +200,7 @@ style="position:absolute; top:10px; right:12px; background:none;  font-size:20px
 
 <!-- Calculator Logic  -->
 <script>
+
 let calcBuffer = "";
 
 function calcInput(char) {
@@ -224,12 +246,13 @@ function calcEquals() {
     
     </div> <!-- closes .header-center -->
   </div> <!-- closes .top-left -->
-</div><!--closes
+</div><!--closes-->
 
 <!-- Scenario Buttons Row -->
-<div class="top-interactive-area">
+<div class="top-interactive-area tab-helper-wrapper">
 
-  <div id="scenario-row" class="scenario-buttons">
+  <div id="scenario-row" class="scenario-buttons tab-helper-wrapper">
+
     <button class="scenario-btn active" data-scenario="default">Default</button>
     <button class="scenario-btn" data-scenario="child-zero">Child Born</button>
     <button class="scenario-btn" data-scenario="start-19">Start Age 19</button>
@@ -237,7 +260,7 @@ function calcEquals() {
     <button class="scenario-btn" data-scenario="start-30">Start Age 30</button>
     <button class="scenario-btn" data-scenario="start-40">Start Age 40</button>
     <button class="scenario-btn" data-scenario="start-50">Start Age 50</button>
-    <button class="scenario-btn" data-scenario="start-60">Start Age 60</button>
+    <button class="scenario-btn" data-scenario="retired">In Retirement</button>
   </div>
 
   <div class="summary-bar">
@@ -250,13 +273,23 @@ function calcEquals() {
       <strong id="monthlyNeeded">$0</strong>
     </div>
     <div class="output tooltip-container" data-tooltip="How much you'd need invested TODAY to avoid having to put any extra MONTHLY contributions and still meet your retirement income goal.">
-      <div class="label-row"><span class="icon">🎯</span> <span class="label-text">Fully Funded</span></div>
+      <div class="label-row">
+  <span class="icon" id="fullyFundedNowIcon">🎯</span>
+  <span class="label-text" id="fullyFundedNowLabel">Fully Funded</span>
+</div>
+
       <strong id="fullyFundedNow">$0</strong>
     </div>
     <div class="output tooltip-container" data-tooltip="Income Protection Number: Estimated life insurance need based on your current income requirement.">
       <div class="label-row"><span class="icon">🛡️</span> <span class="label-text">IPN</span></div>
       <strong id="incomeProtectionNumber">$0</strong>
     </div>
+    <div class="output tooltip-container" data-tooltip="Estimated monthly income based on your current plan at your selected retirement age.">
+  <div class="label-row"><span class="icon">💵</span> <span class="label-text">Actual Monthly Income</span>
+</div>
+  <strong id="actualMonthlyIncome" style="color:gray;">$0</strong>
+</div>
+
   </div>
 
 </div>
@@ -591,7 +624,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
 <!-- script to set the default for scenarios-->
 <script>
- // Define the "all-zero" state specifically for the Default button
+// Global flag for retired mode
+window.isRetiredScenario = false;
+// Define the "all-zero" state specifically for the Default button
  const zeroScenario = {
     desiredIncome: 0,
     currentInvestment: 0,
@@ -624,46 +659,72 @@ document.addEventListener('DOMContentLoaded', function() {
     "start-30":   { ...baseActiveScenario, startAge: 30, monthlyContribution: 0 },
     "start-40":   { ...baseActiveScenario, startAge: 40, monthlyContribution: 0 },
     "start-50":   { ...baseActiveScenario, startAge: 50, monthlyContribution: 0 },
-    "start-60":   { ...baseActiveScenario, startAge: 60, monthlyContribution: 0 }
+    "start-60":   { ...baseActiveScenario, startAge: 60, monthlyContribution: 0 },
+    // 🔹 New: In Retirement scenario
+  // - no contributions
+  // - startAge = stopAge = retireAge (65 by default; user can change retireAge afterward)
+  "retired": {
+    ...baseActiveScenario,
+    monthlyContribution: 0,
+    startAge: 65,
+    retireAge: 65,
+    stopAge: 65
+  }
  };
 
   function setValue(id, value) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.value = value;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  }
+  const el = document.getElementById(id);
+  if (el) {
+    el.value = value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
 
-  document.querySelectorAll(".scenario-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      // UI highlight
-      document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-localStorage.setItem('lastScenario', btn.dataset.scenario);
+document.querySelectorAll(".scenario-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    // UI highlight
+    document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    localStorage.setItem("lastScenario", btn.dataset.scenario);
 
-      const s = scenarios[btn.dataset.scenario];
-      if (!s) return;
+    const s = scenarios[btn.dataset.scenario];
+    if (!s) return;
 
-      // Set plain inputs
-      setValue("desiredIncome", s.desiredIncome);
-      setValue("currentInvestment", s.currentInvestment);
-      setValue("monthlyContribution", s.monthlyContribution);
-      setValue("cppBenefit", s.cppBenefit); 
-      setValue("cppStartAge", s.cppStartAge); 
-      setValue("stopAge", s.stopAge);
-      setValue("inheritanceAmount", s.inheritanceAmount);
-      setValue("inheritanceAge", s.inheritanceAge);
+    // 🔹 Set retired flag FIRST so validateAges() sees it on the very first input event
+    const isRetired = btn.dataset.scenario === "retired";
+    window.isRetiredScenario = isRetired;
 
-      // Set sliders + matching number inputs
-      setValue("inflationRate", s.inflationRate);
-      setValue("preReturn", s.preReturn);
-      setValue("postReturn", s.postReturn);
-      setValue("startAge", s.startAge);
-      setValue("retireAge", s.retireAge);
-      setValue("endAge", s.endAge);
-    });
-  });
+    // Apply scenario values (plain inputs)
+    setValue("desiredIncome",        s.desiredIncome);
+    setValue("currentInvestment",    s.currentInvestment);
+    setValue("monthlyContribution",  s.monthlyContribution);
+    setValue("cppBenefit",           s.cppBenefit);
+    setValue("cppStartAge",          s.cppStartAge);
+    setValue("stopAge",              s.stopAge);
+    setValue("inheritanceAmount",    s.inheritanceAmount);
+    setValue("inheritanceAge",       s.inheritanceAge);
+
+    // Sliders + matching number inputs
+    setValue("inflationRate", s.inflationRate);
+    setValue("preReturn",     s.preReturn);
+    setValue("postReturn",    s.postReturn);
+    setValue("startAge",      s.startAge);
+    setValue("retireAge",     s.retireAge);
+    setValue("endAge",        s.endAge);
+
+    // If "In Retirement": no contributions, and start/stop at retire age
+    if (isRetired) {
+      const ra = +document.getElementById("retireAge").value || 65;
+      setValue("monthlyContribution", 0);
+      setValue("startAge", ra);
+      setValue("stopAge",  ra);
+    }
+
+    // No explicit calculateFIN() needed; setValue dispatches input events.
+  });
+});
+
+
 </script>
 
 
@@ -837,6 +898,12 @@ function loadSettings(){
     Object.keys(s).forEach(k => {
       if (els[k]) els[k].value = s[k];
     });
+    // ✅ Restore future vs today's dollar toggle
+    if (s.finDisplayToggle !== undefined) {
+      const toggle = document.getElementById("finDisplayToggle");
+      toggle.checked = s.finDisplayToggle;
+      document.getElementById("finDisplayLabel").textContent = toggle.checked ? "Future $" : "Today's $";
+    }
 
     // Set min/max for inheritanceAge based on loaded startAge and retireAge
     els.inheritanceAge.min = els.startAge.value;
@@ -872,6 +939,16 @@ function loadSettings(){
     // ✅ Prefer last clicked scenario if stored
     const last = localStorage.getItem('lastScenario');
     const activeScenario = (last && scenarios[last]) ? last : matchedScenario;
+    
+    window.isRetiredScenario = activeScenario === "retired";
+
+    if (window.isRetiredScenario) {
+      const ra = +s.retireAge || 65;
+      els.startAge.value = ra;
+      els.startAgeText.value = ra;
+      els.stopAge.value = ra;
+      els.stopAgeText.value = ra;
+    }
 
     // 🖱️ Apply active scenario UI
     document.querySelectorAll(".scenario-btn").forEach(b => {
@@ -975,12 +1052,13 @@ if (localStorage.getItem('darkMode') === 'enabled') {
   darkToggle.checked = true;
 }
 
-     function saveSettings(){
+function saveSettings(){
   const data={};
   Object.keys(els).forEach(k=>{
     if(['monthlyNeeded','finAmount','ageWarning'].includes(k)) return;
     data[k]=els[k].value;
   });
+  data.finDisplayToggle = document.getElementById("finDisplayToggle").checked;
   localStorage.setItem('finToolSettings',JSON.stringify(data));
 }
 
@@ -989,55 +1067,76 @@ if (localStorage.getItem('darkMode') === 'enabled') {
 
       
 function validateAges(){
-  let sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value, ia = +els.inheritanceAge.value, csa = +els.cppStartAge.value, warn = false;
-  let warnText = '⚠️ Invalid ages auto-adjusted.';
+  let sa = +els.startAge.value, ra = +els.retireAge.value, ea = +els.endAge.value,
+      ia = +els.inheritanceAge.value, csa = +els.cppStartAge.value, warn = false;
+  let warnText = "⚠️ Invalid ages auto-adjusted.";
 
-  if (ra <= sa) { 
-    ra = sa + 1; 
-    els.retireAge.value = ra; 
-    els.retireAgeText.value = ra; 
-    warn = true; 
+  // ✅ In Retirement: allow equality & suppress warnings
+  if (window.isRetiredScenario) {
+    // lock equality strictly via values; no warning
+    els.startAge.value = ra;
+    els.startAgeText.value = ra;
+    els.stopAge.value = ra;
+    els.stopAgeText.value = ra;
+
+    els.ageWarning.style.display = "none";
+
+    // Keep bounds coherent for other inputs that depend on these
+    els.inheritanceAge.min = ra;
+    els.inheritanceAge.max = ra;
+    els.stopAge.min = ra;
+    els.stopAge.max = ra;
+
+    return;
   }
-  if (ea <= ra) { 
-    ea = ra + 1; 
-    els.endAge.value = ea; 
-    els.endAgeText.value = ea; 
-    warn = true; 
+
+  // 🔹 Normal validation rules
+  if (ra <= sa) {
+    ra = sa + 1;
+    els.retireAge.value = ra;
+    els.retireAgeText.value = ra;
+    warn = true;
   }
-  if (ia !== 0 && (ia < sa || ia > ra)) { 
-    ia = sa; 
-    els.inheritanceAge.value = ia; 
-    warn = true; 
+  if (ea <= ra) {
+    ea = ra + 1;
+    els.endAge.value = ea;
+    els.endAgeText.value = ea;
+    warn = true;
+  }
+  if (ia !== 0 && (ia < sa || ia > ra)) {
+    ia = sa;
+    els.inheritanceAge.value = ia;
+    warn = true;
     warnText = `⚠️ Inheritance age must be between ${sa} and ${ra}. Adjusted to ${ia}.`;
   }
-  // New CPP Age Validation
+  // CPP range 60–70
   if (csa < 60 || csa > 70) {
-    csa = Math.max(60, Math.min(csa, 70)); // Clamp between 60 and 70
+    csa = Math.max(60, Math.min(csa, 70));
     els.cppStartAge.value = csa;
     warn = true;
     warnText = `⚠️ CPP start age must be between 60 and 70. Adjusted to ${csa}.`;
   }
 
   els.ageWarning.textContent = warnText;
-  els.ageWarning.style.display = warn ? 'block' : 'none';
-  
+  els.ageWarning.style.display = warn ? "block" : "none";
+
+  // Keep dependent ranges in sync
   els.inheritanceAge.min = sa;
   els.inheritanceAge.max = ra;
-
-// Set the min and max for the Stop Saving Age slider
   els.stopAge.min = sa;
   els.stopAge.max = ra;
-  
-  // If the current stop age is now invalid, fix it
+
+  // Clamp stopAge into the new bounds
   if (+els.stopAge.value < sa) {
-      els.stopAge.value = sa;
-      els.stopAgeText.value = sa;
+    els.stopAge.value = sa;
+    els.stopAgeText.value = sa;
   }
   if (+els.stopAge.value > ra) {
-      els.stopAge.value = ra;
-      els.stopAgeText.value = ra;
+    els.stopAge.value = ra;
+    els.stopAgeText.value = ra;
   }
 }
+
 
 // HELPER 1: Simulates the accumulation of savings until retirement.
 function simulateAccumulation(ci, mc, stopAge, sa, ra, mRate, inheritanceAmount, inheritanceAge) {
@@ -1130,6 +1229,10 @@ function calculateFIN() {
     // --- 2. PERFORM CORE CALCULATIONS (using helpers) ---
     const fin = calculateRealFIN(di, cppBenefit, cppStartAge, sa, ra, ea, inf, post);
     const fvOfCurrentPlan = simulateAccumulation(ci, mc, stopAge, sa, ra, mRate, inheritanceAmount, inheritanceAge);
+    
+    function flipIcon(iconEl, newIcon) { if (!iconEl) return; iconEl.classList.add('flip'); setTimeout(() => { iconEl.textContent = newIcon; iconEl.classList.remove('flip'); }, 200); // Half of the transition time (0.4s) 
+    }
+    
     const fullyFundedNow = fin > 0 ? fin / Math.pow(1 + mRate, months) : 0;
     const totalMonthlySavingRequired = fin > 0 ? (mRate > 0 ? fin * mRate / (Math.pow(1 + mRate, months) - 1) : fin / months) : 0;
 
@@ -1140,17 +1243,120 @@ function calculateFIN() {
         const finTodaysDollars = fin / Math.pow(1 + inf, yrsTo);
         els.finAmount.textContent = '$' + finTodaysDollars.toLocaleString(undefined, { maximumFractionDigits: 0 });
     }
-    document.getElementById("fullyFundedNow").textContent = '$' + Math.max(0, fullyFundedNow - ci).toLocaleString(undefined, { maximumFractionDigits: 0 });
-    const rem = Math.max(fin - fvOfCurrentPlan, 0);
-    const monthlyNeed = rem > 0 ? (mRate > 0 ? rem * mRate / (Math.pow(1 + mRate, months) - 1) : rem / months) : 0;
-    els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    const futureMonthlyIncome = di * Math.pow(1 + inf, yrsTo);
-    document.getElementById('futureIncomeDisplay').value = futureMonthlyIncome.toLocaleString(undefined, { maximumFractionDigits: 0 });
+if (window.isRetiredScenario) {
+  const shortfall = Math.max(0, fin - ci);
+  const ffEl = document.getElementById("fullyFundedNow");
+  ffEl.textContent = '$' + shortfall.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+  const ffLabel = document.getElementById("fullyFundedNowLabel");
+  const ffIcon = document.getElementById("fullyFundedNowIcon");
+
+  if (shortfall > 0) {
+    ffEl.style.color = "red";
+    if (ffLabel) ffLabel.textContent = "Shortfall";
+    if (ffIcon) flipIcon(ffIcon, "🤷‍♂️");
+  } else {
+    ffEl.style.color = "green";
+    if (ffLabel) ffLabel.textContent = "Fully Funded";
+    if (ffIcon) flipIcon(ffIcon, "✅");
+  }
+
+  els.monthlyNeeded.textContent = "—";
+} else {
+  const ffVal = Math.max(0, fullyFundedNow - ci);
+  const ffEl = document.getElementById("fullyFundedNow");
+  ffEl.textContent = '$' + ffVal.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  ffEl.style.color = ''; // Reset
+
+  const ffLabel = document.getElementById("fullyFundedNowLabel");
+  if (ffLabel) ffLabel.textContent = "Fully Funded";
+
+  const ffIcon = document.getElementById("fullyFundedNowIcon");
+if (ffIcon) flipIcon(ffIcon, "🎯");
+
+
+  const rem = Math.max(fin - fvOfCurrentPlan, 0);
+  const monthlyNeed = rem > 0
+    ? (mRate > 0 ? rem * mRate / (Math.pow(1 + mRate, months) - 1) : rem / months)
+    : 0;
+
+  els.monthlyNeeded.textContent = '$' + monthlyNeed.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+// 🎯 Update future income display
+const futureMonthlyIncome = di * Math.pow(1 + inf, yrsTo);
+document.getElementById('futureIncomeDisplay').value = futureMonthlyIncome.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+
+    
+
+
+// 🧮 Estimate maximum sustainable monthly income from current plan
+function estimateSustainableIncome(balance, cppBenefit, cppStartAge, sa, ra, ea, inf, post) {
+  if (balance <= 0) return 0;
+
+  let maxIncomeGuess = (balance / ((ea - ra) * 12)) * 1.5;
+  let low = 0, high = maxIncomeGuess, best = 0;
+
+  while (high - low > 1) {
+    const mid = (low + high) / 2;
+    const result = simulateDrawdown(balance, mid, cppBenefit, cppStartAge, sa, ra, ea, inf, post);
+    const finalBalance = result[result.length - 1].balance;
+
+    if (finalBalance >= 0) {
+      best = mid;
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  return best;
+}
+function updateActualMonthlyIncome() {
+  const cppBenefit = Number(getVal("monthlyCpp"));
+  const cppStartAge = Number(getVal("cppStartAge"));
+
+  const sustainableIncome = estimateSustainableIncome(
+    fvOfCurrentPlan, cppBenefit, cppStartAge, sa, ra, ea, inf, post
+  );
+
+  const actualIncomeEl = document.getElementById('actualMonthlyIncome');
+  actualIncomeEl.textContent = '$' + sustainableIncome.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+  const targetMonthly = di * Math.pow(1 + inf, yrsTo);
+  actualIncomeEl.style.color = sustainableIncome >= targetMonthly ? 'green' : 'red';
+}
+
+
+const sustainableIncome = estimateSustainableIncome(
+  fvOfCurrentPlan, cppBenefit, cppStartAge, sa, ra, ea, inf, post
+);
+
+const actualIncomeEl = document.getElementById('actualMonthlyIncome');
+actualIncomeEl.textContent = '$' + sustainableIncome.toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+const targetMonthly = futureMonthlyIncome;
+if (sustainableIncome >= targetMonthly) {
+  actualIncomeEl.style.color = 'green';
+} else {
+  actualIncomeEl.style.color = 'red';
+}
+
+    
+    
     const fvCurr = ci * Math.pow(1 + mRate, months);
     const fvCont = mRate > 0 ? mc * ((Math.pow(1 + mRate, months) - 1) / mRate) * (1 + mRate) : mc * months;
     document.getElementById("futureValueInvestmentDisplay").value = fvCurr.toLocaleString(undefined, { maximumFractionDigits: 0 });
     document.getElementById("futureValueContributionDisplay").value = fvCont.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    document.getElementById("incomeProtectionNumber").textContent = `$${(di * 12 * 12).toLocaleString(undefined, {maximumFractionDigits:0})}`;
+    // Calculate 12 years of desired income
+let rawIPN = di * 12 * 12;
+
+// Subtract current savings (but never go below zero)
+let adjustedIPN = Math.max(0, rawIPN - ci);
+
+document.getElementById("incomeProtectionNumber").textContent = `$${adjustedIPN.toLocaleString(undefined, {maximumFractionDigits:0})}`;
+
     autoscaleInputs();
 
     // --- 4. PREPARE CHART & TABLE DATA ---
@@ -1586,10 +1792,15 @@ document.addEventListener('keydown', function (e) {
 <div id="sideMenuOverlay" class="side-menu hidden">
 
   <!-- Header -->
-  <div class="side-menu-header">
-    <span><strong>Menu</strong></span>
-    <button id="closeMenuBtn">✖</button>
-  </div>
+ <div class="side-menu-header">
+  <span class="menu-title">
+    <i class="fa-solid fa-bars"></i> <strong>Menu</strong>
+  </span>
+  <button id="closeMenuBtn">
+  <i class="fa-solid fa-xmark"></i>
+</button>
+
+</div>
 
   <!-- Section 1: Global Toggles -->
   <div class="side-menu-section">
@@ -1697,75 +1908,208 @@ document.addEventListener('keydown', function (e) {
 </div>
 
 
-<div id="helpOverlay" class="help-overlay">
-  <div class="help-box">
-    <h2>Help & Shortcuts</h2>
-    <ul>
-      <li><strong>Ctrl + Alt + M</strong> — Toggle Side Menu</li>
-      <li><strong>Ctrl + Alt + C</strong> — Open Calculator</li>
-      <li><strong>Ctrl + Alt + L</strong> — Toggle Dark Mode</li>
-      <li><strong>Ctrl + Alt + R</strong> — Reset Inputs</li>
-      <li><strong>Ctrl + Alt + /</strong> — Show/Hide This Help</li>
-    </ul>
-    <hr>
-    <p>Need help? Contact: <a href="mailto:dmitri.ivanenko@gmail.com">dmitri.ivanenko@gmail.com</a></p>
-    <button onclick="toggleHelpOverlay()">Close</button>
-  </div>
-</div>
 <script>
-//helper yellow bar below the tabs
-  document.addEventListener('DOMContentLoaded', () => {
-    const hint = document.getElementById('shortcutHint');
-    if (!hint) return;
+document.addEventListener('DOMContentLoaded', () => {
+  const hint = document.getElementById('shortcutHint');
+  if (!hint) return;
 
-    let hideTimer;
-    let idleTimer;
-    let wasAutoShown = false;
+  // Optional: tighten vertical gaps around the hint when it’s hidden
+ const wrapper =
+  document.querySelector('.tab-wrapper') ||           // ✅ Always prefer this
+  document.querySelector('#scenario-summary-wrap') ||
+  document.querySelector('#finHeaderArea') ||
+  document.querySelector('.top-bar');
 
-    const hideHint = () => {
-      hint.classList.add('fade-out');
-      setTimeout(() => hint.classList.add('hidden'), 600);
-    };
 
-    const showHint = (auto = false) => {
-      hint.classList.remove('fade-out', 'hidden');
-      if (!auto) {
-        // only set 10s hide timer on first/manual show
-        clearTimeout(hideTimer);
-        hideTimer = setTimeout(hideHint, 10000);
-      } else {
-        wasAutoShown = true;
-      }
-    };
+  const HIDE_AFTER = 10000;   // ms the hint stays visible on manual show
+  const IDLE_AFTER = 300000;  // ms of no activity before auto-show
 
-    const resetIdleTimer = () => {
-      clearTimeout(idleTimer);
+  let hideTimer, idleTimer;
+  let autoVisible = false;
 
-      // If user moves & hint was auto-shown, hide it again
-      if (wasAutoShown) {
-        wasAutoShown = false;
-        hideHint();
-      }
+  function addNoGap()   { wrapper?.classList.add('no-hint-gap'); }
+  function removeNoGap(){ wrapper?.classList.remove('no-hint-gap'); }
 
-      idleTimer = setTimeout(() => {
-        showHint(true); // auto = true: don't set hide timer
-      }, 300000); // idle for 300s
-    };
+  function collapse() {
+    hint.classList.add('hidden');        // remove from layout
+    hint.classList.remove('is-visible'); // ensure transparent for next show
+    addNoGap();
+  }
 
-    // Initial show + hide after 10s
-    showHint();
-    hideTimer = setTimeout(hideHint, 10000);
+  function fadeOut() {
+    // Start fade; when transition ends, we collapse()
+    hint.classList.remove('is-visible');
+  }
 
-    // Activity resets idle
-    ['mousemove', 'keydown', 'touchstart', 'click'].forEach(evt => {
-      document.addEventListener(evt, resetIdleTimer, { passive: true });
-    });
+  function show(auto = false) {
+    // Unhide, then force reflow so the opacity transition can start
+    removeNoGap();
+    hint.classList.remove('hidden');
+    void hint.offsetWidth;               // ⚠️ reflow: enables animation
+    hint.classList.add('is-visible');    // triggers fade-in
 
-    resetIdleTimer(); // Start idle tracking
+    autoVisible = auto;
+    clearTimeout(hideTimer);
+    if (!auto) {
+      hideTimer = setTimeout(fadeOut, HIDE_AFTER);
+    }
+  }
+
+  // When the opacity transition ends and we’re not visible, collapse
+  hint.addEventListener('transitionend', (e) => {
+    if (e.propertyName === 'opacity' && !hint.classList.contains('is-visible')) {
+      collapse();
+    }
   });
+
+  function onActivity() {
+    clearTimeout(idleTimer);
+    if (autoVisible) {
+      autoVisible = false;
+      fadeOut(); // will collapse on transitionend
+    }
+    idleTimer = setTimeout(() => show(true), IDLE_AFTER);
+  }
+
+  // Initial state: show once, then auto-fade
+  show(false);
+
+  // Activity listeners
+  ['mousemove','keydown','touchstart','click','scroll'].forEach(evt =>
+    document.addEventListener(evt, onActivity, { passive: true })
+  );
+
+  // Start idle cycle
+  idleTimer = setTimeout(() => show(true), IDLE_AFTER);
+});
 </script>
 
 
+
+<script>
+(function () {
+  const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
+  const hint = document.getElementById('shortcutHint');
+  if (!hint) return;
+
+  const ALT = isMac ? 'Option' : 'Alt';
+  const SHIFT = 'Shift';
+
+  hint.innerHTML = `
+    💡 <strong>Shortcuts:</strong>
+    Press <kbd>${ALT}</kbd> + <kbd>${SHIFT}</kbd> + <kbd>/</kbd> for Help
+    <span style="opacity:.7;">(and see all keys)</span>
+  `;
+
+  const open = () => window.toggleHelpOverlay?.();
+
+  hint.addEventListener('click', open);
+  hint.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      open();
+    }
+  });
+
+  const helpBtnText = document.querySelector('#helpBtn .help-btn-text');
+  if (helpBtnText) {
+    helpBtnText.textContent = isMac ? 'Help (⌥⇧/)' : 'Help (Alt+Shift+/)';
+  }
+})();
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabLaunchDates = {
+      rdsp: "September 2025",
+      resp: "September 2025",
+      tfsa: "September 2025",
+      btid: "September 2025",
+      tax:  "September 2025",
+      budget: "September 2025",
+      fna:  "October 2025"
+    };
+
+    Object.entries(tabLaunchDates).forEach(([tab, month]) => {
+      const container = document.getElementById(`tab-${tab}`);
+      const messageHTML = `
+        <div style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          text-align: center;
+          padding: 20px;
+          font-size: 1.6em;
+          color: #444;
+          flex-direction: column;
+        ">
+          🚧 <strong>${tab.toUpperCase()}</strong> Tool is<br>
+          <span style="color:#d32f2f;">Under Construction</span><br>
+          <em>Coming ${month}</em>
+        </div>
+      `;
+
+      if (!container) {
+        const div = document.createElement("div");
+        div.id = `tab-${tab}`;
+        div.className = "tab-content";
+        div.innerHTML = messageHTML;
+        document.querySelector(".tab-wrapper").appendChild(div);
+      } else {
+        container.innerHTML = messageHTML;
+      }
+    });
+  });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  // Restore the last opened tab or default to 'fin'
+  const lastTab = localStorage.getItem('activeTab') || 'fin';
+  showTab(lastTab);
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const selectedTab = button.getAttribute('data-tab');
+      showTab(selectedTab);
+      localStorage.setItem('activeTab', selectedTab);
+    });
+  });
+function moveTabHighlight(tabElement) {
+  const highlight = document.querySelector('.tab-highlight');
+  const tabRect = tabElement.getBoundingClientRect();
+  const parentRect = tabElement.parentElement.getBoundingClientRect();
+
+  highlight.style.left = (tabRect.left - parentRect.left) + "px";
+  highlight.style.width = tabRect.width + "px";
+  highlight.style.top = (tabRect.bottom - parentRect.top - 3) + "px"; // align just below tab
+  highlight.style.bottom = "auto";
+}
+
+  function showTab(tabName, skipHighlight = false) {
+  // Activate the correct button
+  tabButtons.forEach(btn =>
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName)
+  );
+
+  // Show/hide tab content
+  tabContents.forEach(content =>
+    content.style.display = content.id === `tab-${tabName}` ? 'block' : 'none'
+  );
+
+  // ✅ Move highlight unless explicitly skipped (e.g., during initial load)
+  if (!skipHighlight) {
+    const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (activeBtn) moveTabHighlight(activeBtn);
+  }
+}
+
+});
+</script>
 
 
 

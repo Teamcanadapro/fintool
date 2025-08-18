@@ -454,13 +454,13 @@ body.dark .tooltip-text {
   grid-template-columns: repeat(4, 1fr);  /* 🧱 4 equal columns */
   gap: 10px;
   max-width: 100%;
-  margin: 0;         /* ✅ eliminate top/bottom margin */
-    padding: 0;
+  margin: 12px auto;
+  padding: 0 10px;
 }
 
 #scenario-row {
-  margin: 0;         /* ✅ eliminate top/bottom margin */
-    padding: 0;
+  margin: 12px auto; /* keep for mobile */
+  padding: 0 10px;
 }
 
 @media (min-width: 721px) {
@@ -492,7 +492,7 @@ body.dark .tooltip-text {
 
 .scenario-btn {
   white-space: nowrap;
-  flex: 1 1 140px;
+  flex: 1 1 0;
   min-width: 100px;
   max-width: 150px;
   overflow: hidden;
@@ -500,25 +500,6 @@ body.dark .tooltip-text {
 .scenario-btn.active {
   background-color: #0094ff;
   border-color: #0094ff;
-}
-
-.scenario-btn {
-  flex: 1 0 auto;         /* Prevent shrinking */
-  width: 100%;            /* Fill container evenly */
-  text-align: center;
-  white-space: nowrap;    /* Prevent line break */
-}
-.scenario-btn {
-  flex: 1 1 160px;  /* Let them grow/shrink evenly */
-}
-#scenario-row .scenario-btn[data-scenario="retired"] {
-  min-width: 120px;
-}
-
-.scenario-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 scenario-row {
@@ -1725,8 +1706,8 @@ body.dark #finChart {
 
 /* Light mode stays as is */
 .tab-wrapper {
-  padding: 0;
-  margin-bottom: 0;
+  padding: 1rem;
+  margin-bottom: 1rem;
   overflow: hidden;
 }
 
@@ -1985,25 +1966,6 @@ body:not(.dark) .side-menu {
   height: 0 !important;
 }
 
-/* 🚨 OVERWRITE help overlay in dark mode */
-body.dark #helpOverlay {
-  background: rgba(0, 0, 0, 0.7) !important;
-}
-
-body.dark #helpOverlay .help-overlay-panel {
-  background-color: #21222c !important;
-  color: #f0f0f0 !important;
-  border: 1px solid #2f2f3a !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7) !important;
-  border-radius: 12px !important;
-}
-
-body.dark #helpOverlay .help-grid span {
-  background: transparent !important;
-  color: #f0f0f0 !important;
-  border: none !important;
-  padding: 0 !important;
-}
 
 
 
@@ -2567,7 +2529,6 @@ body:not(.dark) .side-menu select {
 }
 
 
-
 /* visually soften disabled controls for retired state */
 .scenario-retired input[disabled] {
   opacity: 0.7;
@@ -2598,8 +2559,8 @@ body:not(.dark) .side-menu select {
 
 /* shrink the space right under the helper */
 #scenario-row {
- margin: 0;         /* ✅ eliminate top/bottom margin */
-    padding: 0;
+  /* was margin: 12px auto; */
+  margin: 4px auto 6px !important;   /* small top, small bottom */
 }
 
 /* shrink the space before the summary bar */
@@ -2871,129 +2832,5 @@ body.dark .shortcut-hint-bar kbd {
   background: #3a3a3a;
   border: 1px solid #666;
   color: #fef3a3;
-}
-
-.top-interactive-area {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 1100px;
-  margin: -14px auto 0 auto; /* 👈 This is the key line */
-  gap: 10px;
-}
-
-@media (min-width: 1000px) {
-  .top-interactive-area {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-  }
-}
-
-
-#sideMenuOverlay.side-menu .menu-title {
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#closeMenuBtn {
-  font-size: 16px;
-  color: #aaa;
-  background: none;
-  border: none;
-  cursor: pointer;
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  z-index: 1001;
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-
-#closeMenuBtn:hover {
-  color: #fff;
-  transform: scale(1.1);
-}
-#closeMenuBtn i {
-  font-size: 16px;
-  color: #aaa;
-}
-
-#closeMenuBtn:hover i {
-  color: #fff;
-}
-
-
-.nav-tabs {
-  position: relative;
-}
-.nav-tabs .highlight {
-  position: absolute;
-  bottom: 0;
-  height: 3px;
-  width: 80px; /* will adjust dynamically with JS */
-  background: #2563eb;
-  transition: left 0.3s ease;
-}
-.tab-bar {
-  position: relative;         /* allow absolute child */
-  display: flex;
-  gap: 10px;
-  padding-bottom: 6px;  /* 👈 Give space for the underline */
-}
-
-.tab-bar {
-  position: relative;
-  display: flex;
-  gap: 10px;
-  align-items: flex-end; /* 👈 Important: aligns buttons to bottom */
-  height: 40px;          /* 👈 Gives room for the underline */
-}
-
-.tab-btn {
-  background: none;
-  border: none;
-  padding: 8px 12px;
-  font-weight: 600;
-  color: #94a3b8;             /* inactive color */
-  cursor: pointer;
-}
-.tab-btn {
-  padding: 8px 12px;
-  background: none;
-  border: none;
-  font-weight: 600;
-  color: #94a3b8;
-  cursor: pointer;
-  position: relative;
-}
-
-
-.tab-btn.active { color: #e5eaf2; }  /* active label color */
-
-/* the sliding bar */
-.tab-highlight {
-  position: absolute;
-  bottom: 0;
-  height: 3px;
-  width: 0;                   /* JS sets width */
-  left: 0;                    /* JS sets left   */
-  background: orange;
-  border-radius: 3px;
-  transition: left 250ms ease, width 250ms ease;
-}
-
-.icon {
-  display: inline-block;
-  transition: transform 0.4s ease, opacity 0.4s ease;
-}
-
-.icon.flip {
-  transform: rotateY(180deg);
-  opacity: 0.3;
 }
 

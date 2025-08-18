@@ -200,6 +200,70 @@ applyReturnMax(proEnabled);
         toggleAllTabs.checked = allChecked;
       });
     });
+    document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    const sideMenu = document.getElementById('sideMenuOverlay');
+    if (sideMenu && sideMenu.classList.contains('show')) {
+      sideMenu.classList.remove('show');
+    }
+  }
+});
+function initSlidingHighlightBar() {
+  const tabBar = document.querySelector('.tab-bar'); 
+  if (!tabBar) return;
+
+  const highlight = tabBar.querySelector('.tab-highlight');
+  const buttons = [...tabBar.querySelectorAll('.tab-btn')];
+  if (!highlight || buttons.length === 0) return;
+
+  function moveHighlight(targetBtn) {
+    if (!targetBtn) return;
+    const barRect = tabBar.getBoundingClientRect();
+    const btnRect = targetBtn.getBoundingClientRect();
+    const left = btnRect.left - barRect.left + tabBar.scrollLeft; // safe if horizontally scrollable
+
+    highlight.style.width = `${btnRect.width}px`;
+    highlight.style.left  = `${left}px`;
+  }
+
+  function setActive(btn) {
+    buttons.forEach(b => b.classList.toggle('active', b === btn));
+    moveHighlight(btn);
+  }
+
+  // initial position (fallback to first active or first button)
+  setTimeout(() => {
+    const current = buttons.find(b => b.classList.contains('active')) || buttons[0];
+    setActive(current);
+  }, 0);
+
+  // click to switch
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => setActive(btn));
+  });
+
+  // reposition on resize
+  const ro = new ResizeObserver(() => {
+    const current = buttons.find(b => b.classList.contains('active'));
+    moveHighlight(current || buttons[0]);
+  });
+  ro.observe(tabBar);
+
+  window.addEventListener('resize', () => {
+    const current = buttons.find(b => b.classList.contains('active'));
+    moveHighlight(current || buttons[0]);
+  });
+
+  // if your code switches tabs programmatically, expose a helper:
+  window.setActiveTabByData = function(key) {
+    const target = buttons.find(b => b.dataset.tab === key);
+    if (target) setActive(target);
+  };
+}
+
+// Call it after your existing UI is wired (inside initMenuFunctions or after DOMContentLoaded)
+initSlidingHighlightBar();
+
   }
 })();
 

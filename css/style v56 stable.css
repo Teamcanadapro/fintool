@@ -492,7 +492,7 @@ body.dark .tooltip-text {
 
 .scenario-btn {
   white-space: nowrap;
-  flex: 1 1 140px;
+  flex: 1 1 0;
   min-width: 100px;
   max-width: 150px;
   overflow: hidden;
@@ -500,25 +500,6 @@ body.dark .tooltip-text {
 .scenario-btn.active {
   background-color: #0094ff;
   border-color: #0094ff;
-}
-
-.scenario-btn {
-  flex: 1 0 auto;         /* Prevent shrinking */
-  width: 100%;            /* Fill container evenly */
-  text-align: center;
-  white-space: nowrap;    /* Prevent line break */
-}
-.scenario-btn {
-  flex: 1 1 160px;  /* Let them grow/shrink evenly */
-}
-#scenario-row .scenario-btn[data-scenario="retired"] {
-  min-width: 120px;
-}
-
-.scenario-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 scenario-row {
@@ -2943,15 +2924,6 @@ body.dark .shortcut-hint-bar kbd {
   position: relative;         /* allow absolute child */
   display: flex;
   gap: 10px;
-  padding-bottom: 6px;  /* 👈 Give space for the underline */
-}
-
-.tab-bar {
-  position: relative;
-  display: flex;
-  gap: 10px;
-  align-items: flex-end; /* 👈 Important: aligns buttons to bottom */
-  height: 40px;          /* 👈 Gives room for the underline */
 }
 
 .tab-btn {
@@ -2962,16 +2934,6 @@ body.dark .shortcut-hint-bar kbd {
   color: #94a3b8;             /* inactive color */
   cursor: pointer;
 }
-.tab-btn {
-  padding: 8px 12px;
-  background: none;
-  border: none;
-  font-weight: 600;
-  color: #94a3b8;
-  cursor: pointer;
-  position: relative;
-}
-
 
 .tab-btn.active { color: #e5eaf2; }  /* active label color */
 
@@ -2982,18 +2944,8 @@ body.dark .shortcut-hint-bar kbd {
   height: 3px;
   width: 0;                   /* JS sets width */
   left: 0;                    /* JS sets left   */
-  background: orange;
+  background: #2563eb;        /* accent color */
   border-radius: 3px;
   transition: left 250ms ease, width 250ms ease;
-}
-
-.icon {
-  display: inline-block;
-  transition: transform 0.4s ease, opacity 0.4s ease;
-}
-
-.icon.flip {
-  transform: rotateY(180deg);
-  opacity: 0.3;
 }
 
