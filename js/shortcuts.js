@@ -1,15 +1,8 @@
-// Determine platform
+// shortcuts.js — cross-platform keyboard shortcuts
 const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
+const isLinux = !isMac && /Linux/.test(navigator.platform);
 
-const actions = {
-  '.': () => window.toggleSideMenu?.(),
-  ',': () => document.getElementById('darkModeToggle')?.click(),
-  k: () => window.openCalculator?.(),
-  u: () => window.resetInputs?.(),
-  y: () => window.toggleHighReturn?.(),
-  '/': () => window.toggleHelpOverlay?.()
-};
-
+// Helpers
 function isTypingTarget(el) {
   if (!el) return false;
   const tag = el.tagName?.toLowerCase();
@@ -21,6 +14,18 @@ function normalizeKey(e) {
   return k === '?' ? '/' : k.toLowerCase();
 }
 
+const actions = {
+  m: () => !isMac ? window.toggleSideMenu?.() : null,
+  '.': () => isMac ? window.toggleSideMenu?.() : null,
+  ',': () => isMac ? document.getElementById('darkModeToggle')?.click() : null,
+  l: () => !isMac ? document.getElementById('darkModeToggle')?.click() : null,
+  k: () => window.openCalculator?.(),
+  u: () => window.resetInputs?.(),
+  "'": () => isMac ? window.toggleHighReturn?.() : null,
+  g: () => !isMac ? window.toggleHighReturn?.() : null,
+  '/': () => window.toggleHelpOverlay?.()
+};
+
 document.addEventListener('keydown', (e) => {
   const key = normalizeKey(e);
   const targetIsTyping = isTypingTarget(document.activeElement);
@@ -28,14 +33,14 @@ document.addEventListener('keydown', (e) => {
   const action = actions[key];
   if (!action) return;
 
-  // 1️⃣ Help overlay for all OS: Ctrl + Alt + /
+  // Help fallback: Ctrl + Alt + /
   if (e.ctrlKey && e.altKey && key === '/') {
     e.preventDefault();
     action();
     return;
   }
 
-  // 2️⃣ Mac: Cmd + Shift + [Key]
+  // Mac: Cmd + Shift
   if (isMac && e.metaKey && e.shiftKey && !e.ctrlKey && !e.altKey) {
     if (targetIsTyping && !isHelp) return;
     e.preventDefault();
@@ -43,11 +48,18 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // 3️⃣ Windows/Linux: Alt + Shift + [Key]
+  // Win/Linux: Alt + Shift
   if (!isMac && e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey) {
     if (targetIsTyping && !isHelp) return;
     e.preventDefault();
     action();
+    return;
+  }
+
+  // Linux: Ctrl + Alt + M for menu fallback
+  if (isLinux && key === 'm' && e.ctrlKey && e.altKey && !e.metaKey && !e.shiftKey) {
+    e.preventDefault();
+    actions['m']();
     return;
   }
 });
