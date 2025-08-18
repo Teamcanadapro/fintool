@@ -1,5 +1,4 @@
-// shortcuts.js — cross-platform keyboard shortcuts
-// Mac: Cmd+Shift+Key, Win/Linux: Ctrl+Shift+Key
+// shortcuts.js — Final Cross-Platform Keyboard Shortcuts
 
 function isTypingTarget(el) {
   if (!el) return false;
@@ -10,12 +9,12 @@ function isTypingTarget(el) {
 const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform) || /Mac OS/i.test(navigator.userAgent);
 
 const actions = {
-  m: () => window.toggleSideMenu?.(),
-  c: () => window.openCalculator?.(),
-  l: () => document.getElementById('darkModeToggle')?.click(),
-  r: () => window.resetInputs?.(),
-  '/': () => window.toggleHelpOverlay?.(),
-  g: () => window.toggleHighReturn?.()
+  '.': () => window.toggleSideMenu?.(),
+  ',': () => document.getElementById('darkModeToggle')?.click(),
+  k: () => window.openCalculator?.(),
+  u: () => window.resetInputs?.(),
+  y: () => window.toggleGodMode?.(),
+  '/': () => window.toggleHelpOverlay?.()
 };
 
 function normalizeKey(e) {
@@ -26,22 +25,29 @@ function normalizeKey(e) {
 document.addEventListener('keydown', (e) => {
   const key = normalizeKey(e);
   const targetIsTyping = isTypingTarget(document.activeElement);
-  const isHelp = key === '/';
+  const isHelpKey = key === '/';
   const action = actions[key];
 
   if (!action) return;
 
-  // ✅ Mac: Cmd + Shift + Key
-  if (isMac && e.metaKey && e.shiftKey && !e.ctrlKey && !e.altKey) {
-    if (targetIsTyping && !isHelp) return;
+  // 1️⃣ Help Overlay — universal Ctrl + Alt + /
+  if (e.ctrlKey && e.altKey && isHelpKey) {
     e.preventDefault();
     action();
     return;
   }
 
-  // ✅ Windows/Linux: Ctrl + Shift + Key
+  // 2️⃣ Mac: Cmd + Shift + Key
+  if (isMac && e.metaKey && e.shiftKey && !e.ctrlKey && !e.altKey) {
+    if (targetIsTyping && !isHelpKey) return;
+    e.preventDefault();
+    action();
+    return;
+  }
+
+  // 3️⃣ Windows/Linux: Ctrl + Shift + Key
   if (!isMac && e.ctrlKey && e.shiftKey && !e.altKey && !e.metaKey) {
-    if (targetIsTyping && !isHelp) return;
+    if (targetIsTyping && !isHelpKey) return;
     e.preventDefault();
     action();
     return;
