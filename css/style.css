@@ -2997,3 +2997,110 @@ body.dark .shortcut-hint-bar kbd {
   opacity: 0.3;
 }
 
+
+.header-btn {
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.header-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+overlay.style.cssText = `
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  display: flex; /* ensure flexbox */
+`;
+
+
+.lock-box {
+  backdrop-filter: none !important;
+  z-index: 10001 !important;
+}
+
+
+.lock-screen-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.lock-box {
+  background: var(--card-bg, #fff);
+  color: var(--text-color, #000);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  min-width: 300px;
+  max-width: 92vw;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+}
+
+.lock-input {
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.lock-submit {
+  padding: 10px 20px;
+  border: none;
+  background: #0a84ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Don’t disable events or blur the whole body. Just block scroll. */
+body.locked { 
+  overflow: hidden; 
+}
+
+/* Fullscreen overlay that handles the dim+blur by itself */
+.lock-screen-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;               /* shown via JS */
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  background: rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* The dialog itself is NOT blurred */
+.lock-box {
+  background: var(--card-bg, #fff);
+  color: var(--text-color, #111);
+  width: min(92vw, 420px);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  padding: 24px 22px;
+  text-align: center;
+  position: relative;
+}
+
+.lock-input { width: 100%; padding: 10px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
+.lock-submit { margin-top: 12px; padding: 10px 14px; font-size: 15px; border: 0; border-radius: 8px; background: #0a84ff; color: #fff; cursor: pointer; }
+.lock-error { color: #d33; margin-top: 8px; font-size: 14px; }
