@@ -1,5 +1,5 @@
 (function () {
-  const PASSWORD = 'fna4success';
+  const PASSWORD = 'winning4u';
   const SESSION_KEY = 'loggedIn';
 
   let overlayEl = null;
