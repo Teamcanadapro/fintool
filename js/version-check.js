@@ -1,5 +1,5 @@
 (async function () {
-  const VERSION_URL = '/data/version.txt'; // adjust path as needed
+  const VERSION_URL = './data/version.txt'; // adjust path as needed
   const STORAGE_KEY = 'siteVersion';
 
   try {
