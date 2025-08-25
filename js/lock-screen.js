@@ -8,11 +8,9 @@
   let inited = false;
 
   function nukeLegacyLockIfAny() {
-    // Remove old inline overlay if present
     const legacy = document.getElementById('passwordOverlay');
     if (legacy) legacy.remove();
 
-    // Ensure the main UI is not hidden by legacy markup
     const content = document.getElementById('content');
     if (content && content.style.display === 'none') {
       content.style.display = '';
@@ -28,26 +26,11 @@
 
     overlayEl.innerHTML = `
       <div class="lock-box" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
-        <h2 id="lockTitle" style="margin:0 0 8px">
-          <span aria-hidden="true">🔒</span> Fintools
-        </h2>
-        <p class="lock-msg" style="margin: 0 0 14px;">Enter password to continue</p>
-
-        <input
-          type="password"
-          id="lockPasswordInput"
-          class="lock-input"
-          autocomplete="current-password"
-          aria-label="Password"
-        />
-
-        <button id="unlockBtn" class="lock-submit" type="button" style="margin-top:12px">
-          Unlock
-        </button>
-
-        <div id="lockError" class="lock-error" aria-live="polite" style="display:none">
-          Incorrect password
-        </div>
+        <h2 id="lockTitle"><span aria-hidden="true">🔒</span> Fintools</h2>
+        <p class="lock-msg">Enter password to continue</p>
+        <input type="password" id="lockPasswordInput" class="lock-input" autocomplete="current-password" aria-label="Password" />
+        <button id="unlockBtn" class="lock-submit" type="button">Unlock</button>
+        <div id="lockError" class="lock-error" aria-live="polite" style="display:none">Incorrect password</div>
       </div>
     `;
 
@@ -63,7 +46,6 @@
       if (e.key === 'Enter') tryUnlock();
     });
 
-    // Prevent wheel/scroll from affecting the page while locked
     overlayEl.addEventListener('wheel', (e) => e.preventDefault(), { passive: false });
 
     return overlayEl;
@@ -81,7 +63,6 @@
   }
 
   function show() {
-    // Force a fresh session
     sessionStorage.removeItem(SESSION_KEY);
 
     const ov = buildOverlay();
@@ -92,21 +73,25 @@
       setTimeout(() => inputEl.focus(), 0);
     }
 
-    // Limit page behind (no global pointer-events/blur!)
-    document.body.classList.add('locked'); // CSS should only set overflow:hidden
+    document.body.classList.add('locked');
   }
 
-  function hide() {
-    const ov = buildOverlay();
-    ov.style.display = 'none';
-    document.body.classList.remove('locked');
+function hide() {
+  const ov = buildOverlay();
+  ov.style.display = 'none';
+  document.body.classList.remove('locked');
+
+  // Initialize chart once visible
+  if (window.initAndexChart) {
+    window.initAndexChart();
   }
+}
+
 
   function wireLockButtons() {
     const btn = document.getElementById('lockBtn');
     if (btn) btn.addEventListener('click', show);
 
-    // Optional: support any element with data-action="lock"
     document.querySelectorAll('[data-action="lock"]').forEach((el) => {
       el.addEventListener('click', show);
     });
@@ -120,7 +105,6 @@
 
     const ov = buildOverlay();
 
-    // Show lock immediately when there is no active session
     if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
       document.body.classList.add('locked');
       ov.style.display = 'flex';
@@ -130,10 +114,9 @@
     wireLockButtons();
   }
 
-  // Expose for quick manual testing
   window.toggleLockScreen = show;
 
-  // Your loader injects scripts after DOM is ready; use window.load to be extra safe.
-  window.addEventListener('load', init);
+  // Immediately run init, since loader.js already waits for DOM ready
+  init();
 })();
 

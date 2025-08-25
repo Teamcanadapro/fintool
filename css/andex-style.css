@@ -1,0 +1,24 @@
+#tab-andex {
+  padding: 20px;
+}
+
+#tab-andex .controls button {
+  background: #007bff;
+  color: white;
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+#pdf-canvas {
+  border: 1px solid #ccc;
+  display: block;
+  margin: 0 auto;
+}
+
+body.dark #pdf-canvas {
+  filter: invert(1) hue-rotate(180deg);
+  background: #121212;
+}
+

@@ -149,10 +149,16 @@ applyReturnMax(proEnabled);
       darkToggle.checked = state.darkMode;
       document.body.classList.toggle('dark', state.darkMode);
       darkToggle.addEventListener('change', () => {
-        state.darkMode = darkToggle.checked;
-        document.body.classList.toggle('dark', state.darkMode);
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(state));
-      });
+  state.darkMode = darkToggle.checked;
+  document.body.classList.toggle('dark', state.darkMode);
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state));
+
+  // 🆕 Trigger canvas re-render for dark mode to apply
+  if (typeof window.renderAndexPDF === 'function') {
+    setTimeout(() => window.renderAndexPDF(), 100);
+  }
+});
+
     }
 
     if (finToggle && finLabel) {

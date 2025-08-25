@@ -1288,7 +1288,7 @@ body.dark .retirement-row.on-track {
  
  /* Calculator Styles (copy to your CSS or inside a <style> block) */
 .hidden {
-  display: none !important;
+  display: none ;
 }
 
 :root {
@@ -3104,3 +3104,173 @@ body.locked {
 .lock-input { width: 100%; padding: 10px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; }
 .lock-submit { margin-top: 12px; padding: 10px 14px; font-size: 15px; border: 0; border-radius: 8px; background: #0a84ff; color: #fff; cursor: pointer; }
 .lock-error { color: #d33; margin-top: 8px; font-size: 14px; }
+
+
+/* ----------------------------
+   Annotate Button (bottom-left)
+----------------------------- */
+.bottom-left-btn,
+#toggleAnnotateBtn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10001;
+  background-color: #222;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: background 0.3s, color 0.3s;
+}
+
+body:not(.dark) .bottom-left-btn:hover,
+body:not(.dark) #toggleAnnotateBtn:hover {
+  background-color: #ddd;
+  color: #111;
+}
+
+body.dark .bottom-left-btn:hover,
+body.dark #toggleAnnotateBtn:hover {
+  background-color: #444;
+}
+
+body:not(.dark) #toggleAnnotateBtn {
+  background-color: #f1f3f4;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+body.dark #toggleAnnotateBtn {
+  background-color: #2a2a2a;
+  color: #eee;
+  border: 1px solid #555;
+}
+
+
+/* ----------------------------
+   Annotate Toolbar Controls
+----------------------------- */
+#annotateControls {
+  display: none;
+  flex-direction: row;
+  gap: 6px;
+  margin-left: 54px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 20000;
+}
+
+body.dark #annotateControls {
+  background: #1e1e1e;
+  border: 1px solid #444;
+}
+
+/* Ensure spacing between buttons */
+#annotateControls > * {
+  margin-right: 4px;
+}
+
+
+/* ----------------------------
+   Color Buttons
+----------------------------- */
+.color-btn {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #888;
+  border-radius: 50%;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.2s ease;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+}
+
+body.dark .color-btn {
+  border-color: #ccc;
+}
+
+
+/* ----------------------------
+   Clear Button
+----------------------------- */
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: #333;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+}
+
+body.dark .clear-btn {
+  color: #eee;
+}
+
+
+/* ----------------------------
+   Layering
+----------------------------- */
+#annotateWrapper {
+  z-index: 20000 !important;
+}
+
+canvas {
+  z-index: 10000 !important;
+}
+
+
+/* Light mode (default) */
+.help-btn {
+  color: #333;
+}
+
+/* Target the Help button (adjust selector as needed) */
+body.dark .top-bar .help-btn,
+body.dark a[href*="help"] {
+  color: #9aa4af !important; /* soft desaturated gray-blue */
+  background-color: transparent !important;
+  border: none;
+}
+
+/* Shared base style */
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f7f8fa;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Dark mode overrides */
+body.dark .help-btn {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #ccc;
+}
+
+.help-btn-icon {
+  font-weight: 700;
+}
+
+body.dark .help-btn-icon {
+  color: #ddd;
+}
+
+.help-btn-text {
+  font-size: 0.9rem;
+}
+
