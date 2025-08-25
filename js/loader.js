@@ -3,7 +3,7 @@
   if (window.__fintoolsLoaderLoaded) return;
   window.__fintoolsLoaderLoaded = true;
 
-  const VERSION_URL = '/data/version.txt';
+  const VERSION_URL = './data/version.txt';
   const STORAGE_KEY = 'siteVersion';
   const scriptsToLoad = [
     'js/menu-toggle.js',
