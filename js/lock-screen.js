@@ -28,8 +28,17 @@
       <div class="lock-box" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
         <h2 id="lockTitle"><span aria-hidden="true">🔒</span> Fintools</h2>
         <p class="lock-msg">Enter password to continue</p>
-        <input type="password" id="lockPasswordInput" class="lock-input" autocomplete="current-password" aria-label="Password" />
-        <button id="unlockBtn" class="lock-submit" type="button">Unlock</button>
+        <form id="lockForm" autocomplete="on">
+  <!-- Hidden username field just to satisfy Chrome -->
+  <input type="text" name="username" autocomplete="username" style="display:none" tabindex="-1" aria-hidden="true" />
+
+  <!-- Your real password input -->
+  <input type="password" id="lockPasswordInput" class="lock-input" autocomplete="current-password" aria-label="Password" required />
+
+  <!-- Submit button -->
+  <button id="unlockBtn" class="lock-submit" type="submit">Unlock</button>
+</form>
+
         <div id="lockError" class="lock-error" aria-live="polite" style="display:none">Incorrect password</div>
       </div>
     `;
@@ -39,8 +48,12 @@
     inputEl = overlayEl.querySelector('#lockPasswordInput');
     errorEl = overlayEl.querySelector('#lockError');
 
-    const unlockBtn = overlayEl.querySelector('#unlockBtn');
-    unlockBtn.addEventListener('click', tryUnlock);
+   const form = overlayEl.querySelector('#lockForm');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  tryUnlock();
+});
+
 
     inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') tryUnlock();
