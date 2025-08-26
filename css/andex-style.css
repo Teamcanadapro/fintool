@@ -22,3 +22,14 @@ body.dark #pdf-canvas {
   background: #121212;
 }
 
+Object.assign(canvas.style, {
+  position: "fixed",
+  top: "0",
+  left: "0",
+  zIndex: "10000",
+  pointerEvents: "auto",
+  display: "block",
+  cursor: "crosshair",
+  touchAction: "none" 
+});
+

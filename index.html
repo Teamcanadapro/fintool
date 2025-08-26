@@ -11,7 +11,8 @@ No part of the source code, design, or content may be copied, reproduced, modifi
 -->
 	
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes">
+
   <title>FIN tools</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.2.1"></script>
@@ -77,6 +78,12 @@ No part of the source code, design, or content may be copied, reproduced, modifi
     <div class="version-info">
   <span id="versionTag" data-tooltip='
     <strong>Recent Updates</strong>
+      <ul>(v2.2.6) Aug 25, 2025
+      <li>annotate touchscreen support</li>
+      </ul>
+      <ul>(v2.2.5) Aug 25, 2025
+      <li>andex view change for mobile devices</li>
+      </ul>
       <ul>(v2.2.4) Aug 25, 2025
       <li>added annotation feature to allow drawing on the screen</li>
       </ul>
@@ -566,12 +573,23 @@ document.addEventListener('DOMContentLoaded', function() {
 </div> <!-- end of #content tab-fin-->
 <!-- Andex Chart Tab Content -->
 <div class="tab-content hidden" id="tab-andex">
-  <div id="andex-chart-wrapper" style="margin-top: 20px; text-align: center;">
+  <div id="andexPdfViewer" style="margin-top: 20px; text-align: center;">
     <iframe
-  src="./data/andex.pdf#page=2&toolbar=0&navpanes=0&scrollbar=0&view=FitH"
-  style="width: 100%; height: calc(100vh - 120px); border: none; border-radius: 6px;">
-</iframe>
+      id="pdfViewer"
+      src="./data/andex.pdf#page=2&toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+      style="width: 100%; height: calc(100vh - 120px); border: none; border-radius: 6px;">
+    </iframe>
   </div>
+
+  <div id="andexPdfFallback" style="display: none; text-align: center; margin-top: 20px;">
+    <canvas id="pdf-canvas" style="max-width: 100%; border-radius: 6px;"></canvas>
+    <div style="margin-top: 10px;">
+      <button onclick="zoomOut()">−</button>
+      <button onclick="zoomIn()">+</button>
+    </div>
+  </div>
+</div>
+
 </div> <!-- end of Andex Chart Tab Content -->
 
 
@@ -1801,6 +1819,14 @@ document.addEventListener('keydown', function (e) {
       </label>
       <label for="darkModeToggle"> Dark Mode</label>
     </div>
+<!-- ❔ Helper Bar -->
+<div class="toggle-row tooltip-container" data-tooltip="Show or hide the helper bar that provides quick hints.">
+  <label class="switch">
+    <input type="checkbox" id="helperBarToggle" />
+    <span class="slider"></span>
+  </label>
+  <label for="helperBarToggle"> Helper Bar</label>
+</div>
 
     <!-- 📈 Future $ -->
     <div class="toggle-row tooltip-container" data-tooltip="Toggle between inflation-adjusted and today’s dollar view. Generally you will want to use the Future $ adjusted by inflation as in reality we experience inflation and what things cost today will not be the case in the future. The longer we have before we will be using that money, the more inflation will play a critical role">
@@ -2101,7 +2127,8 @@ function moveTabHighlight(tabElement) {
 
 
 <script src="js/loader.js"></script>
-<!-- Existing Annotate Button + Menu Wrapper (FINAL FIXED) -->
+
+<!--  Annotate Button + Menu Wrapper-->
 <div id="annotateWrapper" style="
   position: fixed;
   bottom: 20px;
@@ -2129,11 +2156,6 @@ function moveTabHighlight(tabElement) {
     <button onclick="clearCanvas()" class="clear-btn">🗑️</button>
   </div>
 </div>
-
-
-
-
-
 
 </body>
 

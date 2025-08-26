@@ -1,4 +1,4 @@
-// loader.js — safe, idempotent sequential loader with version & cache check
+// loader.js — version-aware loader
 (function () {
   if (window.__fintoolsLoaderLoaded) return;
   window.__fintoolsLoaderLoaded = true;
@@ -9,7 +9,7 @@
     'js/menu-toggle.js',
     'js/help-overlay.js',
     'js/shortcuts.js',
-    'js/annotate.js'  ,
+    'js/annotate.js',
     'js/lock-screen.js'
   ];
 
@@ -21,7 +21,6 @@
         updateVersionInfo(versionLine, updatedLine);
 
         const currentVersion = localStorage.getItem(STORAGE_KEY);
-
         if (currentVersion && currentVersion !== versionLine) {
           localStorage.setItem(STORAGE_KEY, versionLine);
           console.log(`[Andex] New version ${versionLine} → Reloading`);
@@ -59,3 +58,81 @@
   }
 })();
 
+// --- PDF Display Logic (one method for desktop, another for mobile) ---
+
+var pdfDoc = null;
+var currentPage = 1;
+var scale = 1.2;
+
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+async function showPDFjsFallback() {
+  document.getElementById('andexPdfViewer').style.display = 'none';
+  document.getElementById('andexPdfFallback').style.display = 'block';
+
+  const pdfjsLib = await import('../pdfjs/build/pdf.mjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '../pdfjs/build/pdf.worker.mjs';
+
+  const url = '../data/andex.pdf';
+  pdfDoc = await pdfjsLib.getDocument(url).promise;
+  renderPDFPage(pdfjsLib);
+}
+
+function renderPDFPage(pdfjsLib) {
+  pdfDoc.getPage(currentPage).then(page => {
+    const canvas = document.getElementById('pdf-canvas');
+    const context = canvas.getContext('2d');
+
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const outputScale = scale * devicePixelRatio;
+
+    const viewport = page.getViewport({ scale: outputScale });
+
+    // Set canvas resolution in physical pixels
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    // ✅ Make canvas fit device width
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+
+    // High-DPI clarity
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    page.render({
+      canvasContext: context,
+      viewport: viewport
+    });
+  });
+}
+
+
+function zoomIn() {
+  scale += 0.25;
+  showPDFjsFallback();
+}
+
+function zoomOut() {
+  scale = Math.max(0.5, scale - 0.25);
+  showPDFjsFallback();
+}
+
+function tryLoadAndexPDF() {
+  const isMobile = isMobileDevice();
+
+  if (isMobile) {
+    console.log('[Andex] Mobile device detected — loading fallback directly.');
+    document.getElementById('andexPdfViewer').style.display = 'none';
+    document.getElementById('andexPdfFallback').style.display = 'block';
+    showPDFjsFallback();
+  } else {
+    console.log('[Andex] Desktop detected — using iframe PDF viewer.');
+    document.getElementById('andexPdfViewer').style.display = 'block';
+    document.getElementById('andexPdfFallback').style.display = 'none';
+  }
+}
+
+window.addEventListener("DOMContentLoaded", tryLoadAndexPDF);

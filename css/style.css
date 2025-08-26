@@ -3274,3 +3274,28 @@ body.dark .help-btn-icon {
   font-size: 0.9rem;
 }
 
+#toggleAnnotateBtn {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  z-index: 10001;
+  padding: 10px 14px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-block;
+  white-space: nowrap;
+  width: auto;
+  max-width: none;
+  touch-action: manipulation; /* allow tap, prevent weird scroll */
+  transform: translateZ(0);   /* fixes some zoom rendering bugs */
+}
+
+/*disable the shortcuts helper bar for now*/
+.hotkey-hint {
+  display: none !important;
+}
+

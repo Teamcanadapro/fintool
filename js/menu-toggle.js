@@ -29,6 +29,24 @@ window.resetInputs = function () {
   }
 
   function initMenuFunctions() {
+    
+   //toggle helper bar code 
+    const helperBar = document.getElementById('shortcutHint');
+const helperBarToggle = document.getElementById('helperBarToggle');
+const HELPER_KEY = 'showHelperBar';
+
+const helperState = JSON.parse(localStorage.getItem(HELPER_KEY) ?? 'true');
+if (helperBarToggle) {
+  helperBarToggle.checked = helperState;
+  if (helperBar) helperBar.style.display = helperState ? '' : 'none';
+
+  helperBarToggle.addEventListener('change', () => {
+    const isEnabled = helperBarToggle.checked;
+    localStorage.setItem(HELPER_KEY, JSON.stringify(isEnabled));
+    if (helperBar) helperBar.style.display = isEnabled ? '' : 'none';
+  });
+}
+
     // 🌍 Global functions for use in shortcuts.js
     
     // --- Hidden Pro Range Toggle (9% <-> 18%) ---
