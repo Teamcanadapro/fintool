@@ -65,8 +65,12 @@ var currentPage = 1;
 var scale = 1.2;
 
 function isMobileDevice() {
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return (
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (window.innerWidth <= 768 && 'ontouchstart' in window)
+  );
 }
+
 
 async function showPDFjsFallback() {
   document.getElementById('andexPdfViewer').style.display = 'none';
