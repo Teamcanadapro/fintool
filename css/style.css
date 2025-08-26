@@ -3298,4 +3298,121 @@ body.dark .help-btn-icon {
 .hotkey-hint {
   display: none !important;
 }
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-container input[type="range"] {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.slider-container input[type="text"] {
+  width: 60px;
+  text-align: center;
+  flex-shrink: 0;
+}
+* {
+  box-sizing: border-box;
+}
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+  width: 100%;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.slider-container input[type="range"] {
+  flex-grow: 1;
+  min-width: 0;
+  appearance: none;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+}
+
+.slider-container input[type="range"]::-moz-range-thumb,
+.slider-container input[type="range"]::-webkit-slider-thumb {
+  background: #1976d2;
+  border: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider-container input[type="text"] {
+  width: 64px;
+  text-align: center;
+  flex-shrink: 0;
+  padding: 6px 8px;
+  font-size: 0.95em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+}
+
+.input-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.input-row input[type="number"],
+.input-row input[type="text"] {
+  width: 100%;
+  max-width: 100px;
+  min-width: 50px;
+  padding: 6px;
+  font-size: 1rem;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  flex: 0 1 auto;
+}
+
+.input-row .suffix {
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+/* Sliders (if used in row like text input + slider) */
+.input-row input[type="range"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  appearance: none;
+  height: 4px;
+  background-color: #ccc;
+  border-radius: 2px;
+}
 
