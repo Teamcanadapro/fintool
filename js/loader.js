@@ -23,7 +23,7 @@
         const currentVersion = localStorage.getItem(STORAGE_KEY);
         if (currentVersion && currentVersion !== versionLine) {
           localStorage.setItem(STORAGE_KEY, versionLine);
-          console.log(`[Andex] New version ${versionLine} → Reloading`);
+          
           location.reload(true);
         } else {
           if (!currentVersion) localStorage.setItem(STORAGE_KEY, versionLine);
@@ -31,7 +31,7 @@
         }
       })
       .catch(err => {
-        console.error('[Andex] Version check failed:', err);
+        
         loadScriptsSequentially();
       });
   }
@@ -124,12 +124,12 @@ function tryLoadAndexPDF() {
   const isMobile = isMobileDevice();
 
   if (isMobile) {
-    console.log('[Andex] Mobile device detected — loading fallback directly.');
+    
     document.getElementById('andexPdfViewer').style.display = 'none';
     document.getElementById('andexPdfFallback').style.display = 'block';
     showPDFjsFallback();
   } else {
-    console.log('[Andex] Desktop detected — using iframe PDF viewer.');
+    
     document.getElementById('andexPdfViewer').style.display = 'block';
     document.getElementById('andexPdfFallback').style.display = 'none';
   }
