@@ -76,10 +76,11 @@ async function showPDFjsFallback() {
   document.getElementById('andexPdfViewer').style.display = 'none';
   document.getElementById('andexPdfFallback').style.display = 'block';
 
-  const pdfjsLib = await import('../pdfjs/build/pdf.mjs');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '../pdfjs/build/pdf.worker.mjs';
+const pdfjsLib = await import('/fintool/pdfjs/build/pdf.mjs');
 
-  const url = '../data/andex.pdf';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '/fintool/pdfjs/build/pdf.worker.mjs';
+
+  const url = 'fintool/data/andex.pdf';
   pdfDoc = await pdfjsLib.getDocument(url).promise;
   renderPDFPage(pdfjsLib);
 }
