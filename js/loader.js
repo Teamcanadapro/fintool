@@ -129,12 +129,10 @@ function tryLoadAndexPDF() {
   const isMobile = isMobileDevice();
 
   if (isMobile) {
-    
     document.getElementById('andexPdfViewer').style.display = 'none';
     document.getElementById('andexPdfFallback').style.display = 'block';
-    showPDFjsFallback();
+    // pdf-loader.js will now handle rendering
   } else {
-    
     document.getElementById('andexPdfViewer').style.display = 'block';
     document.getElementById('andexPdfFallback').style.display = 'none';
   }
