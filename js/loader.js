@@ -61,8 +61,10 @@
 // --- PDF Display Logic (one method for desktop, another for mobile) ---
 
 var pdfDoc = null;
-var currentPage = 1;
+var pdfLib = null;
+var currentPage = 2; // Andex chart is on the second page
 var scale = 1.2;
+var isRendering = false;
 
 function isMobileDevice() {
   return (
@@ -76,66 +78,84 @@ async function showPDFjsFallback() {
   document.getElementById('andexPdfViewer').style.display = 'none';
   document.getElementById('andexPdfFallback').style.display = 'block';
 
-const pdfjsLib = await import('/fintool/pdfjs/build/pdf.mjs');
+  if (pdfDoc) {
+      renderPDFPage();
+      return;
+  }
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/fintool/pdfjs/build/pdf.worker.mjs';
+  const isLocal = !location.hostname.includes('github.io');
+  const pdfUrl = isLocal
+    ? './data/andex.pdf'
+    : 'https://teamcanadapro.github.io/fintool/data/andex.pdf';
 
-  const url = 'fintool/data/andex.pdf';
-  pdfDoc = await pdfjsLib.getDocument(url).promise;
-  renderPDFPage(pdfjsLib);
+  try {
+    pdfLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/es5/build/pdf.mjs');
+    pdfLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/es5/build/pdf.worker.mjs';
+    
+    pdfDoc = await pdfLib.getDocument(pdfUrl).promise;
+    renderPDFPage();
+  } catch (error) {
+    console.error("Error loading PDF:", error);
+  }
 }
 
-function renderPDFPage(pdfjsLib) {
-  pdfDoc.getPage(currentPage).then(page => {
-    const canvas = document.getElementById('pdf-canvas');
-    const context = canvas.getContext('2d');
+function renderPDFPage() {
+    if (!pdfDoc || isRendering) return;
+    isRendering = true;
 
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const outputScale = scale * devicePixelRatio;
+    pdfDoc.getPage(currentPage).then(page => {
+        const canvas = document.getElementById('pdf-canvas');
+        if (!canvas) {
+            isRendering = false;
+            return;
+        }
+        const context = canvas.getContext('2d');
+        const viewport = page.getViewport({ scale: scale });
 
-    const viewport = page.getViewport({ scale: outputScale });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
 
-    // Set canvas resolution in physical pixels
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    // ✅ Make canvas fit device width
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
-
-    // High-DPI clarity
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    page.render({
-      canvasContext: context,
-      viewport: viewport
+        page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise.then(() => {
+            isRendering = false;
+        });
     });
-  });
 }
 
 
 function zoomIn() {
-  scale += 0.25;
-  showPDFjsFallback();
+  scale = Math.min(3.0, scale + 0.25);
+  renderPDFPage();
 }
 
 function zoomOut() {
   scale = Math.max(0.5, scale - 0.25);
-  showPDFjsFallback();
+  renderPDFPage();
 }
 
 function tryLoadAndexPDF() {
-  const isMobile = isMobileDevice();
-
-  if (isMobile) {
-    document.getElementById('andexPdfViewer').style.display = 'none';
-    document.getElementById('andexPdfFallback').style.display = 'block';
-    // pdf-loader.js will now handle rendering
+  if (isMobileDevice()) {
+    showPDFjsFallback();
   } else {
     document.getElementById('andexPdfViewer').style.display = 'block';
     document.getElementById('andexPdfFallback').style.display = 'none';
   }
 }
 
-window.addEventListener("DOMContentLoaded", tryLoadAndexPDF);
+window.addEventListener("DOMContentLoaded", () => {
+    // This now correctly determines whether to use the iframe or the canvas.
+    const andexTabButton = document.querySelector('.tab-btn[data-tab="andex"]');
+    if (andexTabButton) {
+        andexTabButton.addEventListener('click', tryLoadAndexPDF);
+    }
+    
+    // Wire up zoom buttons for mobile view
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
+});
