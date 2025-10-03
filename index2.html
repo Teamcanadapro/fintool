@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="10; url=https://fintool.tech">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Moved - Fintool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 80px 20px;
+      background: #f7f9fb;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2a6ef2;
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #2a6ef2;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    a.button:hover {
+      background: #1d4fd8;
+    }
+    #countdown {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>We’ve Moved!</h1>
+    <p>The Fintool site is now located at <strong>fintool.tech</strong>.</p>
+    <p id="countdown">Redirecting in 10 seconds...</p>
+    <a href="https://fintool.tech" class="button">Go to Fintool.tech Now</a>
+  </div>
+
+  <script>
+    let seconds = 10;
+    const countdownEl = document.getElementById("countdown");
+
+    const timer = setInterval(() => {
+      seconds--;
+      if (seconds > 0) {
+        countdownEl.textContent = `Redirecting in ${seconds} seconds...`;
+      } else {
+        countdownEl.textContent = "Redirecting now...";
+        clearInterval(timer);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
